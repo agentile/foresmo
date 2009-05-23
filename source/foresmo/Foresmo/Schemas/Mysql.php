@@ -1,0 +1,129 @@
+<?php
+return "
+CREATE TABLE  {$prefix}_users (
+  id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  group_id SMALLINT UNSIGNED NOT NULL,
+  username VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  KEY group_ip(group_id),
+  UNIQUE KEY username (username)
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE  {$prefix}_user_info (
+  id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id SMALLINT UNSIGNED NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  value TEXT,
+  PRIMARY KEY  (id),
+  KEY user_id (user_id)
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE {$prefix}_permissions (
+  id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  PRIMARY KEY  (id)
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE {$prefix}_groups (
+  id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  PRIMARY KEY  (id)
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE {$prefix}_groups_permissions (
+  id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  group_id SMALLINT UNSIGNED NOT NULL,
+  permission_id SMALLINT UNSIGNED NOT NULL,
+  PRIMARY KEY  (id),
+  KEY group_id (group_id),
+  KEY permission_id (permission_id)
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE {$prefix}_posts (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  slug VARCHAR(255) NOT NULL,
+  content_type SMALLINT UNSIGNED NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  content LONGTEXT NOT NULL,
+  user_id SMALLINT UNSIGNED NOT NULL,
+  status SMALLINT UNSIGNED NOT NULL,
+  pubdate INT UNSIGNED NOT NULL,
+  updated INT UNSIGNED NOT NULL,
+  modified INT UNSIGNED NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY slug (slug(80))
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE  {$prefix}_post_info  (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  post_id INT UNSIGNED NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  value TEXT,
+  PRIMARY KEY (id),
+  KEY post_id(post_id)
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE  {$prefix}_tags (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  tag VARCHAR(255) NOT NULL,
+  tag_slug VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id),
+  UNIQUE KEY tag_slug (tag_slug)
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE  {$prefix}_posts_tags  (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  post_id INT UNSIGNED NOT NULL,
+  tag_id INT UNSIGNED NOT NULL,
+  type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  value TEXT,
+  PRIMARY KEY (id),
+  KEY post_id(post_id),
+  KEY tag_id(tag_id)
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE  {$prefix}_comments (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  post_id INT UNSIGNED NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  url VARCHAR(255) NULL,
+  ip INT UNSIGNED NOT NULL,
+  content TEXT,
+  status SMALLINT UNSIGNED NOT NULL,
+  date INT UNSIGNED NOT NULL,
+  type SMALLINT UNSIGNED NOT NULL,
+  PRIMARY KEY (id),
+  KEY post_id (post_id)
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE  {$prefix}_comment_info (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  comment_id INT UNSIGNED NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  value TEXT NULL,
+  PRIMARY KEY (id)
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE  {$prefix}_options (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  value TEXT,
+  PRIMARY KEY (id)
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE  {$prefix}_links (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  url varchar(255) NOT NULL,
+  name varchar(255) NOT NULL,
+  target varchar(25) NOT NULL,
+  status SMALLINT UNSIGNED NOT NULL,
+  PRIMARY KEY  (id)
+ ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+";
