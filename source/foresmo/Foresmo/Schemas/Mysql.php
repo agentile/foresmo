@@ -1,6 +1,6 @@
 <?php
 return "
-CREATE TABLE  {$prefix}_users (
+CREATE TABLE  [prefix]users (
   id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
   group_id SMALLINT UNSIGNED NOT NULL,
   username VARCHAR(255) NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE  {$prefix}_users (
   UNIQUE KEY username (username)
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-CREATE TABLE  {$prefix}_user_info (
+CREATE TABLE  [prefix]user_info (
   id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
   user_id SMALLINT UNSIGNED NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -21,19 +21,19 @@ CREATE TABLE  {$prefix}_user_info (
   KEY user_id (user_id)
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-CREATE TABLE {$prefix}_permissions (
+CREATE TABLE [prefix]permissions (
   id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
   PRIMARY KEY  (id)
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-CREATE TABLE {$prefix}_groups (
+CREATE TABLE [prefix]groups (
   id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
   PRIMARY KEY  (id)
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-CREATE TABLE {$prefix}_groups_permissions (
+CREATE TABLE [prefix]groups_permissions (
   id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
   group_id SMALLINT UNSIGNED NOT NULL,
   permission_id SMALLINT UNSIGNED NOT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE {$prefix}_groups_permissions (
   KEY permission_id (permission_id)
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-CREATE TABLE {$prefix}_posts (
+CREATE TABLE [prefix]posts (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   slug VARCHAR(255) NOT NULL,
   content_type SMALLINT UNSIGNED NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE {$prefix}_posts (
   UNIQUE KEY slug (slug(80))
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-CREATE TABLE  {$prefix}_post_info  (
+CREATE TABLE  [prefix]post_info  (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   post_id INT UNSIGNED NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -67,7 +67,7 @@ CREATE TABLE  {$prefix}_post_info  (
   KEY post_id(post_id)
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-CREATE TABLE  {$prefix}_tags (
+CREATE TABLE  [prefix]tags (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   tag VARCHAR(255) NOT NULL,
   tag_slug VARCHAR(255) NOT NULL,
@@ -75,7 +75,7 @@ CREATE TABLE  {$prefix}_tags (
   UNIQUE KEY tag_slug (tag_slug)
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-CREATE TABLE  {$prefix}_posts_tags  (
+CREATE TABLE  [prefix]posts_tags  (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   post_id INT UNSIGNED NOT NULL,
   tag_id INT UNSIGNED NOT NULL,
@@ -86,7 +86,7 @@ CREATE TABLE  {$prefix}_posts_tags  (
   KEY tag_id(tag_id)
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-CREATE TABLE  {$prefix}_comments (
+CREATE TABLE  [prefix]comments (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   post_id INT UNSIGNED NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -101,7 +101,7 @@ CREATE TABLE  {$prefix}_comments (
   KEY post_id (post_id)
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-CREATE TABLE  {$prefix}_comment_info (
+CREATE TABLE  [prefix]comment_info (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   comment_id INT UNSIGNED NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -110,7 +110,7 @@ CREATE TABLE  {$prefix}_comment_info (
   PRIMARY KEY (id)
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-CREATE TABLE  {$prefix}_options (
+CREATE TABLE  [prefix]options (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
   type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
@@ -118,7 +118,7 @@ CREATE TABLE  {$prefix}_options (
   PRIMARY KEY (id)
 ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-CREATE TABLE  {$prefix}_links (
+CREATE TABLE  [prefix]links (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   url varchar(255) NOT NULL,
   name varchar(255) NOT NULL,

@@ -15,6 +15,7 @@ class Foresmo_App_Base extends Solar_App_Base {
     protected $_model;
 
     public $session;
+	public $connect = true;
     public $installed = false;
     public $theme = 'default';
 
@@ -25,17 +26,26 @@ class Foresmo_App_Base extends Solar_App_Base {
      */
     protected function _setup()
     {
-        $this->_model = Solar_Registry::get('model_catalog');
         $this->session = Solar::factory('Solar_Session', array('class' => 'Foresmo_App'));
-        $where = array('name = ?' => 'blog_installed');
-        $result = $this->_model->options->fetchArray($where);
-        if (count($result) > 0) {
-            $this->installed = true;
-        }
-        $where = array('name = ?' => 'blog_theme');
-        $result = $this->_model->options->fetchArray($where);
-        if (count($result) > 0) {
-            $this->theme = $result[0]['value'];
-        }
+		$adapter = Solar_Config::get('Solar_Sql', 'adapter');
+		$adapter = Solar::factory($adapter);
+		try {
+			$adapter->connect();
+		} catch (Exception $e) {
+			$this->connect = false;
+		}
+		if ($this->connect) {
+			$this->_model = Solar_Registry::get('model_catalog');
+			$where = array('name = ?' => 'blog_installed');
+			$result = $this->_model->options->fetchArray($where);
+			if (count($result) > 0) {
+				$this->installed = true;
+			}
+			$where = array('name = ?' => 'blog_theme');
+			$result = $this->_model->options->fetchArray($where);
+			if (count($result) > 0) {
+				$this->theme = $result[0]['value'];
+			}
+		}
     }
 }

@@ -67,7 +67,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
 
         $request = Solar::factory('Solar_Request');
         $process = $request->post('process');
-        if($process=='Login'){
+        if ($process=='Login') {
             $form->populate();
             $values = $form->getValues();
             $result = $this->_model->users->validUser($values);
@@ -75,6 +75,10 @@ class Foresmo_App_Index extends Foresmo_App_Base {
                 $this->session->set('Foresmo_user_id', $result[0]['id']);
                 $this->session->set('Foresmo_group_id', $result[0]['group_id']);
                 $this->session->set('Foresmo_username', $result[0]['username']);
+                $this->session->set(
+                    'Foresmo_permissions',
+                    $this->_getGroupPermissions($result[0]['group_id'])
+                );
                 $this->_redirect('/index');
             } else {
                 $this->msg = 'Login Failed';
@@ -99,5 +103,25 @@ class Foresmo_App_Index extends Foresmo_App_Base {
     {
         $this->session->resetAll();
         $this->_redirect('/index');
+    }
+
+    /**
+     * _getGroupPermissions
+     * Get the group permissions as an array to set in the session
+     *
+     * @access private
+     * @param  $group_id
+     * @return array
+     */
+    private function _getGroupPermissions($group_id)
+    {
+        $where = array('group_id = ?' => $group_id);
+        $result = $this->_model->groups_permissions->fetchArray(
+            array(
+                'where' => $where,
+                'eager' => 'permissions'
+            )
+        );
+		return $result;
     }
 }

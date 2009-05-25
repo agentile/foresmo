@@ -3,6 +3,10 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Foresmo - Dev</title>
+<?php
+echo $this->style('Foresmo/styles/install.css')."\n";
+echo $this->script('Foresmo/scripts/mootools-1.2.2-core.js')."\n";
+?>
 </head>
 <body>
 

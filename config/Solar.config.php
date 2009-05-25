@@ -18,7 +18,7 @@ $config['Solar']['system']  = $system;
  */
 $config['Solar']['ini_set'] = array(
     'error_reporting'   => (E_ALL | E_STRICT),
-    'display_errors'    => true,
+    'display_errors'    => false,
     'html_errors'       => true,
     'session.save_path' => "$system/tmp/session/",
     'date.timezone'     => 'UTC',
@@ -43,11 +43,11 @@ $config['Solar_Sql_Model_Catalog']['classes'] = array('Foresmo_Model');
 $config['Solar_Sql']['adapter'] = 'Solar_Sql_Adapter_Mysql';
 
 $config['Solar_Sql_Adapter_Mysql'] = array(
-    'host' => "mysql50-37.wc1",
-    'user' => "352208_foresmo_d",
-    'pass' => "Veritas2!",
-    'name' => "352208_foresmo_dev",
-    'prefix' => "foresmo"
+    'host' => 'localhost',
+    'user' => 'test',
+    'pass' => 'testing',
+    'name' => 'foresmo',
+    'prefix' => 'foresmo_'
 );
 
 
@@ -57,7 +57,7 @@ $config['Solar_Auth'] = array(
 );
 
 // Salt for password - change to something unique and strong.
-$config['Solar_Auth_Adapter_Sql']['salt'] = 'UmsteigenMoeglichkeit219673aVeritas2!';
+$config['Solar_Auth_Adapter_Sql']['salt'] = '337y24p1d825ebnc1v';
 
 
 /**
@@ -72,3 +72,4 @@ $config['Solar_Controller_Front'] = array(
  * done!
  */
 return $config;
+		
