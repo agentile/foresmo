@@ -22,5 +22,7 @@ class Foresmo_Model_PostsTags extends Solar_Sql_Model {
 
         $this->_table_name = Solar_Config::get('Solar_Sql_Adapter_Mysql', 'prefix') . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
+        $this->_hasMany('tags', array('foreign_key' => 'id'));
+        $this->_hasMany('posts', array('foreign_key' => 'id'));
     }
 }

@@ -15,6 +15,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
 
     public $form;
     public $msg;
+    public $posts = array();
 
     /**
      * actionIndex
@@ -31,6 +32,16 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             $this->_redirect('/install');
         }
         $this->_layout_default = $this->theme;
+        $where = array('status = ?' => 1);
+        $this->posts = $this->_model->posts->fetchArray(
+            array(
+                'where'  => $where,
+                'order'  => array ('id DESC'),
+                'paging' => $this->posts_per_page,
+                'page'   => 1,
+                'eager'  => array('comments', 'tags', 'postinfo'),
+            )
+        );
     }
 
     /**
@@ -79,6 +90,10 @@ class Foresmo_App_Index extends Foresmo_App_Base {
                     'Foresmo_permissions',
                     $this->_getGroupPermissions($result[0]['group_id'])
                 );
+                $this->session->set(
+                    'Foresmo_user_info',
+                    $this->_getUserInfo($result[0]['id'])
+                );
                 $this->_redirect('/index');
             } else {
                 $this->msg = 'Login Failed';
@@ -122,6 +137,25 @@ class Foresmo_App_Index extends Foresmo_App_Base {
                 'eager' => 'permissions'
             )
         );
-		return $result;
+        return $result;
+    }
+
+    /**
+     * _getGroupPermissions
+     * Get the group permissions as an array to set in the session
+     *
+     * @access private
+     * @param  $group_id
+     * @return array
+     */
+    private function _getUserInfo($user_id)
+    {
+        $where = array('user_id = ?' => $user_id);
+        $result = $this->_model->user_info->fetchArray(
+            array(
+                'where' => $where,
+            )
+        );
+        return $result;
     }
 }

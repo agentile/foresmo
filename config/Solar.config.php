@@ -72,4 +72,4 @@ $config['Solar_Controller_Front'] = array(
  * done!
  */
 return $config;
-		
+
