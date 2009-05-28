@@ -12,8 +12,8 @@
 class Foresmo_App_Ajax extends Foresmo_App_Base {
 
     protected $_action_default = 'index';
-	
-	public $random_str;
+
+    public $random_str;
 
     /**
      * actionIndex
@@ -43,28 +43,28 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
      */
     public function ajax_blog_install($post_data)
     {
-		if (!empty($post_data['db_type'])) {
-			$db_type = ucfirst($post_data['db_type']);
-			$adapter = 'Solar_Sql_Adapter_' . $db_type;
-		} else {
-			return 'DB Type cannot be blank!';
-		}
-		Solar_Config::set('Solar_Sql', 'adapter', $adapter);
-		Solar_Config::set($adapter, 'host', $post_data['db_host']);
-		Solar_Config::set($adapter, 'user', $post_data['db_username']);
-		Solar_Config::set($adapter, 'pass', $post_data['db_password']);
-		Solar_Config::set($adapter, 'name', $post_data['db_name']);
-		Solar_Config::set($adapter, 'prefix', $post_data['db_prefix']);
-		$adapter = Solar::factory($adapter);
-		try {
-			$adapter->connect();
-		} catch (Exception $e) {
-			return 'Cannot connect to database! Please ensure valid DB info.';
-		}
-		
-		$config_file = Solar_Config::get('Solar', 'system') . '/config/Solar.config.php';
-		$config_content = $this->_getConfigContent($post_data);
-		if(($handle = @fopen($config_file, 'w')) !== false) {
+        if (!empty($post_data['db_type'])) {
+            $db_type = ucfirst($post_data['db_type']);
+            $adapter = 'Solar_Sql_Adapter_' . $db_type;
+        } else {
+            return 'DB Type cannot be blank!';
+        }
+        Solar_Config::set('Solar_Sql', 'adapter', $adapter);
+        Solar_Config::set($adapter, 'host', $post_data['db_host']);
+        Solar_Config::set($adapter, 'user', $post_data['db_username']);
+        Solar_Config::set($adapter, 'pass', $post_data['db_password']);
+        Solar_Config::set($adapter, 'name', $post_data['db_name']);
+        Solar_Config::set($adapter, 'prefix', $post_data['db_prefix']);
+        $adapter = Solar::factory($adapter);
+        try {
+            $adapter->connect();
+        } catch (Exception $e) {
+            return 'Cannot connect to database! Please ensure valid DB info.';
+        }
+
+        $config_file = Solar_Config::get('Solar', 'system') . '/config/Solar.config.php';
+        $config_content = $this->_getConfigContent($post_data);
+        if(($handle = @fopen($config_file, 'w')) !== false) {
             if (@fwrite($handle, $config_content) === false) {
                 fclose($handle);
                 return "Cannot write to: {$config_file}. Please set the permissions to 777 for this file.";
@@ -72,33 +72,34 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
                 fclose($handle);
             }
         } else {
-			return "Could not open {$config_file}, please ensure that this file exists and is writable.";
-		}
+            return "Could not open {$config_file}, please ensure that this file exists and is writable.";
+        }
 
-		$schema = Solar_Config::get('Solar', 'system') . '/source/foresmo/Foresmo/Schemas/' . $db_type . '.php';
-		$schema_sql = Solar_File::load($schema);
-		$schema_sql = str_replace('[prefix]', $post_data['db_prefix'], $schema_sql);
-		try {
-			$adapter->query($schema_sql);
-		} catch (Exception $e) {
-			// tables already exist?
-		}
-		
+        $schema = Solar_Config::get('Solar', 'system') . '/source/foresmo/Foresmo/Schemas/' . $db_type . '.php';
+        $schema_sql = Solar_File::load($schema);
+        $schema_sql = str_replace('[prefix]', $post_data['db_prefix'], $schema_sql);
+        try {
+            $adapter->query($schema_sql);
+        } catch (Exception $e) {
+            // tables already exist?
+        }
+
         $errors = array();
-		$matches = array();
+        $matches = array();
         $ret_str = '';
 
-        if (empty($post_data['blog_password']) == true 
-			|| empty($post_data['blog_password2']) == true 
-			|| empty($post_data['blog_user']) == true 
-			|| empty($post_data['blog_email']) == true) {
+        if (empty($post_data['blog_password']) == true
+            || empty($post_data['blog_password2']) == true
+            || empty($post_data['blog_user']) == true
+            || empty($post_data['blog_title']) == true
+            || empty($post_data['blog_email']) == true) {
 
             $errors[] = 'No fields should be left blank!';
         }
 
-		preg_match('/^([.0-9a-z_-]+)@(([0-9a-z-]+\.)+[0-9a-z]{2,4})$/i', $post_data['blog_email'], $matches);
+        preg_match('/^([.0-9a-z_-]+)@(([0-9a-z-]+\.)+[0-9a-z]{2,4})$/i', $post_data['blog_email'], $matches);
         if (count($matches) == 0) {
-			$errors[] = 'Not a valid email address.';
+            $errors[] = 'Not a valid email address.';
         }
 
         if (strlen($post_data['blog_password']) < 7) {
@@ -120,86 +121,100 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         $username = $post_data['blog_user'];
         $password = $post_data['blog_password'];
         $salt = $this->random_str;
-		$password = md5($salt . $password);
-		$email = $post_data['blog_email'];
-		
-		$table = $post_data['db_prefix'] . 'groups';
-		$data = array(
-			'id' => '',
-			'name' => 'Admin',
-		);
+        $password = md5($salt . $password);
+        $email = $post_data['blog_email'];
 
-		$adapter->insert($table, $data);
-		$last_insert_id = $adapter->lastInsertId($table, 'id');
-		$permissions = array();
-		$table = $post_data['db_prefix'] . 'permissions';
-		$data = array(
-			'id' => '',
-			'name' => 'create_post',
-		);
-		$adapter->insert($table, $data);
-		$permissions[] = $adapter->lastInsertId($table, 'id');
-		$data = array(
-			'id' => '',
-			'name' => 'edit_post',
-		);
-		$adapter->insert($table, $data);
-		$permissions[] = $adapter->lastInsertId($table, 'id');
-		$data = array(
-			'id' => '',
-			'name' => 'delete_post',
-		);
-		$adapter->insert($table, $data);
-		$permissions[] = $adapter->lastInsertId($table, 'id');
-		$table = $post_data['db_prefix'] . 'groups_permissions';
-		foreach($permissions as $permission) {
-			$data = array(
-				'id' => '',
-				'group_id' => $last_insert_id,
-				'permission_id' => $permission,
-			);
-			$adapter->insert($table, $data);
-		}
+        $table = $post_data['db_prefix'] . 'groups';
+        $data = array(
+            'id' => '',
+            'name' => 'Admin',
+        );
 
-		$table = $post_data['db_prefix'] . 'users';
-		$data = array(
-			'id' => '',
-			'group_id' => $last_insert_id,
+        $adapter->insert($table, $data);
+        $last_insert_id = $adapter->lastInsertId($table, 'id');
+        $permissions = array();
+        $table = $post_data['db_prefix'] . 'permissions';
+        $data = array(
+            'id' => '',
+            'name' => 'create_post',
+        );
+        $adapter->insert($table, $data);
+        $permissions[] = $adapter->lastInsertId($table, 'id');
+        $data = array(
+            'id' => '',
+            'name' => 'edit_post',
+        );
+        $adapter->insert($table, $data);
+        $permissions[] = $adapter->lastInsertId($table, 'id');
+        $data = array(
+            'id' => '',
+            'name' => 'delete_post',
+        );
+        $adapter->insert($table, $data);
+        $permissions[] = $adapter->lastInsertId($table, 'id');
+        $table = $post_data['db_prefix'] . 'groups_permissions';
+        foreach($permissions as $permission) {
+            $data = array(
+                'id' => '',
+                'group_id' => $last_insert_id,
+                'permission_id' => $permission,
+            );
+            $adapter->insert($table, $data);
+        }
+
+        $table = $post_data['db_prefix'] . 'users';
+        $data = array(
+            'id' => '',
+            'group_id' => $last_insert_id,
             'username'=> $username,
             'password' => $password,
             'email' => $email,
-		);
-		$adapter->insert($table, $data);
-		
-		$table = $post_data['db_prefix'] . 'options';
-		$data = array(
-			'id' => '',
-			'name' => 'blog_installed',
-			'type' => 1,
-			'value' => time(),
-		);
-		$adapter->insert($table, $data);
-		$data = array(
-			'id' => '',
-			'name' => 'blog_theme',
-			'type' => 0,
-			'value' => 'default',
-		);
-		$adapter->insert($table, $data);
-		return 'Foresmo installed! Click here to check it out! Also, don\'t forget to change the permissions of the config back to read only.';
+        );
+        $adapter->insert($table, $data);
+
+        $table = $post_data['db_prefix'] . 'options';
+        $data = array(
+            'id' => '',
+            'name' => 'blog_installed',
+            'type' => 1,
+            'value' => time(),
+        );
+        $adapter->insert($table, $data);
+        $data = array(
+            'id' => '',
+            'name' => 'blog_theme',
+            'type' => 0,
+            'value' => 'default',
+        );
+        $adapter->insert($table, $data);
+        $data = array(
+            'id' => '',
+            'name' => 'blog_title',
+            'type' => 0,
+            'value' => $post_data['blog_title'],
+        );
+        $adapter->insert($table, $data);
+        $data = array(
+            'id' => '',
+            'name' => 'blog_posts_per_page',
+            'type' => 0,
+            'value' => 10,
+        );
+        $adapter->insert($table, $data);
+        return 'Foresmo installed! Click here to check it out! Also, don\'t forget to change the permissions of the config back to read only.';
     }
-	
-	/**
-	 * _getConfigContent
-	 * Get Solar.config.php content to write.
-	 * 
-	 * @param $post_data
-	 * @access private
-	 * @return string
-	 */
-	private function _getConfigContent($post_data)
-	{
-		return "<?php
+
+    /**
+     * _getConfigContent
+     * Get Solar.config.php content to write.
+     *
+     * @param $post_data
+     * @access private
+     * @return string
+     */
+    private function _getConfigContent($post_data)
+    {
+        return "<?php
 /**
  * all config values go in this array, which will be returned at the end of
  * this script
@@ -251,6 +266,8 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
     'prefix' => '".$post_data['db_prefix']."'
 );
 
+// Foresmo settings
+\$config['Foresmo']['installed'] = true;
 
 // Authentication source
 \$config['Solar_Auth'] = array(
@@ -273,54 +290,54 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
  * done!
  */
 return \$config;
-		";
-	}
-	
-	
-	/**
-	 * Generate and return a random string
-	 *
-	 * The default string returned is 8 alphanumeric characters.
-	 *
-	 * The type of string returned can be changed with the output parameter.
-	 * Four types are available: alpha, numeric, alphanum and hexadec.
-	 *
-	 * If the output parameter does not match one of the above, then the string
-	 * supplied is used.
-	 *
-	 * @author      Aidan Lister <aidan@php.net>
-	 * @version     2.1.0
-	 * @link        http://aidanlister.com/repos/v/function.str_rand.php
-	 * @param       int     $length  Length of string to be generated
-	 * @param       string  $seeds   Seeds string should be generated from
-	 */
-	public function str_rand($length = 8, $output = 'alphanum')
-	{
-		// Possible seeds
-		$outputs['alpha']    = 'abcdefghijklmnopqrstuvwxyz';
-		$outputs['numeric']  = '0123456789';
-		$outputs['alphanum'] = 'abcdefghijklmnopqrstuvwxyz0123456789';
-		$outputs['alphanumi'] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-		$outputs['hexadec']  = '0123456789abcdef';
+        ";
+    }
 
-		// Choose seed
-		if (isset($outputs[$output])) {
-			$output = $outputs[$output];
-		}
 
-		// Seed generator
-		list($usec, $sec) = explode(' ', microtime());
-		$seed = (float) $sec + ((float) $usec * 100000);
-		mt_srand($seed);
+    /**
+     * Generate and return a random string
+     *
+     * The default string returned is 8 alphanumeric characters.
+     *
+     * The type of string returned can be changed with the output parameter.
+     * Four types are available: alpha, numeric, alphanum and hexadec.
+     *
+     * If the output parameter does not match one of the above, then the string
+     * supplied is used.
+     *
+     * @author      Aidan Lister <aidan@php.net>
+     * @version     2.1.0
+     * @link        http://aidanlister.com/repos/v/function.str_rand.php
+     * @param       int     $length  Length of string to be generated
+     * @param       string  $seeds   Seeds string should be generated from
+     */
+    public function str_rand($length = 8, $output = 'alphanum')
+    {
+        // Possible seeds
+        $outputs['alpha']    = 'abcdefghijklmnopqrstuvwxyz';
+        $outputs['numeric']  = '0123456789';
+        $outputs['alphanum'] = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        $outputs['alphanumi'] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        $outputs['hexadec']  = '0123456789abcdef';
 
-		// Generate
-		$str = '';
-		$output_count = strlen($output);
-		for ($i = 0; $length > $i; $i++) {
-			$str .= $output{mt_rand(0, $output_count - 1)};
-		}
-		$this->random_str = $str;
-		return $str;
-	}
+        // Choose seed
+        if (isset($outputs[$output])) {
+            $output = $outputs[$output];
+        }
+
+        // Seed generator
+        list($usec, $sec) = explode(' ', microtime());
+        $seed = (float) $sec + ((float) $usec * 100000);
+        mt_srand($seed);
+
+        // Generate
+        $str = '';
+        $output_count = strlen($output);
+        for ($i = 0; $length > $i; $i++) {
+            $str .= $output{mt_rand(0, $output_count - 1)};
+        }
+        $this->random_str = $str;
+        return $str;
+    }
 
 }

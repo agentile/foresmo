@@ -44,11 +44,14 @@ $config['Solar_Sql']['adapter'] = 'Solar_Sql_Adapter_Mysql';
 
 $config['Solar_Sql_Adapter_Mysql'] = array(
     'host' => 'localhost',
-    'user' => 'test',
-    'pass' => 'testing',
+    'user' => 'user',
+    'pass' => 'pass',
     'name' => 'foresmo',
     'prefix' => 'foresmo_'
 );
+
+// Foresmo settings
+$config['Foresmo']['installed'] = false;
 
 
 // Authentication source

@@ -31,17 +31,59 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         if (!$this->installed) {
             $this->_redirect('/install');
         }
-        $this->_layout_default = $this->theme;
-        $where = array('status = ?' => 1);
+
         $this->posts = $this->_model->posts->fetchArray(
             array(
-                'where'  => $where,
+                'where'  => array('status = ?' => 1),
                 'order'  => array ('id DESC'),
                 'paging' => $this->posts_per_page,
                 'page'   => 1,
-                'eager'  => array('comments', 'tags', 'postinfo'),
+                'eager'  => array(
+                    'comments' => array(
+                        'eager' => array(
+                            'commentinfo'
+                        )
+                    ),
+                    'tags',
+                    'postinfo'
+                ),
             )
         );
+    }
+
+
+    public function actionTag($tag = null)
+    {
+        if (!$tag) {
+            $this->_redirect('/');
+        }
+        $tag = (string) $tag;
+        $where = array(
+            'tags.tag_slug = ?' => $tag
+        );
+
+        $this->posts = $this->_model->posts->fetchArray(
+            array(
+                'where'  => array('status = ?' => 1),
+                'order'  => array ('id DESC'),
+                'paging' => $this->posts_per_page,
+                'page'   => 1,
+                'eager'  => array(
+                    'comments' => array(
+                        'eager' => array(
+                            'commentinfo'
+                        )
+                    ),
+                    'tags' => array(
+                        'where' => array(
+                            'tags.tag_slug = ?' => $tag
+                        )
+                    ),
+                    'postinfo'
+                ),
+            )
+        );
+        $this->_view = 'index';
     }
 
     /**
@@ -141,8 +183,8 @@ class Foresmo_App_Index extends Foresmo_App_Base {
     }
 
     /**
-     * _getGroupPermissions
-     * Get the group permissions as an array to set in the session
+     * _getUserInfo
+     * Get the user info as an array to set in the session
      *
      * @access private
      * @param  $group_id

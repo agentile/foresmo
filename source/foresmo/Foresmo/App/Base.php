@@ -17,8 +17,9 @@ class Foresmo_App_Base extends Solar_App_Base {
     public $session;
     public $connect = true;
     public $installed = false;
-    public $theme = 'default';
+    public $blog_theme = 'default';
     public $posts_per_page = 10;
+    public $blog_title = 'Foresmo Blog';
 
     /**
      * _setup
@@ -37,21 +38,23 @@ class Foresmo_App_Base extends Solar_App_Base {
         }
         if ($this->connect) {
             $this->_model = Solar_Registry::get('model_catalog');
-            $where = array('name = ?' => 'blog_installed');
-            $result = $this->_model->options->fetchArray($where);
-            if (count($result) > 0) {
-                $this->installed = true;
-            }
+            $this->installed = Solar_Config::get('Foresmo', 'installed');
             $where = array('name = ?' => 'blog_theme');
-            $result = $this->_model->options->fetchArray($where);
+            $result = $this->_model->options->fetchArray(array('where' => $where));
             if (count($result) > 0) {
-                $this->theme = $result[0]['value'];
+                $this->blog_theme = $result[0]['value'];
+            }
+            $where = array('name = ?' => 'blog_title');
+            $result = $this->_model->options->fetchArray(array('where' => $where));
+            if (count($result) > 0) {
+                $this->blog_title = $result[0]['value'];
             }
             $where = array('name = ?' => 'blog_posts_per_page');
-            $result = $this->_model->options->fetchArray($where);
+            $result = $this->_model->options->fetchArray(array('where' => $where));
             if (count($result) > 0) {
-                $this->theme = $result[0]['value'];
+                $this->posts_per_page = $result[0]['value'];
             }
+            $this->_layout_default = $this->blog_theme;
         }
     }
 }
