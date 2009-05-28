@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title><?php echo $this->blog_title; ?></title>
-<?php echo $this->style('Foresmo/default/styles/default.css');?>
+<?php echo $this->style("Foresmo/{$this->blog_theme}/styles/{$this->blog_theme}.css");?>
 </head>
 <body>
     <div id="container">

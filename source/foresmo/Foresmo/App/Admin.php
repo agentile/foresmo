@@ -29,5 +29,6 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
             || !$this->session->get('Foresmo_username')) {
             $this->_redirect('/login');
         }
+        $this->_layout = 'admin';
     }
 }

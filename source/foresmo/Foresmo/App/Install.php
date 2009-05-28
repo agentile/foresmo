@@ -11,7 +11,6 @@
  */
 class Foresmo_App_Install extends Foresmo_App_Base {
 
-    protected $_layout_default = 'install';
     protected $_action_default = 'index';
 
     /**
@@ -28,5 +27,6 @@ class Foresmo_App_Install extends Foresmo_App_Base {
         if ($this->installed) {
             $this->_redirect('/');
         }
+        $this->_layout = 'install';
     }
 }

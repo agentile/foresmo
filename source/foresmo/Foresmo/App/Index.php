@@ -32,26 +32,64 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             $this->_redirect('/install');
         }
 
-        $this->posts = $this->_model->posts->fetchArray(
-            array(
-                'where'  => array('status = ?' => 1),
-                'order'  => array ('id DESC'),
-                'paging' => $this->posts_per_page,
-                'page'   => 1,
-                'eager'  => array(
-                    'comments' => array(
-                        'eager' => array(
-                            'commentinfo'
-                        )
+        $posts = array();
+
+        if (!empty($this->_info)) {
+            $posts = $this->_model->posts->fetchArray(
+                array(
+                    'where'  => array('status = ?' => 1, 'slug = ?' => $this->_info[0]),
+                    'order'  => array ('id DESC'),
+                    'paging' => $this->posts_per_page,
+                    'page'   => 1,
+                    'eager'  => array(
+                        'comments' => array(
+                            'eager' => array(
+                                'commentinfo'
+                            )
+                        ),
+                        'tags',
+                        'postinfo'
                     ),
-                    'tags',
-                    'postinfo'
-                ),
-            )
-        );
+                )
+            );
+        }
+        if (!empty($posts)) {
+            $this->_view = 'post';
+        }
+
+        if (empty($posts) && !empty($this->_info)) {
+            $this->_view = 'notfound';
+        } else {
+            $posts = $this->_model->posts->fetchArray(
+                array(
+                    'where'  => array('status = ?' => 1),
+                    'order'  => array ('id DESC'),
+                    'paging' => $this->posts_per_page,
+                    'page'   => 1,
+                    'eager'  => array(
+                        'comments' => array(
+                            'eager' => array(
+                                'commentinfo'
+                            )
+                        ),
+                        'tags',
+                        'postinfo'
+                    ),
+                )
+            );
+        }
+        $this->posts = $posts;
     }
 
-
+    /**
+     * actionTag
+     * Get posts by tag name
+     *
+     * @return void
+     *
+     * @access public
+     * @since  0.05
+     */
     public function actionTag($tag = null)
     {
         if (!$tag) {

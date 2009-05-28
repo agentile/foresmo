@@ -4,6 +4,19 @@
  * by Anthony Gentile
  * Redlink Technology Solutions, LLP
  */
+
+/*Reset from Eric Meyer:
+http://meyerweb.com/eric/tools/css/reset/
+----------------------------------------*/
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td {
+border:0;
+outline:0;
+font-size:100%;
+font-family:inherit;
+margin:0;
+padding:0;
+}
+
 * {
     margin:0;
     padding:0;
@@ -33,25 +46,25 @@ h1, h2, h3, h4 {
 }
 h1 {
 
-    color: #000;
+    color: #222;
     font-size: 130%;
     margin: 0.1em 0;
     font-weight:300;
 }
 h2 {
-    color: #000;
+    color: #222;
     font-size: 120%;
     margin: 0.1em 0;
     font-weight:300;
 }
 h3 {
-    color: #000;
+    color: #222;
     font-size: 110%;
     margin: 0.1em 0;
     font-weight:300;
 }
 h4 {
-    color: #993;
+    color: #222;
     font-weight: normal;
     padding-top: 0.5em;
 }
@@ -185,19 +198,37 @@ hr{
     background-color: #000000;
 }
 
+.comment_count{
+padding-top:10px;
+width:40px;
+text-align:center;
+font-size:1.3em;
+clear:both;
+float:left;
+}
 .comment{
-    width: 100%;
-    padding: 2px 3px;
-    border-top:1px solid #e3e3e3;
-    border-bottom:1px solid #e3e3e3;
-    margin-bottom:3px;
+width: 630px;
+padding: 5px;
+background:#FAFAFA;
+margin-bottom:5px;
+color:#222;
+float:left;
 }
 
+.comment a{
+color:#006699;
+}
+.comment a:hover{
+color:#28506d;
+}
 .odd{
-    background-color:#eee;
+border-top:5px solid #999;
 }
 .even{
-    background-color:#fcfcfc;
+border-top:5px solid #CCC;
+}
+.admin{
+border-top:5px solid #006699;
 }
 
 /* Tables */
@@ -338,7 +369,6 @@ form div.submit {
     margin-left: 100px;
 }
 label {
-    display: block;
     font-size: 100%;
     padding-right: 20px;
 }
@@ -349,7 +379,6 @@ input{
     width: 250px;
     border: 1px solid #222;
     margin-right:5px;
-    float:left;
 
 }
 textarea {

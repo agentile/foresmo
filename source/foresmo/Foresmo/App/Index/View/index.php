@@ -1,9 +1,16 @@
 <?php
-var_dump($this->posts);
 foreach($this->posts as $post) {
 ?>
-    <h4><a href="/<?php echo $post['slug'];?>" alt="<?php echo $post['title'];?>"><?php echo $post['title'];?></a></h4>
-    <span><?php echo count($post['comments']);?> comments</span><br/><br/>
+    <h2><a href="/<?php echo $post['slug'];?>" alt="<?php echo $post['title'];?>"><?php echo $post['title'];?></a></h2>
+    <span>
+    <?php
+    if (count($post['comments']) == 1) {
+        echo count($post['comments']) . ' ' . '<a href="/'.$post['slug'].'#comments">comment</a>';
+    } else {
+        echo count($post['comments']) . ' ' . '<a href="/'.$post['slug'].'#comments">comments</a>';
+    }
+    ?>
+    </span><br/><br/>
     <p><?php echo $post['content'];?></p><br/>
     <?php
     $tags = array();
