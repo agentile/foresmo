@@ -35,23 +35,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         $posts = array();
 
         if (!empty($this->_info)) {
-            $posts = $this->_model->posts->fetchArray(
-                array(
-                    'where'  => array('status = ?' => 1, 'slug = ?' => $this->_info[0]),
-                    'order'  => array ('id DESC'),
-                    'paging' => $this->posts_per_page,
-                    'page'   => 1,
-                    'eager'  => array(
-                        'comments' => array(
-                            'eager' => array(
-                                'commentinfo'
-                            )
-                        ),
-                        'tags',
-                        'postinfo'
-                    ),
-                )
-            );
+            $posts = $this->_model->posts->getPostBySlug($this->_info[0]);
         }
         if (!empty($posts)) {
             $this->_view = 'post';
@@ -60,25 +44,28 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         if (empty($posts) && !empty($this->_info)) {
             $this->_view = 'notfound';
         } else {
-            $posts = $this->_model->posts->fetchArray(
-                array(
-                    'where'  => array('status = ?' => 1),
-                    'order'  => array ('id DESC'),
-                    'paging' => $this->posts_per_page,
-                    'page'   => 1,
-                    'eager'  => array(
-                        'comments' => array(
-                            'eager' => array(
-                                'commentinfo'
-                            )
-                        ),
-                        'tags',
-                        'postinfo'
-                    ),
-                )
-            );
+            $posts = $this->_model->posts->getAllPublishedPosts();
         }
         $this->posts = $posts;
+    }
+
+    /**
+     * actionPage
+     * Get posts by page number (pagination)
+     *
+     * @return void
+     *
+     * @access public
+     * @since  0.15
+     */
+    public function actionPage($page = null)
+    {
+        if (!$page || $page < 0 || $page > $this->pages_count) {
+            $this->_redirect('/');
+        }
+
+        $this->posts = $this->_model->posts->getAllPublishedPostsByPage($page);
+        $this->_view = 'index';
     }
 
     /**
@@ -90,37 +77,14 @@ class Foresmo_App_Index extends Foresmo_App_Base {
      * @access public
      * @since  0.05
      */
-    public function actionTag($tag = null)
+    public function actionTag()
     {
-        if (!$tag) {
+        $tags = func_get_args();
+        if (empty($tags)) {
             $this->_redirect('/');
         }
-        $tag = (string) $tag;
-        $where = array(
-            'tags.tag_slug = ?' => $tag
-        );
 
-        $this->posts = $this->_model->posts->fetchArray(
-            array(
-                'where'  => array('status = ?' => 1),
-                'order'  => array ('id DESC'),
-                'paging' => $this->posts_per_page,
-                'page'   => 1,
-                'eager'  => array(
-                    'comments' => array(
-                        'eager' => array(
-                            'commentinfo'
-                        )
-                    ),
-                    'tags' => array(
-                        'where' => array(
-                            'tags.tag_slug = ?' => $tag
-                        )
-                    ),
-                    'postinfo'
-                ),
-            )
-        );
+        $this->posts = $this->_model->posts->getPostsByTag($tags);
         $this->_view = 'index';
     }
 
@@ -168,13 +132,13 @@ class Foresmo_App_Index extends Foresmo_App_Base {
                 $this->session->set('Foresmo_username', $result[0]['username']);
                 $this->session->set(
                     'Foresmo_permissions',
-                    $this->_getGroupPermissions($result[0]['group_id'])
+                    $this->_model->groups_permissions->getGroupPermissionsByID($result[0]['group_id'])
                 );
                 $this->session->set(
                     'Foresmo_user_info',
-                    $this->_getUserInfo($result[0]['id'])
+                    $this->_model->user_info->getUserInfoByID($result[0]['id'])
                 );
-                $this->_redirect('/index');
+                $this->_redirect('/admin');
             } else {
                 $this->msg = 'Login Failed';
             }
@@ -198,44 +162,5 @@ class Foresmo_App_Index extends Foresmo_App_Base {
     {
         $this->session->resetAll();
         $this->_redirect('/index');
-    }
-
-    /**
-     * _getGroupPermissions
-     * Get the group permissions as an array to set in the session
-     *
-     * @access private
-     * @param  $group_id
-     * @return array
-     */
-    private function _getGroupPermissions($group_id)
-    {
-        $where = array('group_id = ?' => $group_id);
-        $result = $this->_model->groups_permissions->fetchArray(
-            array(
-                'where' => $where,
-                'eager' => 'permissions'
-            )
-        );
-        return $result;
-    }
-
-    /**
-     * _getUserInfo
-     * Get the user info as an array to set in the session
-     *
-     * @access private
-     * @param  $group_id
-     * @return array
-     */
-    private function _getUserInfo($user_id)
-    {
-        $where = array('user_id = ?' => $user_id);
-        $result = $this->_model->user_info->fetchArray(
-            array(
-                'where' => $where,
-            )
-        );
-        return $result;
     }
 }

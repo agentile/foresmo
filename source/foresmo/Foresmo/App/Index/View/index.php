@@ -21,4 +21,13 @@ foreach($this->posts as $post) {
     ?>
 <?php
 }
+?>
+<br/><br/>
+<div id="pages">
+<?php
+for ($i = 1; $i <= $this->pages_count; $i++) {
+    echo "<a href=\"/page/{$i}\" class=\"pagination\">{$i}</a>";
+}
+?>
+</div>
 
