@@ -132,7 +132,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
                 $this->session->set('Foresmo_username', $result[0]['username']);
                 $this->session->set(
                     'Foresmo_permissions',
-                    $this->_model->groups_permissions->getGroupPermissionsByID($result[0]['group_id'])
+                    $this->_model->groups_permissions->getGroupPermissionsByID($result[0]['group_id'], true)
                 );
                 $this->session->set(
                     'Foresmo_user_info',

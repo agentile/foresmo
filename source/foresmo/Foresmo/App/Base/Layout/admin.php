@@ -7,11 +7,57 @@
 echo $this->style('Foresmo/default/styles/admin.css')."\n";
 echo $this->script('Foresmo/default/scripts/mootools-1.2.2-core.js')."\n";
 echo $this->script('Foresmo/default/scripts/mootools-1.2.2.2-more.js')."\n";
+echo $this->script('Foresmo/default/scripts/tiny_mce/tiny_mce.js')."\n";
+echo $this->script('Foresmo/default/scripts/admin.js')."\n";
 ?>
 </head>
 <body>
-
-    <?php echo $this->layout_content; ?>
-
+    <div id="top_nav">
+        <ul class="nav main">
+            <li>
+                <a href="/admin">Home</a>
+            </li>
+            <li>
+                <a href="/admin/posts">Posts</a>
+                <ul>
+                    <li><a href="/admin/posts/new">Create New Post</a></li>
+                    <li><a href="#">Manage Posts</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="/admin/comments">Comments</a>
+                <ul>
+                    <li><a href="#">Spam</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="/admin/modules">Modules</a>
+            </li>
+            <li>
+                <a href="/admin/users">Users</a>
+            </li>
+            <li>
+                <a href="/admin/settings">Settings</a>
+            </li>
+        </ul>
+        <ul class="nav right">
+            <li>
+                <a href="/logout">Logout</a>
+            </li>
+            <li>
+                <a href="#"><?php echo $this->session->get('Foresmo_username'); ?></a>
+                <ul>
+                    <li><a href="#">Preferences</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div id="main_content" class="container_16">
+        <?php echo $this->layout_content; ?>
+    </div>
+    <div id="footer">
+        <span class="footer-left">Theme: Redlink, using <a href="http://designinfluences.com/fluid960gs/" target="_blank">Fluid 960</a> and <a href="http://splashyfish.com/icons/" target="_blank">Splashy Icons</a></span>
+        <span class="footer-right"><a href="http://redlinktech.com" target="_blank">Redlink Technology Solutions, LLP</a></span>
+    </div>
 </body>
 </html>

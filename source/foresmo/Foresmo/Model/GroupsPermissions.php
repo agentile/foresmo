@@ -34,9 +34,9 @@ class Foresmo_Model_GroupsPermissions extends Solar_Sql_Model {
      * @param  $group_id
      * @return array
      */
-    public function getGroupPermissionsByID($group_id)
+    public function getGroupPermissionsByID($group_id, $short_list = false)
     {
-        return $this->fetchArray(
+        $permissions = $this->fetchArray(
             array(
                 'where' => array(
                     'group_id = ?' => $group_id
@@ -44,5 +44,20 @@ class Foresmo_Model_GroupsPermissions extends Solar_Sql_Model {
                 'eager' => 'permissions'
             )
         );
+
+        if ($short_list === false) {
+            return $permissions;
+        }
+        $short = array();
+        foreach ($permissions as $permission) {
+            if (is_array($permission['permissions'])) {
+                foreach ($permission['permissions'] as $permission_data) {
+                    if (isset($permission_data['name'])) {
+                        $short[] = $permission_data['name'];
+                    }
+                }
+            }
+        }
+        return $short;
     }
 }
