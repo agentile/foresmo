@@ -1,6 +1,6 @@
         <div class="grid_16">
-            <h2 class="page-heading"><i>Home</i></h2>
-            <h2 class="page-heading-right"><i>Foresmo administration</i></h2>
+            <h2 class="page-heading">Home</h2>
+            <h2 class="page-heading-right"><?php echo $this->blog_title;?> administration</h2>
         </div>
         <div class="clear"></div>
         <div class="grid_4">

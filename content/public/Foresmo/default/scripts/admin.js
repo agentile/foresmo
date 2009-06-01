@@ -16,3 +16,12 @@ window.addEvent('domready', function() {
   }, $('section-menu'));
 
 });
+
+// TinyMCE content ajax fix
+var fixTiny = function(properties) {
+    var properties = properties || new Object();
+    var instance = properties.instance || 'mce_editor_0';
+    tinyMCE.execInstanceCommand(instance,'mceCleanup');
+    tinyMCE.triggerSave(true,true);
+    return true;
+}

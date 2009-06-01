@@ -51,7 +51,6 @@ CREATE TABLE [prefix]posts (
   user_id SMALLINT UNSIGNED NOT NULL,
   status SMALLINT UNSIGNED NOT NULL,
   pubdate INT UNSIGNED NOT NULL,
-  updated INT UNSIGNED NOT NULL,
   modified INT UNSIGNED NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY slug (slug(80))
@@ -79,8 +78,6 @@ CREATE TABLE  [prefix]posts_tags  (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   post_id INT UNSIGNED NOT NULL,
   tag_id INT UNSIGNED NOT NULL,
-  type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-  value TEXT,
   PRIMARY KEY (id),
   KEY post_id(post_id),
   KEY tag_id(tag_id)

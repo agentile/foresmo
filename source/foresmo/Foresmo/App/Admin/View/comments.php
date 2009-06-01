@@ -1,5 +1,5 @@
         <div class="grid_16">
-            <h2 class="page-heading"><i>Comments</i></h2>
-            <h2 class="page-heading-right"><i>Foresmo administration</i></h2>
+            <h2 class="page-heading">Comments</h2>
+            <h2 class="page-heading-right"><?php echo $this->blog_title;?> administration</h2>
         </div>
         <div class="clear"></div>

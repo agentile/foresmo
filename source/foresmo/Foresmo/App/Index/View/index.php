@@ -4,6 +4,7 @@ foreach($this->posts as $post) {
     <h2><a href="/<?php echo $post['slug'];?>" alt="<?php echo $post['title'];?>"><?php echo $post['title'];?></a></h2>
     <span>
     <?php
+    echo $post['pubdate'] . '<br/>';
     if (count($post['comments']) == 1) {
         echo count($post['comments']) . ' ' . '<a href="/'.$post['slug'].'#comments">comment</a>';
     } else {
@@ -25,8 +26,10 @@ foreach($this->posts as $post) {
 <br/><br/>
 <div id="pages">
 <?php
-for ($i = 1; $i <= $this->pages_count; $i++) {
-    echo "<a href=\"/page/{$i}\" class=\"pagination\">{$i}</a>";
+if (strtolower($this->action) !== 'tag') {
+    for ($i = 1; $i <= $this->pages_count; $i++) {
+        echo "<a href=\"/page/{$i}\" class=\"pagination\">{$i}</a>";
+    }
 }
 ?>
 </div>

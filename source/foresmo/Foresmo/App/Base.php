@@ -1,7 +1,7 @@
 <?php
 /**
  * Foresmo_App_Base
- * Foresmo Arch Class
+ * Foresmo App Arch Class
  *
  * @category  App
  * @package   Foresmo
@@ -20,6 +20,7 @@ class Foresmo_App_Base extends Solar_App_Base {
     public $blog_theme = 'default';
     public $blog_title = 'Foresmo Blog';
     public $pages_count;
+    public $adapter;
 
     /**
      * _setup
@@ -37,6 +38,7 @@ class Foresmo_App_Base extends Solar_App_Base {
             $this->connect = false;
         }
         if ($this->connect) {
+            $this->adapter = $adapter;
             $this->_model = Solar_Registry::get('model_catalog');
             $this->installed = Solar_Config::get('Foresmo', 'installed');
 
@@ -85,5 +87,44 @@ class Foresmo_App_Base extends Solar_App_Base {
             return;
         }
         $this->pages_count = ceil(($posts_count / $posts_per_page));
+    }
+
+    /**
+     * allowAction
+     * Check user permissions for an action to be performed
+     *
+     * @param $action
+     * @return bool
+     */
+    public function allowAction($action)
+    {
+        $user_permissions = $this->session->get('Foresmo_permissions');
+        if (!is_array($user_permissions)) {
+            return false;
+        }
+        switch ($action) {
+            case 'admin_post_new':
+                return (in_array('create_post', $user_permissions)) ? true : false;
+            break;
+        }
+        return false;
+    }
+
+    /**
+     * validate
+     * This maps to Solar validation functions, without having to use a
+     * form
+     *
+     * @param $validator validate function to use e.g. validateEmail
+     * @param $str string to validate
+     *
+     * @return bool
+     */
+    public function validate($validator, $str)
+    {
+        $obj = Solar::factory('Solar_Filter_' . ucfirst($validator));
+        if (is_object($obj)) {
+            return $obj->$validator($str);
+        }
     }
 }

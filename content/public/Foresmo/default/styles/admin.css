@@ -662,6 +662,7 @@ h2.page-heading {
     margin:0 0 10px 0;
     border-bottom:1px solid #ccc;
     font-family: "Trajan Pro","Times New Roman",Times,serif;
+    font-style: italic;
     float:left;
 }
 
@@ -671,13 +672,14 @@ h2.page-heading-right{
     margin:0 0 10px 0;
     border-bottom:1px solid #ccc;
     font-family: "Trajan Pro","Times New Roman",Times,serif;
+    font-style: italic;
     float:right;
 }
 
 /* boxes
 ----------------------------------------------- */
 .box {
-    background:#ddd;
+    background:#f2f2f2;
     margin-bottom:20px;
     padding:10px 10px 1px 10px;
 }
@@ -1085,56 +1087,6 @@ input.search.button {
     padding-bottom:10px;
 }
 
-
-/* Mootools Kwicks
------------------------------------------------ */
-#kwick-box {
-    padding:0;
-    overflow:hidden;
-}
-#kwick-box h2 {
-    margin:0;
-}
-#kwick {
-    position: relative;
-}
-#kwick .kwicks {
-    display: block;
-    background: #999;
-    height: 120px;
-    list-style:none;
-    margin:0;
-    overflow:hidden;
-}
-#kwick li {
-    float: left;
-    margin:0;
-    padding:0;
-}
-#kwick .kwick {
-    display: block;
-    cursor: pointer;
-    overflow: hidden;
-    height: 100px;
-    width: 215px;
-    padding: 10px;
-    background: #fff;
-}
-#kwick .kwick span {
-    color:#fff;
-}
-#kwick .one {
-    background: #666;
-}
-#kwick .two {
-    background: #777;
-}
-#kwick .three {
-    background: #888;
-}
-#kwick .four {
-    background: #999;
-}
 /*
 -----------------------------------------------
 Navigation
@@ -1368,12 +1320,38 @@ label {
     font-family:"Trajan Pro","Times New Roman",Times,serif;
 }
 
+#message {
+    font-family:"Trajan Pro","Times New Roman",Times,serif;
+    padding-top:5px;
+    padding-bottom:5px;
+}
+
 .input {
     border: 1px solid #ccc;
     color: #444;
     background-color:#fafafa;
     padding: 2px;
-    width: 694px;
+}
+
+.byline {
+    font-size: 10px;
+    font-style: italic;
+}
+
+select {
+    border: 1px solid #ccc;
+    color: #444;
+    background-color:#fafafa;
+    padding: 2px;
+}
+
+select:hover {
+    border: 1px solid #222;
+}
+
+option {
+    color: #444;
+    background-color:#fafafa;
 }
 
 .input:hover {
@@ -1564,6 +1542,5 @@ label {
 }
 
 .message {
-    float:right;
     color:#990000;
 }

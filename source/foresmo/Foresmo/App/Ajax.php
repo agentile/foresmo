@@ -30,8 +30,60 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         $post_data = $this->_request->post();
         if (isset($post_data['ajax_action'])) {
             $method = 'ajax_' . $post_data['ajax_action'];
+            if (stristr($post_data['ajax_action'], 'admin_')) {
+                if ($this->session->get('Foresmo_username', false) === false
+                    || !$this->session->get('Foresmo_username')) {
+                    $this->_response->content = 'Please login <a href="/login">here</a>.';
+                    return;
+                }
+                if (!$this->allowAction($post_data['ajax_action'])) {
+                    $this->_response->content = 'You are not authorized to perform this action.';
+                    return;
+                }
+            }
             $this->_response->content = self::$method($post_data);
         }
+    }
+
+    /**
+     * ajax_admin_post_new
+     * New blog post
+     *
+     * @param $post_data
+     * @return string
+     */
+    public function ajax_admin_post_new($post_data)
+    {
+        $errors = array();
+        if (!isset($post_data['post_title']) || $this->validate('validateBlank', $post_data['post_title'])) {
+            $errors[] = 'Title cannot be blank.';
+        }
+        if (!isset($post_data['post_content']) || $this->validate('validateBlank', $post_data['post_title'])) {
+            $errors[] = 'Content cannot be blank.';
+        }
+        if (count($errors) > 0) {
+            $message = implode('<br/>', $errors);
+            $ret = array(
+                'success' => false,
+                'message' => $message,
+            );
+        } else {
+            $post_data['post_slug'] = $this->_model->posts->makeSlug($post_data['post_title']);
+            $last_insert_id = $this->_model->posts->newPost($post_data);
+            if (!$this->validate('validateBlank', $post_data['post_tags'])) {
+                $tags = explode(',', rtrim(trim($post_data['post_tags']), ','));
+                foreach ($tags as $key => $tag) {
+                    $tags[$key] = trim($tag);
+                }
+                $this->_model->posts_tags->setPostTags($last_insert_id, $tags);
+            }
+            $ret = array(
+                'success' => true,
+                'id' => $last_insert_id,
+                'message' => "Success! <a href=\"/{$post_data['post_slug']}\">View post</a>.",
+            );
+        }
+        return json_encode($ret);
     }
 
     /**
@@ -192,6 +244,20 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             'name' => 'blog_title',
             'type' => 0,
             'value' => $post_data['blog_title'],
+        );
+        $adapter->insert($table, $data);
+        $data = array(
+            'id' => '',
+            'name' => 'blog_date_format',
+            'type' => 0,
+            'value' => 'F j, Y, g:i a',
+        );
+        $adapter->insert($table, $data);
+        $data = array(
+            'id' => '',
+            'name' => 'blog_timezone',
+            'type' => 0,
+            'value' => '0:00',
         );
         $adapter->insert($table, $data);
         $data = array(

@@ -43,7 +43,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
 
         if (empty($posts) && !empty($this->_info)) {
             $this->_view = 'notfound';
-        } else {
+        } elseif (empty($posts) && empty($this->_info)) {
             $posts = $this->_model->posts->getAllPublishedPosts();
         }
         $this->posts = $posts;

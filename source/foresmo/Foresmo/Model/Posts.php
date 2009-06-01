@@ -8,6 +8,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     public $posts_per_page = 10;
     public $page_count;
     public $published_posts_count = 1;
+    public $date_format;
+    public $timezone;
 
     /**
      *
@@ -46,6 +48,10 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
              'through'       => 'posts_tags',
              'through_key'   => 'tag_id',
         ));
+
+        $time_info = Foresmo::getTimeInfo();
+        $this->date_format = $time_info['blog_date_format'];
+        $this->timezone = $time_info['blog_timezone'];
     }
 
     /**
@@ -59,11 +65,10 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
      */
     public function getPostBySlug($slug_name)
     {
-        return $this->fetchArray(
+        $results = $this->fetchArray(
             array(
                 'where'  => array(
-                    'status = ?' => 1,
-                    'slug = ?' => $slug_name
+                    'status = ? AND slug = ?' => array(1, $slug_name),
                 ),
                 'order'  => array (
                     'id DESC'
@@ -81,6 +86,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 ),
             )
         );
+        $this->dateFilter($results);
+        return $results;
     }
 
     /**
@@ -92,7 +99,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
      */
     public function getAllPublishedPosts()
     {
-        return $this->fetchArray(
+        $results = $this->fetchArray(
             array(
                 'where'  => array(
                     'status = ?' => 1
@@ -113,6 +120,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 ),
             )
         );
+        $this->dateFilter($results);
+        return $results;
     }
 
     /**
@@ -125,7 +134,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     public function getAllPublishedPostsByPage($page_num)
     {
         $page_num = (int) $page_num;
-        return $this->fetchArray(
+        $results = $this->fetchArray(
             array(
                 'where'  => array(
                     'status = ?' => 1
@@ -146,6 +155,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 ),
             )
         );
+        $this->dateFilter($results);
+        return $results;
     }
 
     /**
@@ -164,21 +175,19 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
 
         $where_stmt = 'tags.tag_slug = ?';
         for ($i = 1; $i < count($tags); $i++) {
-            $where_stmt .= ' OR ?';
+            $where_stmt .= ' OR tags.tag_slug = ?';
         }
 
         $where = array(
             $where_stmt => $tags
         );
 
-        return $this->fetchArray(
+        $results = $this->fetchArray(
             array(
                 'where'  => array(
                     'status = ?' => 1
                 ),
                 'order'  => array ('id DESC'),
-                'paging' => $this->posts_per_page,
-                'page'   => 1,
                 'eager'  => array(
                     'comments' => array(
                         'eager' => array(
@@ -192,6 +201,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 ),
             )
         );
+        $this->dateFilter($results);
+        return $results;
     }
 
     /**
@@ -215,4 +226,87 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
 
         $this->published_posts_count = (int) $result->count;
     }
+
+    /**
+     * newPost
+     * Insert a new post from post data
+     *
+     * @param $post_data
+     * @return void
+     */
+    public function newPost($post_data)
+    {
+        $post_status = (int) $post_data['post_status'];
+        if ($post_data['post_status'] <= 0 || $post_data['post_status'] > 2) {
+            // if unexpected int, default to 1 (published)
+            $post_data['post_status'] = 1;
+        }
+        $cur_time = time();
+        $data = array(
+            'id' => '',
+            'slug' => $post_data['post_slug'],
+            'content_type' => 1,
+            'title' => $post_data['post_title'],
+            'content' => $post_data['post_content'],
+            'user_id' => $_SESSION['Foresmo_App']['Foresmo_user_id'],
+            'status' => $post_status,
+            'pubdate' => $cur_time,
+            'modified' => $cur_time,
+        );
+        $result = $this->insert($data);
+        return $result['id'];
+    }
+
+    /**
+     * makeSlug
+     * Change string to url friendly slug
+     *
+     * @param $str
+     * @param $delim  default '-'
+     *
+     * @return string
+     */
+    public function makeSlug($str, $delim = '-')
+    {
+        $str = preg_replace('/[^a-z0-9-]/', $delim, strtolower(trim($str)));
+        $str = preg_replace("/{$delim}+/", $delim, trim($str, $delim));
+        return $str;
+    }
+
+    /**
+     * dateFilter
+     * Modify datetime fields for timezone and date format settings
+     *
+     * @param $posts
+     * @param $key
+     *
+     * @return array
+     */
+     public function dateFilter(&$posts)
+     {
+         foreach ($posts as $k => $v) {
+             if (is_array($v)) {
+                 $this->dateFilter($posts[$k]);
+             }
+             if ($k ==='date' || $k === 'pubdate' || $k === 'modified') {
+                 $fetched_time = (int) $v;
+                 $timezone = explode(':', $this->timezone);
+                 if ($timezone[0][0] == '-') {
+                     $first = substr($timezone[0], 1);
+                     $change = $first * 60 * 60;
+                     if ($timezone[1] == '30') {
+                         $change = $change + 1800;
+                     }
+                     $time = date($this->date_format, $fetched_time - $change);
+                 } else {
+                     $change = $timezone[0] * 60 * 60;
+                     if ($timezone[1] == '30') {
+                         $change = $change + 1800;
+                     }
+                     $time = date($this->date_format, $fetched_time + $change);
+                 }
+                 $posts[$k] = $time;
+             }
+         }
+     }
 }
