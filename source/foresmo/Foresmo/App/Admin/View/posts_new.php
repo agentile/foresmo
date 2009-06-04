@@ -68,6 +68,8 @@
                     <input type="text" name="post_tags" class="input" style="width: 90%;"/><br/>
                     <span class="byline">Seperated by commas.</span>
                     <br/><br/>
+                    <label for="post_comments_disabled">Disable Comments</label>
+                    <input type="checkbox" name="post_comments_disabled" value="true"/>
                 </div>
             </div>
         </div>

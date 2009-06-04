@@ -15,6 +15,20 @@
 
         <div id="content-container">
             <div id="content-bar">
+                <ul id="tabControl">
+                    <li class="first">
+                        <a href="#">Blog</a>
+                    </li>
+                    <li>
+                        <a href="#">About</a>
+                    </li>
+                    <li>
+                        <a href="#">Blah</a>
+                    </li>
+                    <li class="right">
+                        <a href="/rss"><img src="<?php echo "public/Foresmo/{$this->blog_theme}/images/rss.gif"; ?>"/></a>
+                    </li>
+                </ul>
             </div>
             <div id="content">
                 <?php echo $this->layout_content; ?>

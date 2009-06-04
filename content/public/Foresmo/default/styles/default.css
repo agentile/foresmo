@@ -26,8 +26,8 @@ html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abb
 /* General Style Info */
 body
 {
-  background:#fafafa;
-  color:#fff;
+  background:#fff;
+  color:#222;
   font-family:verdana,helvetica,sans-serif;
   line-height:1.5em;
   letter-spacing:.05em;
@@ -91,7 +91,7 @@ ul,li
 /* Layout */
 #container
 {
-  width:980px;
+  width:100%;
   text-align:left;
   background-color:#fff;
   margin:0 auto;
@@ -99,7 +99,9 @@ ul,li
 
 #topbar
 {
-  width:980px;
+  position:fixed;
+  top: 0px;
+  width:100%;
   height:5px;
   background-color:#000;
   margin-bottom:5px;
@@ -107,19 +109,14 @@ ul,li
 
 #content-bar
 {
-  width:980px;
-  border-bottom:1px solid #222;
+  width:100%;
+  border-bottom:1px solid #888;
   background-color:#fff;
-  color:#222;
-  height:20px;
   float:left;
 }
 
 #content-bar span
 {
-  font-size:.7em;
-  font-weight:500;
-  font-family:verdana;
   float:right;
   margin-right:10px;
   margin-left:5px;
@@ -141,15 +138,15 @@ ul,li
 #header
 {
   width:960px;
-  height:20px;
-  padding:10px;
+  height:30px;
+  padding-top:20px;
+  margin: 0 auto;
 }
 
 #header span
 {
-  font-family:Constantia, Verdana;
-  font-size:16px;
-  font-weight:700;
+  font-family:Constantia, Georgia;
+  font-size:1.8em;
   float:right;
   color:#000;
 }
@@ -160,8 +157,9 @@ hr
   border-top:1px dashed #000;
   width:100%;
   height:1px;
-  margin-top:10px;
-  margin-bottom:10px;
+  margin-top:15px;
+  margin-bottom:15px;
+  clear: both;
 }
 
 #content-container
@@ -169,7 +167,6 @@ hr
   background-color:#fff;
   width:980px;
   height:100%;
-  float:left;
   margin:0 auto;
 }
 
@@ -178,7 +175,7 @@ hr
   width:700px;
   background:#fff;
   color:#333;
-  padding:10px 20px 40px;
+  padding:10px 5px 40px;
   text-align:justify;
   float:left;
 }
@@ -232,7 +229,7 @@ hr
 
 #bottom-bar
 {
-  width:980px;
+  width:100%;
   height:5px;
   margin:0 auto;
   background-color:#000;
@@ -271,7 +268,7 @@ hr
   width:630px;
   padding:5px;
   background:#FAFAFA;
-  margin-bottom:5px;
+  margin-bottom:15px;
   color:#222;
   float:left;
 }
@@ -346,7 +343,80 @@ table tr td
   vertical-align:top;
 }
 
+/* Nav Tabs */
+
+/* START TAB BUTTONS AND PANEL */
+.tab {
+    display: none;
+}
+
+.tab_active {
+    display: inline;
+}
+
+#push {
+    margin-left: 20px;
+    height: 50px;
+}
+
+ul#tabControl {
+    width:100%;
+    list-style-type: none;
+    height: 1.5em;
+    margin: 0;
+    padding: 0;
+}
+
+ul#tabControl li {
+    float: left;
+    height: 20px;
+    text-align: center;
+    border-top: 1px solid #999;
+    border-right: 1px solid #999;
+    margin-right: 0px;
+    margin-left:0px;
+    padding: 2px 5px 2px 5px;
+}
+
+li.first{
+    border-left: 1px solid #999;
+}
+
+ul#tabControl li:hover {
+    float: left;
+    height: 20px;
+    text-align: center;
+    background-color:#fafafa;
+    border-top: 1px solid #888;
+    border-right: 1px solid #888;
+    margin-right: 0px;
+    padding: 2px 5px 2px 5px;
+}
+
+ul#tabControl li a {
+    color: #555;
+    text-decoration: none;
+}
+
+ul#tabControl li a:hover,ul#tabControl li a:active,ul#tabControl li a:focus
+    {
+    color: #006699;
+    text-decoration: none;
+}
+li.right{
+    float:right;
+}
 /* Forms */
+
+dd ul, ul.failure {
+    list-style-type: none;
+    color: #990000;
+}
+
+.spam_empty {
+    display:none;
+}
+
 form
 {
   clear:both;
@@ -483,6 +553,7 @@ input[type=submit]
   padding:2px 3px;
   width:auto;
   vertical-align:bottom;
+  cursor: pointer;
 }
 
 /* Notices and Errors */

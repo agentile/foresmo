@@ -39,6 +39,8 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         }
         if (!empty($posts)) {
             $this->_view = 'post';
+            $posts = $posts[0];
+            $this->_setPostCommentForm($posts['id']);
         }
 
         if (empty($posts) && !empty($this->_info)) {
@@ -122,7 +124,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
 
         $request = Solar::factory('Solar_Request');
         $process = $request->post('process');
-        if ($process=='Login') {
+        if ($process == 'Login') {
             $form->populate();
             $values = $form->getValues();
             $result = $this->_model->users->validUser($values);
@@ -162,5 +164,85 @@ class Foresmo_App_Index extends Foresmo_App_Base {
     {
         $this->session->resetAll();
         $this->_redirect('/index');
+    }
+
+    /**
+     * Get Comment Form for Post and if applicable, the message.
+     *
+     * @param $post_id
+     */
+    private function _setPostCommentForm($post_id)
+    {
+        if ($this->_model->post_info->commentsDisabled($post_id)) {
+            $this->msg = 'This post has commenting disabled.';
+            return;
+        }
+        $form = Solar::factory('Solar_Form');
+
+        $form->setElement('name', array(
+            'name'  => 'name',
+            'type'  => 'text',
+            'label' => 'Name (required)',
+            'filters' => array('validateNotBlank'),
+        ));
+        $form->setElement('email', array(
+            'name'  => 'email',
+            'type'  => 'text',
+            'label' => 'E-mail (required, not published)',
+            'filters' => array('validateNotBlank','validateEmail'),
+        ));
+        $form->setElement('url', array(
+            'name'  => 'url',
+            'type'  => 'text',
+            'label' => 'Web-site'
+        ));
+        $form->setElement('comment', array(
+            'name'  => 'comment',
+            'type'  => 'textarea',
+            'label' => 'Comment',
+            'filters' => array('validateNotBlank'),
+        ));
+        $form->setElement('post_id', array(
+            'name'  => 'post_id',
+            'type'  => 'hidden',
+            'label' => '',
+            'value' => $post_id,
+            'filters' => array('validateInt'),
+        ));
+        $form->setElement('spam_empty', array(
+            'name'  => 'spam_empty',
+            'type'  => 'text',
+            'label' => '',
+            'value' => '',
+            'class' => 'hidden',
+            'filters' =>  array('validateBlank'),
+        ));
+        $form->setElement('process', array(
+            'type'  => 'submit',
+            'label' => '',
+            'value' => 'Submit Comment',
+        ));
+
+        $request = Solar::factory('Solar_Request');
+        $process = $request->post('process');
+        if ($process == 'Submit Comment') {
+            $form->populate();
+            $is_valid = $form->validate();
+            if ($is_valid) {
+                $values = $form->getValues();
+                if ($this->_model->comments->isSpam($values)) {
+                    $form->feedback = 'This comment has been flagged as spam and has been sent to blog admin for review.';
+                    $this->_model->comments->insertComment($values, true);
+                } else {
+                    $form->feedback = 'Comment posted!';
+                    $this->_model->comments->insertComment($values);
+                }
+            } else {
+                $form->feedback = 'Validation Errors!';
+            }
+        }
+
+        $view = Solar::factory('Solar_View');
+        $this->form = $view->form($form);
     }
 }

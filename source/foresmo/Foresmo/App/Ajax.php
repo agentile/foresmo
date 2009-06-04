@@ -77,6 +77,11 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
                 }
                 $this->_model->posts_tags->setPostTags($last_insert_id, $tags);
             }
+            if (isset($post_data['post_comments_disabled']) && $post_data['post_comments_disabled'] == 'true') {
+                $this->_model->post_info->setCommentsDisabled($last_insert_id, true);
+            } else {
+                $this->_model->post_info->setCommentsDisabled($last_insert_id, false);
+            }
             $ret = array(
                 'success' => true,
                 'id' => $last_insert_id,
@@ -265,6 +270,13 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             'name' => 'blog_posts_per_page',
             'type' => 0,
             'value' => 10,
+        );
+        $adapter->insert($table, $data);
+        $data = array(
+            'id' => '',
+            'name' => 'blog_comment_link_limit',
+            'type' => 0,
+            'value' => 3,
         );
         $adapter->insert($table, $data);
         return 'Foresmo installed! Click here to check it out! Also, don\'t forget to change the permissions of the config back to read only.';

@@ -61,6 +61,9 @@ class Foresmo_App_Base extends Solar_App_Base {
                     case 'blog_posts_per_page':
                         $this->_model->posts->posts_per_page = (int) $result['value'];
                     break;
+                    case 'blog_comment_link_limit':
+                        $this->_model->comments->link_count_limit = (int) $result['value'];
+                    break;
                 }
             }
 
@@ -76,7 +79,7 @@ class Foresmo_App_Base extends Solar_App_Base {
      * the blog's posts given the amount of posts and what the
      * posts_per_page is set to.
      *
-     * @return int
+     * @return void
      */
     private function _setPagesCount()
     {

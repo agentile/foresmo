@@ -36,6 +36,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
         $this->_hasMany('comments', array(
             'foreign_class' => 'Foresmo_Model_Comments',
             'foreign_key' => 'post_id',
+            'where' => array('status = ?' => 1)
         ));
 
         $this->_hasMany('posts_tags', array(
@@ -86,7 +87,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 ),
             )
         );
-        $this->dateFilter($results);
+        $this->_dateFilter($results);
+        $this->_sanitize($results);
         return $results;
     }
 
@@ -120,7 +122,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 ),
             )
         );
-        $this->dateFilter($results);
+        $this->_dateFilter($results);
+        $this->_sanitize($results);
         return $results;
     }
 
@@ -155,7 +158,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 ),
             )
         );
-        $this->dateFilter($results);
+        $this->_dateFilter($results);
+        $this->_sanitize($results);
         return $results;
     }
 
@@ -190,6 +194,9 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 'order'  => array ('id DESC'),
                 'eager'  => array(
                     'comments' => array(
+                        'where' => array(
+                            'comments.status = ?' => 1
+                        ),
                         'eager' => array(
                             'commentinfo'
                         )
@@ -201,7 +208,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 ),
             )
         );
-        $this->dateFilter($results);
+        $this->_dateFilter($results);
+        $this->_sanitize($results);
         return $results;
     }
 
@@ -241,6 +249,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
             // if unexpected int, default to 1 (published)
             $post_data['post_status'] = 1;
         }
+        $post_data['post_title'] = htmlentities($post_data['post_title'], ENT_COMPAT, 'UTF-8');
         $cur_time = time();
         $data = array(
             'id' => '',
@@ -278,17 +287,16 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
      * Modify datetime fields for timezone and date format settings
      *
      * @param $posts
-     * @param $key
      *
-     * @return array
+     * @return void
      */
-     public function dateFilter(&$posts)
+     private function _dateFilter(&$posts)
      {
          foreach ($posts as $k => $v) {
              if (is_array($v)) {
-                 $this->dateFilter($posts[$k]);
+                 $this->_dateFilter($posts[$k]);
              }
-             if ($k ==='date' || $k === 'pubdate' || $k === 'modified') {
+             if ($k === 'date' || $k === 'pubdate' || $k === 'modified') {
                  $fetched_time = (int) $v;
                  $timezone = explode(':', $this->timezone);
                  if ($timezone[0][0] == '-') {
@@ -309,4 +317,31 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
              }
          }
      }
+
+    /**
+    * sanitize
+    * Sanitize text output within arrays
+    *
+    * @param $post
+    * @param $track
+    * @return void
+    */
+    private function _sanitize(&$posts, $track = array())
+    {
+        foreach ($posts as $k => $v) {
+            if (is_array($v)) {
+                $track[] = $k;
+                $this->_sanitize($posts[$k], $track);
+                array_pop($track);
+            } elseif ($k === 'title'
+                || ($k === 'content' && (count($track) > 1))
+                || $k === 'modified'
+                || $k === 'name'
+                || $k === 'email'
+                || $k === 'tag') {
+
+                $posts[$k] = htmlspecialchars($posts[$k], ENT_QUOTES, 'UTF-8');
+            }
+        }
+    }
 }

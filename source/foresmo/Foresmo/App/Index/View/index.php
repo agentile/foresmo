@@ -19,6 +19,7 @@ foreach($this->posts as $post) {
         $tags[] = "<span class=\"tag\"><a href=\"/tag/{$tag['tag_slug']}\" alt=\"{$tag['tag']}\">{$tag['tag']}</a></span>";
     }
     echo '<span>Tags: ' . implode(', ', $tags) . '</span>';
+    echo '<hr/>';
     ?>
 <?php
 }

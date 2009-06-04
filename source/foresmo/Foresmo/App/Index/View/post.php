@@ -1,20 +1,18 @@
-<?php
-foreach($this->posts as $post) {
-?>
-    <h2><?php echo $post['title'];?></h2>
+
+    <h2><?php echo $this->posts['title'];?></h2>
     <span>
     <?php
-    if (count($post['comments']) == 1) {
-        echo count($post['comments']) . ' ' . '<a href="/'.$post['slug'].'#comments">comment</a>';
+    if (count($this->posts['comments']) == 1) {
+        echo count($this->posts['comments']) . ' ' . '<a href="/'.$this->posts['slug'].'#comments">comment</a>';
     } else {
-        echo count($post['comments']) . ' ' . '<a href="/'.$post['slug'].'#comments">comments</a>';
+        echo count($this->posts['comments']) . ' ' . '<a href="/'.$this->posts['slug'].'#comments">comments</a>';
     }
     ?>
     </span><br/><br/>
-    <p><?php echo $post['content'];?></p><br/>
+    <p><?php echo $this->posts['content'];?></p><br/>
     <?php
     $tags = array();
-    foreach ($post['tags'] as $tag) {
+    foreach ($this->posts['tags'] as $tag) {
         $tags[] = "<span class=\"tag\"><a href=\"/tag/{$tag['tag_slug']}\" alt=\"{$tag['tag']}\">{$tag['tag']}</a></span>";
     }
     echo '<span>Tags: ' . implode(', ', $tags) . '</span>';
@@ -22,10 +20,10 @@ foreach($this->posts as $post) {
 
 
     <br/><br/>
-    <span><a name="comments">Comments</a> - <?php echo count($post['comments']);?></span><br/><br/>
+    <span><a name="comments">Comments</a> - <?php echo count($this->posts['comments']);?></span><br/><br/>
 <?php
 
-foreach($post['comments'] as $key => $comment){
+foreach($this->posts['comments'] as $key => $comment){
 
     if ($comment['email'] === 'asgentile@gmail.com') {
         echo "<div class=\"comment admin\">";
@@ -55,9 +53,14 @@ foreach($post['comments'] as $key => $comment){
     echo "</div>";
     echo "</div>";
 }
-echo "<br/>";
 ?>
-
+<hr/>
+<h2>Post a Comment</h2>
+<br/>
 <?php
+echo $this->form;
+echo "\n<br/>";
+if (isset($this->msg)) {
+    echo $this->msg;
 }
 
