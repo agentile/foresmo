@@ -4,7 +4,7 @@
  * Model class.
  *
  */
-class Foresmo_Model_Links extends Solar_Sql_Model {
+class Foresmo_Model_Modules extends Solar_Sql_Model {
 
     /**
      *
@@ -23,5 +23,9 @@ class Foresmo_Model_Links extends Solar_Sql_Model {
         $adapter = Solar_Config::get('Solar_Sql', 'adapter');
         $this->_table_name = Solar_Config::get($adapter, 'prefix') . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
+        $this->_hasMany('moduleinfo', array(
+            'foreign_class' => 'Foresmo_Model_ModuleInfo',
+            'foreign_key' => 'module_id',
+        ));
     }
 }

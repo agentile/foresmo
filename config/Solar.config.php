@@ -44,8 +44,8 @@ $config['Solar_Sql']['adapter'] = 'Solar_Sql_Adapter_Mysql';
 
 $config['Solar_Sql_Adapter_Mysql'] = array(
     'host' => 'localhost',
-    'user' => 'root',
-    'pass' => 'Veritas2!',
+    'user' => 'user',
+    'pass' => 'pass',
     'name' => 'foresmo',
     'prefix' => 'foresmo_'
 );
@@ -53,14 +53,13 @@ $config['Solar_Sql_Adapter_Mysql'] = array(
 // Foresmo settings
 $config['Foresmo']['installed'] = true;
 
-
 // Authentication source
 $config['Solar_Auth'] = array(
     'adapter' => 'Solar_Auth_Adapter_Sql',
 );
 
 // Salt for password - change to something unique and strong.
-$config['Solar_Auth_Adapter_Sql']['salt'] = '337y24p1d825ebnc1v';
+$config['Solar_Auth_Adapter_Sql']['salt'] = 'g7qx01jusvg39c25s8';
 
 
 /**
@@ -75,4 +74,3 @@ $config['Solar_Controller_Front'] = array(
  * done!
  */
 return $config;
-

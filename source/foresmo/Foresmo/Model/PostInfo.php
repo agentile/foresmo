@@ -20,7 +20,8 @@ class Foresmo_Model_PostInfo extends Solar_Sql_Model {
              . 'Setup'
              . DIRECTORY_SEPARATOR;
 
-        $this->_table_name = Solar_Config::get('Solar_Sql_Adapter_Mysql', 'prefix') . Solar_File::load($dir . 'table_name.php');
+        $adapter = Solar_Config::get('Solar_Sql', 'adapter');
+        $this->_table_name = Solar_Config::get($adapter, 'prefix') . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
     }
 
@@ -34,7 +35,7 @@ class Foresmo_Model_PostInfo extends Solar_Sql_Model {
     public function commentsDisabled($post_id)
     {
         $where = array(
-            'post_id = ?' => $post_id,
+            'post_id = ?' => (int) $post_id,
             'name = ?' => 'comments_disabled'
         );
         $result = $this->fetchArray(array('where' => $where));
@@ -42,7 +43,7 @@ class Foresmo_Model_PostInfo extends Solar_Sql_Model {
             return false;
         }
         if (isset($result[0]['value'])) {
-            if ($result[0]['value'] == 'true') {
+            if ($result[0]['value'] == '1') {
                 return true;
             }
         }

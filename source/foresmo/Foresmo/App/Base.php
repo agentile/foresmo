@@ -13,6 +13,8 @@ class Foresmo_App_Base extends Solar_App_Base {
 
     protected $_layout_default = 'default';
     protected $_model;
+    protected $_adapter;
+    protected $_modules;
 
     public $session;
     public $connect = true;
@@ -20,7 +22,8 @@ class Foresmo_App_Base extends Solar_App_Base {
     public $blog_theme = 'default';
     public $blog_title = 'Foresmo Blog';
     public $pages_count;
-    public $adapter;
+    public $web_root;
+    public $enabled_modules = array();
 
     /**
      * _setup
@@ -38,9 +41,13 @@ class Foresmo_App_Base extends Solar_App_Base {
             $this->connect = false;
         }
         if ($this->connect) {
-            $this->adapter = $adapter;
+            $this->_adapter = $adapter;
+            $this->installed = (bool) Solar_Config::get('Foresmo', 'installed');
+            if (!$this->installed) {
+                return;
+            }
+            $this->web_root = Solar_Config::get('Solar', 'system') . '/content/';
             $this->_model = Solar_Registry::get('model_catalog');
-            $this->installed = Solar_Config::get('Foresmo', 'installed');
 
             $results = $this->_model->options->fetchArray(
                 array(
@@ -70,6 +77,9 @@ class Foresmo_App_Base extends Solar_App_Base {
             $this->_model->posts->published_posts_count = $this->_model->posts->getPublishedPostsCount();
             $this->_setPagesCount();
             $this->_layout_default = $this->blog_theme;
+            $this->_setToken();
+            $this->_modules = Solar::factory('Foresmo_Modules', $this->_model);
+            $this->enabled_modules = $this->_modules->getEnabledModules();
         }
     }
 
@@ -129,5 +139,49 @@ class Foresmo_App_Base extends Solar_App_Base {
         if (is_object($obj)) {
             return $obj->$validator($str);
         }
+    }
+
+    /**
+     * _setToken
+     * This will set a session token that will be used to match against
+     * forms posted.
+     *
+     * @return void
+     */
+    protected function _setToken()
+    {
+        if ($this->session->get('Foresmo_token', false) === false
+            || !$this->session->get('Foresmo_token')) {
+            $token = md5(uniqid(mt_rand(), TRUE));
+            $this->session->set('Foresmo_token', $token);
+        }
+        // else already set.
+    }
+
+    /**
+     * _checkToken
+     * Check a token against the one stored in the session
+     *
+     * @param $token
+     * @return bool
+     */
+    protected function _checkToken($token)
+    {
+        if ($this->session->get('Foresmo_token', false) !== false
+            && $this->session->get('Foresmo_token') === $token) {
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * _loadModules
+     * Load enabled modules
+     *
+     * @return void
+     */
+    protected function _loadModules()
+    {
+
     }
 }

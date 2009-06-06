@@ -9,7 +9,7 @@ CREATE TABLE  [prefix]users (
   PRIMARY KEY (id),
   KEY group_ip(group_id),
   UNIQUE KEY username (username)
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE  [prefix]user_info (
   id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -19,19 +19,19 @@ CREATE TABLE  [prefix]user_info (
   value TEXT,
   PRIMARY KEY  (id),
   KEY user_id (user_id)
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE [prefix]permissions (
   id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
   PRIMARY KEY  (id)
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE [prefix]groups (
   id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
   PRIMARY KEY  (id)
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE [prefix]groups_permissions (
   id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -40,7 +40,7 @@ CREATE TABLE [prefix]groups_permissions (
   PRIMARY KEY  (id),
   KEY group_id (group_id),
   KEY permission_id (permission_id)
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE [prefix]posts (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -54,7 +54,7 @@ CREATE TABLE [prefix]posts (
   modified INT UNSIGNED NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY slug (slug(80))
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE  [prefix]post_info  (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -64,7 +64,24 @@ CREATE TABLE  [prefix]post_info  (
   value TEXT,
   PRIMARY KEY (id),
   KEY post_id(post_id)
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE  [prefix]modules  (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  enabled SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (id)
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+CREATE TABLE  [prefix]module_info  (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  module_id INT UNSIGNED NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  value TEXT,
+  PRIMARY KEY (id),
+  KEY module_id(module_id)
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE  [prefix]tags (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -72,7 +89,7 @@ CREATE TABLE  [prefix]tags (
   tag_slug VARCHAR(255) NOT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY tag_slug (tag_slug)
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE  [prefix]posts_tags  (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -81,7 +98,7 @@ CREATE TABLE  [prefix]posts_tags  (
   PRIMARY KEY (id),
   KEY post_id(post_id),
   KEY tag_id(tag_id)
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE  [prefix]comments (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -96,7 +113,7 @@ CREATE TABLE  [prefix]comments (
   type SMALLINT UNSIGNED NOT NULL,
   PRIMARY KEY (id),
   KEY post_id (post_id)
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE  [prefix]comment_info (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -105,7 +122,7 @@ CREATE TABLE  [prefix]comment_info (
   type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   value TEXT NULL,
   PRIMARY KEY (id)
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE  [prefix]options (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -113,7 +130,7 @@ CREATE TABLE  [prefix]options (
   type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   value TEXT,
   PRIMARY KEY (id)
-) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE  [prefix]links (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -122,5 +139,5 @@ CREATE TABLE  [prefix]links (
   target varchar(25) NOT NULL,
   status SMALLINT UNSIGNED NOT NULL,
   PRIMARY KEY  (id)
- ) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+ ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 ";

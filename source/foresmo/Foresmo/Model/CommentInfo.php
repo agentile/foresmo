@@ -20,7 +20,8 @@ class Foresmo_Model_CommentInfo extends Solar_Sql_Model {
              . 'Setup'
              . DIRECTORY_SEPARATOR;
 
-        $this->_table_name = Solar_Config::get('Solar_Sql_Adapter_Mysql', 'prefix') . Solar_File::load($dir . 'table_name.php');
+        $adapter = Solar_Config::get('Solar_Sql', 'adapter');
+        $this->_table_name = Solar_Config::get($adapter, 'prefix') . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
         $this->_belongsTo('comments', array(
             'foreign_class' => 'Foresmo_Model_Comments',

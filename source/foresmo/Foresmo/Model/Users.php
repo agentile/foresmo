@@ -20,11 +20,19 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
              . 'Setup'
              . DIRECTORY_SEPARATOR;
 
-        $this->_table_name = Solar_Config::get('Solar_Sql_Adapter_Mysql', 'prefix') . Solar_File::load($dir . 'table_name.php');
+        $adapter = Solar_Config::get('Solar_Sql', 'adapter');
+        $this->_table_name = Solar_Config::get($adapter, 'prefix') . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
         $this->_hasMany('userinfo');
     }
 
+    /**
+     * validUser
+     * Given credentionals, is this a valid user. (Login)
+     *
+     * @param $values
+     * @return mixed false on invalid, fetched row if valid.
+     */
     public function validUser($values = array())
     {
         if (array_key_exists('username', $values)
@@ -41,8 +49,61 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
             if (is_array($result) && count($result) === 0) {
                 return false;
             } elseif (is_array($result) && count($result) > 0) {
-                return $result;
+                return $result[0];
             }
+        }
+        return false;
+    }
+
+    /**
+     * checkUsernameExists
+     * Checks to see if e-mail address supplied is an e-mail address of
+     * one of the blogs registered users.
+     */
+    public function checkUsernameExists($username)
+    {
+        $where = array(
+            'username LIKE ?' => $username
+        );
+        $results = $this->fetchArray(array('where' => $where));
+        if (!empty($results)) {
+            return $results[0];
+        }
+        return false;
+    }
+
+    /**
+     * checkEmailExists
+     * Checks to see if e-mail address supplied is an e-mail address of
+     * one of the blogs registered users.
+     */
+    public function checkEmailExists($email)
+    {
+        $where = array(
+            'email = ?' => strtolower($email)
+        );
+        $results = $this->fetchArray(array('where' => $where));
+        if (!empty($results)) {
+            return $results[0];
+        }
+        return false;
+    }
+
+    /**
+     * getEmailFromID
+     *
+     * @param $id
+     * @return string
+     */
+    public function getEmailFromID($id)
+    {
+        $where = array(
+            'id = ?' => (int) $id
+        );
+
+        $results = $this->fetchArray(array('where' => $where));
+        if (!empty($results)) {
+            return $results[0]['email'];
         }
         return false;
     }

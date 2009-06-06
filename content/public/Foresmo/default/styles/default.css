@@ -154,7 +154,7 @@ ul,li
 hr
 {
   border:none 0;
-  border-top:1px dashed #000;
+  border-top:1px dashed #888;
   width:100%;
   height:1px;
   margin-top:15px;
@@ -240,6 +240,14 @@ hr
   text-align:center;
 }
 
+.title_text a{
+    color:#222;
+}
+
+.title_text a:hover{
+    color:#222;
+}
+
 .pagination
 {
   padding:1px 2px;
@@ -265,12 +273,22 @@ hr
 
 .comment
 {
-  width:630px;
+  width:100%;
   padding:5px;
   background:#FAFAFA;
   margin-bottom:15px;
   color:#222;
   float:left;
+}
+
+.comment-author {
+    float:left;
+    width:20px;
+}
+
+.comment-message {
+    float:right;
+    width:80%;
 }
 
 .comment a
@@ -411,6 +429,11 @@ li.right{
 dd ul, ul.failure {
     list-style-type: none;
     color: #990000;
+}
+ul.success {
+    list-style-type: none;
+    color: #009900;
+    background-color: #fff;
 }
 
 .spam_empty {

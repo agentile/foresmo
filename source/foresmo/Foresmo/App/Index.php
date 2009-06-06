@@ -14,6 +14,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
     protected $_action_default = 'index';
 
     public $form;
+    public $form_success = false;
     public $msg;
     public $posts = array();
 
@@ -41,6 +42,10 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             $this->_view = 'post';
             $posts = $posts[0];
             $this->_setPostCommentForm($posts['id']);
+            if ($this->form_success) {
+                $posts = $this->_model->posts->getPostBySlug($this->_info[0]);
+                $posts = $posts[0];
+            }
         }
 
         if (empty($posts) && !empty($this->_info)) {
@@ -129,16 +134,16 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             $values = $form->getValues();
             $result = $this->_model->users->validUser($values);
             if ($result !== false) {
-                $this->session->set('Foresmo_user_id', $result[0]['id']);
-                $this->session->set('Foresmo_group_id', $result[0]['group_id']);
-                $this->session->set('Foresmo_username', $result[0]['username']);
+                $this->session->set('Foresmo_user_id', $result['id']);
+                $this->session->set('Foresmo_group_id', $result['group_id']);
+                $this->session->set('Foresmo_username', $result['username']);
                 $this->session->set(
                     'Foresmo_permissions',
-                    $this->_model->groups_permissions->getGroupPermissionsByID($result[0]['group_id'], true)
+                    $this->_model->groups_permissions->getGroupPermissionsByID($result['group_id'], true)
                 );
                 $this->session->set(
                     'Foresmo_user_info',
-                    $this->_model->user_info->getUserInfoByID($result[0]['id'])
+                    $this->_model->user_info->getUserInfoByID($result['id'])
                 );
                 $this->_redirect('/admin');
             } else {
@@ -185,12 +190,22 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             'label' => 'Name (required)',
             'filters' => array('validateNotBlank'),
         ));
-        $form->setElement('email', array(
-            'name'  => 'email',
-            'type'  => 'text',
-            'label' => 'E-mail (required, not published)',
-            'filters' => array('validateNotBlank','validateEmail'),
-        ));
+        if ($this->session->get('Foresmo_username', false) === false
+            || !$this->session->get('Foresmo_username')) {
+            $form->setElement('email', array(
+                'name'  => 'email',
+                'type'  => 'text',
+                'label' => 'E-mail (required, not published)',
+                'filters' => array('validateNotBlank','validateEmail'),
+            ));
+        } else {
+            $form->setElement('email', array(
+                'name'  => 'email',
+                'type'  => 'hidden',
+                'value' => $this->_model->users->getEmailFromID($this->session->get('Foresmo_user_id')),
+                'filters' => array('validateNotBlank','validateEmail'),
+            ));
+        }
         $form->setElement('url', array(
             'name'  => 'url',
             'type'  => 'text',
@@ -202,17 +217,21 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             'label' => 'Comment',
             'filters' => array('validateNotBlank'),
         ));
+        $form->setElement('token', array(
+            'name'  => 'token',
+            'type'  => 'hidden',
+            'value' => $this->session->get('Foresmo_token'),
+            'filters' => array('validateNotBlank','validateAlnum'),
+        ));
         $form->setElement('post_id', array(
             'name'  => 'post_id',
             'type'  => 'hidden',
-            'label' => '',
             'value' => $post_id,
             'filters' => array('validateInt'),
         ));
         $form->setElement('spam_empty', array(
             'name'  => 'spam_empty',
             'type'  => 'text',
-            'label' => '',
             'value' => '',
             'class' => 'hidden',
             'filters' =>  array('validateBlank'),
@@ -230,12 +249,31 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             $is_valid = $form->validate();
             if ($is_valid) {
                 $values = $form->getValues();
-                if ($this->_model->comments->isSpam($values)) {
-                    $form->feedback = 'This comment has been flagged as spam and has been sent to blog admin for review.';
-                    $this->_model->comments->insertComment($values, true);
+                $token_check = $this->_checkToken($values['token']);
+                $registered_check = false;
+                $registered = $this->_model->users->checkEmailExists($values['email']);
+                if ($token_check == false) {
+                    $form->feedback = 'Invalid/Stale token. Comment not submitted.';
+                }
+                if ($registered !== false) {
+                    if ($this->session->get('Foresmo_user_id', false) === false
+                        || $this->session->get('Foresmo_user_id') !== $registered['id']) {
+                        $form->feedback = 'This e-mail address is registered, if you are this user, please login to comment.';
+                    } else {
+                        $registered_check = true;
+                    }
                 } else {
-                    $form->feedback = 'Comment posted!';
-                    $this->_model->comments->insertComment($values);
+                    $registered_check = true;
+                }
+                if ($registered_check && $token_check) {
+                    if ($this->_model->comments->isSpam($values)) {
+                        $form->feedback = 'This comment has been flagged as spam and has been sent to blog admin for review.';
+                        $this->_model->comments->insertComment($values, true);
+                    } else {
+                        $form->feedback = 'Comment posted!';
+                        $this->_model->comments->insertComment($values);
+                        $this->form_success = true;
+                    }
                 }
             } else {
                 $form->feedback = 'Validation Errors!';

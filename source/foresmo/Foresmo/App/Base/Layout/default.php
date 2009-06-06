@@ -10,30 +10,21 @@
         <div id="topbar">
         </div>
         <div id="header">
-            <span><?php echo $this->blog_title; ?></span>
+            <span class="title_text"><a href="/"><?php echo $this->blog_title; ?></a></span>
         </div>
 
         <div id="content-container">
             <div id="content-bar">
-                <ul id="tabControl">
-                    <li class="first">
-                        <a href="#">Blog</a>
-                    </li>
-                    <li>
-                        <a href="#">About</a>
-                    </li>
-                    <li>
-                        <a href="#">Blah</a>
-                    </li>
-                    <li class="right">
-                        <a href="/rss"><img src="<?php echo "public/Foresmo/{$this->blog_theme}/images/rss.gif"; ?>"/></a>
-                    </li>
-                </ul>
             </div>
             <div id="content">
                 <?php echo $this->layout_content; ?>
             </div>
             <div id="content-right">
+                <?php
+                    foreach($this->enabled_modules as $module) {
+                        echo $module->output;
+                    }
+                ?>
             </div>
         </div>
     </div>

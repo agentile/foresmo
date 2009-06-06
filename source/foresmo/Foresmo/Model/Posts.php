@@ -1,6 +1,16 @@
 <?php
 /**
- * Posts Model Class
+ * Foresmo_Model_Posts
+ * Posts model
+ *
+ * content type
+ * 1 = blog post
+ * 2 = page
+ *
+ * status codes
+ * 0 = hidden
+ * 1 = published
+ * 2 = draft
  *
  */
 class Foresmo_Model_Posts extends Solar_Sql_Model {
@@ -25,7 +35,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
              . 'Setup'
              . DIRECTORY_SEPARATOR;
 
-        $this->_table_name = Solar_Config::get('Solar_Sql_Adapter_Mysql', 'prefix') . Solar_File::load($dir . 'table_name.php');
+        $adapter = Solar_Config::get('Solar_Sql', 'adapter');
+        $this->_table_name = Solar_Config::get($adapter, 'prefix') . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
 
         $this->_hasMany('postinfo', array(
@@ -69,7 +80,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
         $results = $this->fetchArray(
             array(
                 'where'  => array(
-                    'status = ? AND slug = ?' => array(1, $slug_name),
+                    'status = ? AND slug = ? AND content_type = ?' => array(1, $slug_name, 1),
                 ),
                 'order'  => array (
                     'id DESC'
@@ -104,7 +115,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
         $results = $this->fetchArray(
             array(
                 'where'  => array(
-                    'status = ?' => 1
+                    'status = ? AND content_type = ?' => array(1, 1)
                 ),
                 'order'  => array (
                     'id DESC'
@@ -140,7 +151,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
         $results = $this->fetchArray(
             array(
                 'where'  => array(
-                    'status = ?' => 1
+                    'status = ? AND content_type = ?' => array(1, 1)
                 ),
                 'order'  => array (
                     'id DESC'
@@ -189,14 +200,11 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
         $results = $this->fetchArray(
             array(
                 'where'  => array(
-                    'status = ?' => 1
+                    'status = ? AND content_type = ?' => array(1, 1)
                 ),
                 'order'  => array ('id DESC'),
                 'eager'  => array(
                     'comments' => array(
-                        'where' => array(
-                            'comments.status = ?' => 1
-                        ),
                         'eager' => array(
                             'commentinfo'
                         )
@@ -227,7 +235,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                     'COUNT(*) AS count',
                 ),
                 'where'  => array(
-                    'status = ?' => 1
+                    'status = ? AND content_type = ?' => array(1, 1)
                 ),
             )
         );
@@ -249,7 +257,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
             // if unexpected int, default to 1 (published)
             $post_data['post_status'] = 1;
         }
-        $post_data['post_title'] = htmlentities($post_data['post_title'], ENT_COMPAT, 'UTF-8');
+
         $cur_time = time();
         $data = array(
             'id' => '',
@@ -340,7 +348,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 || $k === 'email'
                 || $k === 'tag') {
 
-                $posts[$k] = htmlspecialchars($posts[$k], ENT_QUOTES, 'UTF-8');
+                $posts[$k] = htmlentities($posts[$k], ENT_QUOTES, 'UTF-8');
             }
         }
     }

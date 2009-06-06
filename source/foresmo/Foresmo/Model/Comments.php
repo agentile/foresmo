@@ -10,7 +10,8 @@
  *
  * type codes
  * 0 = regular comment
- * 1 = trackback
+ * 1 = admin comment
+ * 2 = trackback
  *
  */
 class Foresmo_Model_Comments extends Solar_Sql_Model {
@@ -31,7 +32,8 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
              . 'Setup'
              . DIRECTORY_SEPARATOR;
 
-        $this->_table_name = Solar_Config::get('Solar_Sql_Adapter_Mysql', 'prefix') . Solar_File::load($dir . 'table_name.php');
+        $adapter = Solar_Config::get('Solar_Sql', 'adapter');
+        $this->_table_name = Solar_Config::get($adapter, 'prefix') . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
         $this->_hasMany('commentinfo', array(
             'foreign_class' => 'Foresmo_Model_CommentInfo',
@@ -100,15 +102,18 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
      */
     public function insertComment($comment_data, $spam = false)
     {
-        $comment_data['name'] = htmlentities($comment_data['name'], ENT_COMPAT, 'UTF-8');
-        $comment_data['comment'] = htmlentities($comment_data['comment'], ENT_COMPAT, 'UTF-8');
-        $comment_data['email'] = htmlentities($comment_data['email'], ENT_COMPAT, 'UTF-8');
         $comment_data['post_id'] = (int) $comment_data['post_id'];
-        $comment_data['url'] = (int) $this->_cleanURL($comment_data['url']);
+        $comment_data['url'] = $this->_cleanURL($comment_data['url']);
         if ($spam) {
             $status = 2;
         } else {
             $status = 1;
+        }
+
+        if (isset($_SESSION['Foresmo_App']['Foresmo_user_id'])) {
+            $type = 1;
+        } else {
+            $type = 0;
         }
 
         $data = array(
@@ -121,7 +126,7 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
             'content' => $comment_data['comment'],
             'status' => $status,
             'date' => time(),
-            'type' => 0,
+            'type' => $type,
         );
         $result = $this->insert($data);
         return $result;
@@ -146,7 +151,7 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
                 || $k === 'name'
                 || $k === 'email'
                 || $k === 'tag') {
-                $data[$k] = htmlspecialchars($data[$k], ENT_QUOTES, 'UTF-8');
+                $data[$k] = htmlentities($data[$k], ENT_QUOTES, 'UTF-8');
             }
         }
     }

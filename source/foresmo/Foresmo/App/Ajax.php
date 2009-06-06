@@ -144,7 +144,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         $errors = array();
         $matches = array();
         $ret_str = '';
-
+        $post_data['blog_user'] = trim($post_data['blog_user']);
         if (empty($post_data['blog_password']) == true
             || empty($post_data['blog_password2']) == true
             || empty($post_data['blog_user']) == true
@@ -179,7 +179,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         $password = $post_data['blog_password'];
         $salt = $this->random_str;
         $password = md5($salt . $password);
-        $email = $post_data['blog_email'];
+        $email = trim($post_data['blog_email']);
 
         $table = $post_data['db_prefix'] . 'groups';
         $data = array(
@@ -225,7 +225,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             'group_id' => $last_insert_id,
             'username'=> $username,
             'password' => $password,
-            'email' => $email,
+            'email' => strtolower($email),
         );
         $adapter->insert($table, $data);
 
@@ -255,14 +255,14 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             'id' => '',
             'name' => 'blog_date_format',
             'type' => 0,
-            'value' => 'F j, Y, g:i a',
+            'value' => 'F j, Y, g:ia',
         );
         $adapter->insert($table, $data);
         $data = array(
             'id' => '',
             'name' => 'blog_timezone',
             'type' => 0,
-            'value' => '0:00',
+            'value' => '-4:00',
         );
         $adapter->insert($table, $data);
         $data = array(
@@ -279,7 +279,48 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             'value' => 3,
         );
         $adapter->insert($table, $data);
-        return 'Foresmo installed! Click here to check it out! Also, don\'t forget to change the permissions of the config back to read only.';
+        $table = $post_data['db_prefix'] . 'posts';
+        $data = array(
+            'id' => '',
+            'slug' => 'my-first-post',
+            'content_type' => 1,
+            'title' => 'My first post!',
+            'content' => "Welcome to {$post_data['blog_title']}. Look forward to new blog posts soon!",
+            'user_id' => 1,
+            'status' => 1,
+            'pubdate' => time(),
+            'modified' => time(),
+        );
+        $adapter->insert($table, $data);
+        $table = $post_data['db_prefix'] . 'comments';
+        $data = array(
+            'id' => '',
+            'post_id' => 1,
+            'name' => 'Foresmo',
+            'email' => 'foresmo@foresmo.com',
+            'url' => 'http://foresmo.com',
+            'ip' => sprintf("%u", ip2long('192.168.0.1')),
+            'content' => 'Congratulations!',
+            'status' => 1,
+            'date' => time(),
+            'type' => 0,
+        );
+        $adapter->insert($table, $data);
+        $table = $post_data['db_prefix'] . 'tags';
+        $data = array(
+            'id' => '',
+            'tag' => 'Foresmo',
+            'tag_slug' => 'foresmo',
+        );
+        $adapter->insert($table, $data);
+        $table = $post_data['db_prefix'] . 'posts_tags';
+        $data = array(
+            'id' => '',
+            'post_id' => 1,
+            'tag_id' => 1,
+        );
+        $adapter->insert($table, $data);
+        return 'Foresmo installed! Click <a href="/">here</a> to check it out! Also, don\'t forget to change the permissions of the config back to read only.';
     }
 
     /**

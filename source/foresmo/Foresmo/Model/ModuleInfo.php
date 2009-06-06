@@ -4,7 +4,7 @@
  * Model class.
  *
  */
-class Foresmo_Model_Links extends Solar_Sql_Model {
+class Foresmo_Model_ModuleInfo extends Solar_Sql_Model {
 
     /**
      *
