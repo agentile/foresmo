@@ -21,7 +21,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Apc.php 3685 2009-04-15 15:54:14Z pmjones $
+ * @version $Id: Apc.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Cache_Adapter_Apc extends Solar_Cache_Adapter
@@ -30,7 +30,7 @@ class Solar_Cache_Adapter_Apc extends Solar_Cache_Adapter
      * 
      * Constructor.
      * 
-     * @param array $config User-provided configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

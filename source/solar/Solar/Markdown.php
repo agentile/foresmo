@@ -36,7 +36,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Markdown.php 3617 2009-02-16 19:47:30Z pmjones $
+ * @version $Id: Markdown.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  * @todo How to configure plugins at the start?
  * 
@@ -47,21 +47,16 @@ class Solar_Markdown extends Solar_Base
 {
     /**
      * 
-     * Default configuration for the class.
+     * Default configuration values.
      * 
-     * Keys are ...
+     * @config int tab_width Number of spaces per tab.  Default 4.
      * 
-     * `tab_width`
-     * : (int) Number of spaces per tab.  Default 4.
-     * 
-     * `tidy`
-     * : (bool|array) If empty/false/null, do not use Tidy to post-process
+     * @config bool|array tidy If empty/false/null, do not use Tidy to post-process
      * the transformed output.  If true or a non-empty array, is a set of
      * config options to pass to Tidy when rendering output.
      * See also <http://php.net/tidy>.  Default false.
      * 
-     * `plugins`
-     * : (array) An array of plugins for the parser to use, in order.
+     * @config array plugins An array of plugins for the parser to use, in order.
      * 
      * @var array
      * 
@@ -265,7 +260,7 @@ class Solar_Markdown extends Solar_Base
      * Loads the plugins, builds a list of characters to encode, and
      * builds the list of block-type and span-type plugin classes.
      * 
-     * @param array $config User-defined configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

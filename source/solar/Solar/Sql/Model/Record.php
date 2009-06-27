@@ -9,9 +9,11 @@
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
+ * @author Jeff Moore <jeff@procata.com>
+ * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Record.php 3749 2009-05-17 02:07:36Z pmjones $
+ * @version $Id: Record.php 3835 2009-06-12 20:05:36Z pmjones $
  * 
  */
 class Solar_Sql_Model_Record extends Solar_Struct
@@ -22,6 +24,7 @@ class Solar_Sql_Model_Record extends Solar_Struct
     const STATUS_NEW        = 'new';
     const STATUS_ROLLBACK   = 'rollback';
     const STATUS_UPDATED    = 'updated';
+    const STATUS_UNCHANGED  = 'unchanged';
     
     /**
      * 
@@ -299,26 +302,13 @@ class Solar_Sql_Model_Record extends Solar_Struct
             }
         }
         
-        // unserialize any serialize_cols in the load
-        $this->_model->unserializeCols($load);
-        
-        // use parent load to push values directly into $_data array
-        parent::load($load);
-        
-        // reset values that require a set access method
-        foreach ($this->_access_methods as $field => $methods) {
-            if (isset($methods['set']) && array_key_exists($field, $load)) {
-                $this->__set($field, $load[$field]);
-            }
+        // Set values, respecting accessor methods
+        foreach ($load as $key => $value) {
+            $this->$key = $value;
         }
         
         // fix relateds
         $this->_fixRelatedData();
-        
-        // if there were changes, mark the record as dirty
-        if ($this->isChanged()) {
-            $this->setStatus(self::STATUS_DIRTY);
-        }
     }
     
     /**
@@ -704,15 +694,107 @@ class Solar_Sql_Model_Record extends Solar_Struct
      */
     protected function _insert()
     {
+        // pre-insert logic
+        $this->_preInsert();
+        
+        // modify special columns for insert
+        $this->_modInsert();
+        
+        // apply record filters
+        $this->filter();
+        
+        // get the data for insert
+        $data = $this->_getInsertData();
+        
+        // try the insert
         try {
-            $this->_preInsert();
-            $this->_model->insert($this);
-            $this->_postInsert();
+            // retain the inserted ID, if any
+            $id = $this->_model->insert($data);
         } catch (Solar_Sql_Adapter_Exception_QueryFailed $e) {
             // failed at at the database for some reason
             $this->setInvalid('*', $e->getInfo('pdo_text'));
             throw $e;
         }
+        
+        // if there is an autoinc column, set its value
+        foreach ($this->_model->table_cols as $col => $info) {
+            if ($info['autoinc']) {
+                // set the value ...
+                $this->_data[$col] = $id;
+                // ... and skip all other cols
+                break;
+            }
+        }
+        
+        // record was successfully inserted
+        $this->setStatus(self::STATUS_INSERTED);
+        
+        // post-insert logic
+        $this->_postInsert();
+    }
+    
+    /**
+     * 
+     * Modify the current record before it is inserted into the DB.
+     * 
+     * @return void
+     * 
+     */
+    protected function _modInsert()
+    {
+        // time right now for created/updated
+        $now = date('Y-m-d H:i:s');
+        
+        // force the 'created' value if there is a 'created' column
+        $col = $this->_model->created_col;
+        if ($col) {
+            $this->$col = $now;
+        }
+        
+        // force the 'updated' value if there is an 'updated' column
+        $col = $this->_model->updated_col;
+        if ($col) {
+            $this->$col = $now;
+        }
+        
+        // if inheritance is turned on, auto-set the inheritance value
+        if ($this->_model->inherit_model) {
+            $col = $this->_model->inherit_col;
+            $this->$col = $this->_model->inherit_model;
+        }
+        
+        // auto-set sequence values if needed
+        foreach ($this->_model->sequence_cols as $col => $val) {
+            if (empty($this->$col)) {
+                // no value given for the key. add a new sequence value.
+                $this->$col = $this->_model->sql->nextSequence($val);
+            }
+        }
+    }
+    
+    /**
+     * 
+     * Gather values to insert into the DB for a new record.
+     * 
+     * @return array The values to be inserted.
+     * 
+     */
+    protected function _getInsertData()
+    {
+        // get only table columns
+        $data = array();
+        $cols = array_keys($this->_model->table_cols);
+        foreach ($this->_data as $col => $val) {
+            if (in_array($col, $cols)) {
+                $data[$col] = $val;
+            }
+        }
+        
+        // serialize columns for insert
+        $this->_model->serializeCols($data);
+        
+        // done
+        return $data;
     }
     
     /**
@@ -747,19 +829,99 @@ class Solar_Sql_Model_Record extends Solar_Struct
      */
     protected function _update()
     {
+        // pre-update logic
+        $this->_preUpdate();
+        
+        // modify special columns for update
+        $this->_modUpdate();
+        
+        // apply record filters
+        $this->filter();
+        
+        // get the data for update
+        $data = $this->_getUpdateData();
+        
+        // it's possible we have no data to update, even after all that
+        if (! $data) {
+            $this->setStatus(self::STATUS_UNCHANGED);
+            return;
+        }
+        
+        // build the where clause
+        $primary = $this->getPrimaryCol();
+        $where = array("$primary = ?" => $this->getPrimaryVal());
+        
+        // try the update
         try {
-            $this->_preUpdate();
-            $primary = $this->getPrimaryCol();
-            $where = array(
-                "$primary = ?" => $this->getPrimaryVal()
-            );
-            $this->_model->update($this, $where);
-            $this->_postUpdate();
+            $this->_model->update($data, $where);
         } catch (Solar_Sql_Adapter_Exception_QueryFailed $e) {
             // failed at at the database for some reason
             $this->setInvalid('*', $e->getInfo('pdo_text'));
             throw $e;
         }
+        
+        // record was successfully updated
+        $this->setStatus(self::STATUS_UPDATED);
+        
+        // post-update logic
+        $this->_postUpdate();
+    }
+    
+    /**
+     * 
+     * Modify the current record before it is updated into the DB.
+     * 
+     * @return void
+     * 
+     */
+    protected function _modUpdate()
+    {
+        // force the 'updated' value
+        $col = $this->_model->updated_col;
+        if ($col) {
+            $this->$col = date('Y-m-d H:i:s');
+        }
+        
+        // if inheritance is turned on, auto-set the inheritance value
+        $col = $this->_model->inherit_col;
+        if ($col && $this->_model->inherit_model) {
+            $this->$col = $this->_model->inherit_model;
+        }
+        
+        // auto-set sequences where keys exist and values are empty
+        foreach ($this->_model->sequence_cols as $col => $val) {
+            if (array_key_exists($col, $this->_data) && empty($this->$col)) {
+                // key is present but no value is given.
+                // add a new sequence value.
+                $this->$col = $this->_model->sql->nextSequence($val);
+            }
+        }
+    }
+    
+    /**
+     * 
+     * Gather values to update into the DB.  Only values that have
+     * Changed will be updated
+     * 
+     * @return array values that should be updated
+     * 
+     */
+    protected function _getUpdateData()
+    {
+        // get only table columns that have changed
+        $data = array();
+        $cols = array_keys($this->_model->table_cols);
+        foreach ($this->_data as $col => $val) {
+            if (in_array($col, $cols) && $this->isChanged($col)) {
+                $data[$col] = $val;
+            }
+        }
+        
+        // serialize columns for update
+        $this->_model->serializeCols($data);
+        
+        // done!
+        return $data;
     }
     
     /**
@@ -922,7 +1084,7 @@ class Solar_Sql_Model_Record extends Solar_Struct
         
         $result = $this->_model->fetch($id);
         foreach ($this->_model->table_cols as $col => $info) {
-            $this->$col = $result->$col;
+            $this->_data[$col] = $result->_data[$col];
         }
         
         if ($status) {
@@ -1248,7 +1410,7 @@ class Solar_Sql_Model_Record extends Solar_Struct
     
     /**
      * 
-     * Sets the status of this record.
+     * Sets the status of this record only; does not change parent status.
      * 
      * @param string $status The new status.
      * 
@@ -1259,7 +1421,7 @@ class Solar_Sql_Model_Record extends Solar_Struct
     {
         $dirty_new = $status == self::STATUS_DIRTY
                   && $this->_status == self::STATUS_NEW;
-                  
+        
         if ($dirty_new) {
             // new records cannot be dirty
             return;
@@ -1275,9 +1437,7 @@ class Solar_Sql_Model_Record extends Solar_Struct
         if ($reset) {
             
             // reset the initial data for table columns
-            foreach (array_keys($this->_model->table_cols) as $col) {
-                $this->_initial[$col] = $this->$col;
-            }
+            $this->_initial = array_intersect_key($this->_data, $this->_model->table_cols);
             
             // can't be invalid, either
             $this->_invalid = array();
@@ -1337,10 +1497,10 @@ class Solar_Sql_Model_Record extends Solar_Struct
         
         // track changes to or from null
         $from_null = $this->_initial[$col] === null &&
-                     $this->$col !== null;
+                     $this->_data[$col] !== null;
         
         $to_null   = $this->_initial[$col] !== null &&
-                     $this->$col === null;
+                     $this->_data[$col] === null;
         
         if ($from_null || $to_null) {
             return true;
@@ -1348,14 +1508,14 @@ class Solar_Sql_Model_Record extends Solar_Struct
         
         // track numeric changes
         $both_numeric = is_numeric($this->_initial[$col]) &&
-                        is_numeric($this->$col);
+                        is_numeric($this->_data[$col]);
         if ($both_numeric) {
             // use normal inequality
-            return $this->_initial[$col] != (string) $this->$col;
+            return $this->_initial[$col] != (string) $this->_data[$col];
         }
         
         // use strict inequality
-        return $this->_initial[$col] !== $this->$col;
+        return $this->_initial[$col] !== $this->_data[$col];
     }
     
     /**
@@ -1465,6 +1625,7 @@ class Solar_Sql_Model_Record extends Solar_Struct
             break;
         case self::STATUS_INSERTED:
         case self::STATUS_UPDATED:
+        case self::STATUS_UNCHANGED:
             $form->setStatus(true);
             break;
         }
@@ -1514,7 +1675,7 @@ class Solar_Sql_Model_Record extends Solar_Struct
      * This differs from a simple traversal in that parameters
      * can further restrict or transform the results.
      * 
-     * @param string $key The property name.
+     * @param string $name The related property name.
      * 
      * @param array $params An array of SELECT parameters.
      * 
@@ -1532,7 +1693,12 @@ class Solar_Sql_Model_Record extends Solar_Struct
      * Initialize the record object.  This is effectively a "first load"
      * method.
      * 
-     * @param Solar_Sql_Model $model The origin model object.
+     * @param Solar_Sql_Model $model The originating model object instance (a
+     * dependency injection).
+     * 
+     * @param array $spec The data with which to initialize this record.
+     * 
+     * @param array $status The status this record should have.
      * 
      * @return void
      * 
@@ -1557,6 +1723,13 @@ class Solar_Sql_Model_Record extends Solar_Struct
         
         // unserialize any serialize_cols in the load
         $this->_model->unserializeCols($load);
+
+        // Make sure changes to xml struct records cause us to be dirty
+        foreach ($this->_model->xmlstruct_cols as $col) {
+            if (!empty($load[$col])) {
+                $load[$col]->setParent($this);
+            }
+        }
         
         // use parent load to push values directly into $_data array
         parent::load($load);
@@ -1568,16 +1741,6 @@ class Solar_Sql_Model_Record extends Solar_Struct
         foreach ($this->_model->calculate_cols as $name => $info) {
             if (! array_key_exists($name, $this->_data)) {
                 $this->_data[$name] = null;
-            }
-        }
-        
-        // reset values that require an access method
-        foreach ($this->_access_methods as $col => $methods) {
-            if (isset($methods['set']) && array_key_exists($col, $load)) {
-                $this->$col = $load[$col];
-            }
-            if (isset($methods['get']) && array_key_exists($col, $this->_initial)) {
-                $this->_initial[$col] = $this->$col;
             }
         }
         
@@ -1597,6 +1760,13 @@ class Solar_Sql_Model_Record extends Solar_Struct
         }
     }
     
+    /**
+     * 
+     * Has this record been deleted?
+     * 
+     * @return bool
+     * 
+     */
     public function isDeleted()
     {
         return $this->getStatus() == self::STATUS_DELETED;
@@ -1614,7 +1784,8 @@ class Solar_Sql_Model_Record extends Solar_Struct
      */
     protected function _fixRelatedData()
     {
-        foreach ($this->_model->related as $name => $obj) {
+        $list = array_keys($this->_model->related);
+        foreach ($list as $name) {
             
             // convert related values to correct object type
             $convert = array_key_exists($name, $this->_data)
@@ -1624,18 +1795,30 @@ class Solar_Sql_Model_Record extends Solar_Struct
                 continue;
             }
             
+            $related = $this->_model->getRelated($name);
             if (empty($this->_data[$name])) {
-                $this->_data[$name] = $obj->fetchEmpty();
+                $this->_data[$name] = $related->fetchEmpty();
             } else {
-                $this->_data[$name] = $this->newRelated($name, $this->_data[$name]);
+                $this->_data[$name] = $related->newObject($this->_data[$name]);
             }
         }
     }
     
+    /**
+     * 
+     * Create a new record related to this one.
+     * 
+     * @param string $name The relation name.
+     * 
+     * @param array $data Initial data
+     * 
+     * @return Solar_Sql_Model_Record
+     * 
+     */
     public function newRelated($name, $data = null)
     {
-        $new = $this->_model->getRelated($name)->newObject($data);
-        $new->setParent($this);
+        $related = $this->_model->getRelated($name);
+        $new = $related->fetchNew($data);
         return $new;
     }
 }

@@ -15,7 +15,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Filter.php 3696 2009-04-18 01:47:04Z pmjones $
+ * @version $Id: Filter.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Filter extends Solar_Base
@@ -163,7 +163,7 @@ class Solar_Filter extends Solar_Base
      * 
      * Constructor.
      * 
-     * @param array $config User-provided configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

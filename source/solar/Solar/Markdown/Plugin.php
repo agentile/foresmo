@@ -11,19 +11,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Plugin.php 2933 2007-11-09 20:37:35Z moraes $
+ * @version $Id: Plugin.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 abstract class Solar_Markdown_Plugin extends Solar_Base {
     
     /**
      * 
-     * Default configuration values for this class.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `markdown`
-     * : (Solar_Markdown) The "parent" Markdown object.
+     * @config Solar_Markdown markdown The "parent" Markdown object.
      * 
      * @var array
      * 
@@ -111,7 +108,7 @@ abstract class Solar_Markdown_Plugin extends Solar_Base {
      * 
      * Constructor.
      * 
-     * @param array $config User-defined configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

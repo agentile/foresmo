@@ -11,19 +11,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Adapter.php 3690 2009-04-17 00:58:32Z pmjones $
+ * @version $Id: Adapter.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 abstract class Solar_Role_Adapter extends Solar_Base {
     
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `cache`
-     * : (dependency) A Solar_Cache dependency injection. Default is to create
+     * @config dependency cache A Solar_Cache dependency injection. Default is to create
      *   a Solar_Cache_Adapter_Session object internal to this instance to 
      *   retain the role list.
      * 
@@ -50,7 +47,7 @@ abstract class Solar_Role_Adapter extends Solar_Base {
      * 
      * Constructor to set up the storage adapter.
      * 
-     * @param array $config User-provided configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)
@@ -164,7 +161,7 @@ abstract class Solar_Role_Adapter extends Solar_Base {
      * 
      * Appends a single role to the existing list of roles.
      * 
-     * @param string $list The role to append.
+     * @param string $val The role to append.
      * 
      * @return void
      * 

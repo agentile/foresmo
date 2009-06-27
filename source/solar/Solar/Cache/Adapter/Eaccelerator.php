@@ -20,7 +20,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Eaccelerator.php 3685 2009-04-15 15:54:14Z pmjones $
+ * @version $Id: Eaccelerator.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  * @todo Does not work with objects.  Need to add custom support for them.
  * <http://bart.eaccelerator.net/doc/phpdoc/eAccelerator/_shared_memory_php.html#functioneaccelerator_put>
@@ -32,7 +32,7 @@ class Solar_Cache_Adapter_Eaccelerator extends Solar_Cache_Adapter
      * 
      * Constructor.
      * 
-     * @param array $config User-provided configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

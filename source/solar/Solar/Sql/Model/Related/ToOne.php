@@ -1,15 +1,23 @@
 <?php
+/**
+ * 
+ * Represents the characteristics of a "to-one" related model.
+ * 
+ * @category Solar
+ * 
+ * @package Solar_Sql_Model
+ * 
+ * @author Paul M. Jones <pmjones@solarphp.com>
+ * 
+ * @author Jeff Moore <jeff@procata.com>
+ * 
+ * @license http://opensource.org/licenses/bsd-license.php BSD
+ * 
+ * @version $Id: Related.php 3761 2009-05-27 18:20:20Z pmjones $
+ * 
+ */
 abstract class Solar_Sql_Model_Related_ToOne extends Solar_Sql_Model_Related
 {
-    /**
-     * 
-     * To one Relationship default to server side joins
-     * 
-     * @var int
-     * 
-     */
-    protected $_join_strategy = 'server';
-    
     /**
      * 
      * Is this related to one record?
@@ -53,9 +61,30 @@ abstract class Solar_Sql_Model_Related_ToOne extends Solar_Sql_Model_Related
         }
     }
     
+    /**
+     * 
+     * Fetches an empty value for the related.
+     * 
+     * @return null
+     * 
+     */
     public function fetchEmpty()
     {
         return null;
+    }
+    
+    /**
+     * 
+     * Fetches a new related record.
+     * 
+     * @param array $data Data for the new record.
+     * 
+     * @return Solar_Sql_Model_Record
+     * 
+     */
+    public function fetchNew($data = array())
+    {
+        return $this->_foreign_model->fetchNew($data);
     }
     
     /**
@@ -117,7 +146,17 @@ abstract class Solar_Sql_Model_Related_ToOne extends Solar_Sql_Model_Related
     }
     
     /**
-     * Extract dependent to-one records from a single row
+     * 
+     * Extracts dependent to-one records from a single row.
+     * 
+     * Essentially, in to-one server joins, this pulls out the columns in
+     * the row that were joined from another table.
+     * 
+     * @param array &$target The array row from which we are extracting the 
+     * dependent row.
+     * 
+     * @return array The dependent record data.
+     * 
      */
     protected function _extractDependentOne(&$target)
     {
@@ -133,7 +172,7 @@ abstract class Solar_Sql_Model_Related_ToOne extends Solar_Sql_Model_Related
                     unset($target[$key]);
                 }
             }
-            return array();
+            return null;
         }
         
         // Extract a record
@@ -149,7 +188,17 @@ abstract class Solar_Sql_Model_Related_ToOne extends Solar_Sql_Model_Related
     }
     
     /**
-     * Extract dependent to-one records from an array of rows
+     * 
+     * Extracts dependent to-one records from a multiple rows.
+     * 
+     * Essentially, in to-one server joins, this pulls out the columns in
+     * the row that were joined from another table.
+     * 
+     * @param array &$target The array rows from which we are extracting the 
+     * dependent rows.
+     * 
+     * @return array The dependent record data.
+     * 
      */
     protected function _extractDependentAll(&$target)
     {
@@ -193,7 +242,7 @@ abstract class Solar_Sql_Model_Related_ToOne extends Solar_Sql_Model_Related
     
     /**
      * 
-     * Join related objects into a parent record or collection 
+     * Join related objects into a parent record or collection.
      *
      * @param Solar_Sql_Model_Collection $target colletion to join into
      * 
@@ -213,11 +262,14 @@ abstract class Solar_Sql_Model_Related_ToOne extends Solar_Sql_Model_Related
         $count = count($target);
         
         if ($options['join_strategy'] == 'server' || $options['require_related']) {
-        
+
             if ($count == 1) {
                 $result = array();
                 $onlyone = reset($target);
-                $result[] = $this->_extractDependentOne($onlyone);
+                $onlyone = $this->_extractDependentOne($onlyone);
+                if ($onlyone) {
+                    $result[] = $onlyone;
+                }
             } else {
                 $result = $this->_extractDependentAll($target);
             }
@@ -258,7 +310,7 @@ abstract class Solar_Sql_Model_Related_ToOne extends Solar_Sql_Model_Related
     
     /**
      * 
-     * Join related objects into a parent record or collection 
+     * Join related objects into a parent record or collection.
      *
      * @param Solar_Sql_Model_Record $target Record to Join into
      * 
@@ -281,13 +333,13 @@ abstract class Solar_Sql_Model_Related_ToOne extends Solar_Sql_Model_Related
         if ($options['join_strategy'] == 'server' || $options['require_related']) {
         
             $result = $this->_extractDependentOne($target);
-        
-            
-            foreach ($options['eager'] as $name => $dependent_options) {
-                $related = $this->_foreign_model->getRelated($name);
-                $result = $related->joinOne($result, $select, $dependent_options);
-            }
-            
+
+            if ($result) {
+                foreach ($options['eager'] as $name => $dependent_options) {
+                    $related = $this->_foreign_model->getRelated($name);
+                    $result = $related->joinOne($result, $select, $dependent_options);
+                }
+            }            
         } else if ($options['join_strategy'] == 'client') {
         
             $params = array('eager' => $options['eager']);
@@ -321,6 +373,8 @@ abstract class Solar_Sql_Model_Related_ToOne extends Solar_Sql_Model_Related
      * Automatically adds the foreign columns to the select.
      * 
      * @param Solar_Sql_Select $select The SELECT to be modified.
+     * 
+     * @param string $parent_alias The alias for the parent table.
      * 
      * @param array $options options controlling eager selection
      * 

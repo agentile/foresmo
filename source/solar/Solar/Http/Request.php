@@ -11,19 +11,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Request.php 3278 2008-07-30 12:47:02Z pmjones $
+ * @version $Id: Request.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Http_Request extends Solar_Factory
 {
     /**
      * 
-     * User-supplied configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `adapter`
-     * : (string) The adapter class; for example, 'Solar_Http_Request_Adapter_Stream'
+     * @config string adapter The adapter class; for example, 'Solar_Http_Request_Adapter_Stream'
      *   (the default).  When the `curl` extension is loaded, the default is
      *   'Solar_Http_Request_Adapter_Curl'.
      * 

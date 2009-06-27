@@ -9,9 +9,11 @@
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
+ * @author Jeff Moore <jeff@procata.com>
+ * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Collection.php 3720 2009-04-23 20:25:11Z pmjones $
+ * @version $Id: Collection.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  * @todo Implement an internal unit-of-work status registry so that we can 
  * handle mass insert/delete without hitting the database unnecessarily.
@@ -31,8 +33,6 @@ class Solar_Sql_Model_Collection extends Solar_Struct
     /**
      * 
      * The pager information for this collection.
-     * 
-     * Keys are ...
      * 
      * `count`
      * : (int) The total number of rows in the database.
@@ -108,9 +108,6 @@ class Solar_Sql_Model_Collection extends Solar_Struct
             
             // done
             $this->_data[$key] = $this->_model->newRecord($load);
-            
-            // make sure the record is tied to this collection
-            $this->_data[$key]->setParent($this);
         }
         
         // return the record
@@ -123,8 +120,8 @@ class Solar_Sql_Model_Collection extends Solar_Struct
      * collection. Will not cause records to be created for as of yet 
      * unaccessed rows.
      * 
-     * @param string $key The primary column to look for; when null, uses
-     * the model primary key.
+     * @param string $col The column to look for; when null, uses the model
+     * primary-key column.
      *
      * @return array
      * 
@@ -452,7 +449,6 @@ class Solar_Sql_Model_Collection extends Solar_Struct
     {
         // create a new record from the spec and append it
         $record = $this->_model->fetchNew($spec);
-        $record->setParent($this);
         $this->_data[] = $record;
         return $record;
     }

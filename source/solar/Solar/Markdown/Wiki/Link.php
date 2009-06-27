@@ -41,7 +41,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Link.php 3713 2009-04-21 21:50:02Z pmjones $
+ * @version $Id: Link.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Markdown_Wiki_Link extends Solar_Markdown_Plugin
@@ -178,7 +178,7 @@ class Solar_Markdown_Wiki_Link extends Solar_Markdown_Plugin
      * 
      * Constructor.
      * 
-     * @param array $config Array of user-defined configuariont values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

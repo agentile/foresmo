@@ -41,7 +41,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  * 
- * @version $Id: Checker.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: Checker.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Json_Checker extends Solar_Base
@@ -301,7 +301,7 @@ class Solar_Json_Checker extends Solar_Base
      * 
      * Constructor.
      * 
-     * @param array $config User-provided configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

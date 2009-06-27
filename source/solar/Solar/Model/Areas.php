@@ -1,7 +1,17 @@
 <?php
 /**
  * 
- * Model class.
+ * Areas of content.
+ * 
+ * @category Solar
+ * 
+ * @package Solar_Model
+ * 
+ * @author Paul M. Jones <pmjones@solarphp.com>
+ * 
+ * @license http://opensource.org/licenses/bsd-license.php BSD
+ * 
+ * @version $Id: Areas.php 3833 2009-06-12 02:18:00Z pmjones $
  * 
  */
 class Solar_Model_Areas extends Solar_Model {

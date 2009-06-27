@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Config.php 3510 2008-10-17 21:07:33Z pmjones $
+ * @version $Id: Config.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Config
@@ -193,7 +193,7 @@ class Solar_Config
      * 
      * @param string $class The class name.
      * 
-     * @param array $config The config built for that class.
+     * @param array $config Configuration value overrides, if any.
      * 
      * @return void
      * 

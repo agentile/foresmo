@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Adapter.php 3366 2008-08-26 01:36:49Z pmjones $
+ * @version $Id: Adapter.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 abstract class Solar_Session_Handler_Adapter extends Solar_Base {
@@ -20,7 +20,7 @@ abstract class Solar_Session_Handler_Adapter extends Solar_Base {
      * 
      * Constructor.
      * 
-     * @param array $config User-defined configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

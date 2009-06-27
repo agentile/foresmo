@@ -11,24 +11,20 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Adapter.php 2933 2007-11-09 20:37:35Z moraes $
+ * @version $Id: Adapter.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 abstract class Solar_Log_Adapter extends Solar_Base {
     
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `events`
-     * : (string|array) The event types this instance
+     * @config string|array events The event types this instance
      *   should recognize; a comma-separated string of events, or
      *   a sequential array.  Default is all events ('*').
      * 
-     * `microtime`
-     * : (bool) Use timestamps with decimal microseconds.  Default false.
+     * @config bool microtime Use timestamps with decimal microseconds.  Default false.
      * 
      * @var array
      * 
@@ -56,7 +52,7 @@ abstract class Solar_Log_Adapter extends Solar_Base {
      * 
      * Constructor.
      * 
-     * @param array $config User-defined configuration.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

@@ -30,7 +30,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Base.php 3682 2009-04-08 19:41:54Z pmjones $
+ * @version $Id: Base.php 3853 2009-06-25 19:40:31Z pmjones $
  * 
  */
 abstract class Solar_Base
@@ -74,14 +74,7 @@ abstract class Solar_Base
      * 
      * Constructor.
      * 
-     * If the $config param is an array, it is merged with the class
-     * config array and any values from the Solar.config.php file.
-     * 
-     * The Solar.config.php values are inherited along class parent
-     * lines; for example, all classes descending from Solar_Base use the 
-     * Solar_Base config file values until overridden.
-     * 
-     * @param mixed $config User-defined configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)
@@ -268,7 +261,7 @@ abstract class Solar_Base
      * @return void
      * 
      */
-    public function _postConfig()
+    protected function _postConfig()
     {
     }
     

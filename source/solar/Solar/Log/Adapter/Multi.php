@@ -41,19 +41,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Multi.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: Multi.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Log_Adapter_Multi extends Solar_Log_Adapter
 {
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `adapters`
-     * : (array) An array of arrays, where each sub-array
+     * @config array adapters An array of arrays, where each sub-array
      *   is a separate adapter configuration.
      * 
      * @var array
@@ -84,7 +81,7 @@ class Solar_Log_Adapter_Multi extends Solar_Log_Adapter
      * 
      * Constructor.
      * 
-     * @param array $config User-defined configuration.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

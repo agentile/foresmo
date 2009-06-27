@@ -55,7 +55,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Page.php 3725 2009-04-28 01:28:52Z pmjones $
+ * @version $Id: Page.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 abstract class Solar_Controller_Page extends Solar_Base {
@@ -358,7 +358,7 @@ abstract class Solar_Controller_Page extends Solar_Base {
      * 
      * Constructor.
      * 
-     * @param array $config User-provided configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

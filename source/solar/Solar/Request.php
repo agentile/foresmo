@@ -15,7 +15,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Request.php 3547 2008-10-29 19:27:22Z pmjones $
+ * @version $Id: Request.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Request extends Solar_Base
@@ -108,7 +108,7 @@ class Solar_Request extends Solar_Base
      * 
      * Constructor.
      * 
-     * @param array $config User-defined configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

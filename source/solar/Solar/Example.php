@@ -11,14 +11,20 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Example.php 3439 2008-09-28 14:14:47Z pmjones $
+ * @version $Id: Example.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Example extends Solar_Base
 {
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
+     * 
+     * @config string foo Example config key and value.
+     * 
+     * @config string baz Example config key and value.
+     * 
+     * @config string zim Example config key and value.
      * 
      * @var array
      * 

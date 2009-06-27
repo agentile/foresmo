@@ -10,9 +10,11 @@
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
+ * @author Jeff Moore <jeff@procata.com>
+ * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: HasMany.php 3683 2009-04-13 18:20:57Z pmjones $
+ * @version $Id: HasMany.php 3835 2009-06-12 20:05:36Z pmjones $
  * 
  */
 class Solar_Sql_Model_Related_HasMany extends Solar_Sql_Model_Related_ToMany
@@ -29,6 +31,15 @@ class Solar_Sql_Model_Related_HasMany extends Solar_Sql_Model_Related_ToMany
         $this->type = 'has_many';
     }
     
+    /**
+     * 
+     * Saves a related collection from a native record.
+     * 
+     * @param Solar_Sql_Model_Record $native The native record to save from.
+     * 
+     * @return void
+     * 
+     */
     public function save($native)
     {
         $foreign = $native->{$this->name};

@@ -28,12 +28,14 @@ class Solar_Test_Suite extends Solar_Base
 {
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
+     * @config dependency log A Solar_Log dependency for logging test results.
      * 
-     * `log`
-     * : (dependency) A Solar_Log dependency for logging test results.
+     * @config mixed test_config The config param to use for Solar::start() 
+     * when running tests in the separate PHP environment.
+     * 
+     * @config bool verbose Whether or not to show verbose output.
      * 
      * @var array
      * 
@@ -107,7 +109,7 @@ class Solar_Test_Suite extends Solar_Base
      * 
      * Constructor.
      * 
-     * @param array $config User-defined configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)
@@ -172,14 +174,14 @@ class Solar_Test_Suite extends Solar_Base
      * 
      * Finds tests and loads them into the plan.
      * 
-     * @param string $dir The Test directory, typically "include".
-     * 
      * @param string $class Start with this test class; e.g, "Test_Foo".
      * 
      * @param string $method Load only this test method; e.g, "testBar".
      * 
      * @param bool $only Load only the named class, or class and method, 
      * instead of descending into sub-tests.
+     * 
+     * @return void
      * 
      */
     public function loadTests($class = null, $method = null, $only = null)
@@ -431,6 +433,9 @@ class Solar_Test_Suite extends Solar_Base
      * sub-test classes and methods.  When non-empty, run **only** this test 
      * method in the named test class; do not include the "test" prefix. 
      * Default null; ignored when $class is empty.
+     * 
+     * @param bool $only Load only the named class, or class and method, 
+     * instead of descending into sub-tests.
      * 
      * @return void
      * 

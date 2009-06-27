@@ -11,19 +11,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Locale.php 3732 2009-04-29 17:27:56Z pmjones $
+ * @version $Id: Locale.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Locale extends Solar_Base
 {
     /**
      * 
-     * User-provided configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `code`
-     * : (string) The default locale code to use.
+     * @config string code The default locale code to use.
      * 
      * @var array
      * 
@@ -54,7 +51,7 @@ class Solar_Locale extends Solar_Base
      * 
      * Constructor.
      * 
-     * @param array $config User-defined configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

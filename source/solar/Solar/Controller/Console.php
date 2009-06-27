@@ -12,25 +12,20 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Console.php 3217 2008-06-12 14:45:07Z pmjones $
+ * @version $Id: Console.php 3858 2009-06-25 22:57:34Z pmjones $
  * 
  */
 class Solar_Controller_Console extends Solar_Base
 {
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are:
+     * @config array classes Base class names for commands.
      * 
-     * `classes`
-     * : (array) Base class names for commands.
+     * @config array routing An array of commands to class names.
      * 
-     * `routing`
-     * : (array) An array of commands to class names.
-     * 
-     * `default`
-     * : (string) The default command to run.
+     * @config string default The default command to run.
      * 
      * @var array
      * 
@@ -63,7 +58,7 @@ class Solar_Controller_Console extends Solar_Base
      * 
      * Constructor.
      * 
-     * @param array $config User-provided configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

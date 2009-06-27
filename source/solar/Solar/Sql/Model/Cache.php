@@ -24,19 +24,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Cache.php 3366 2008-08-26 01:36:49Z pmjones $
+ * @version $Id: Cache.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Sql_Model_Cache extends Solar_Base
 {
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `cache`
-     * : (dependency) A Solar_Cache dependency.
+     * @config dependency cache A Solar_Cache dependency.
      * 
      * @var array
      * 
@@ -77,7 +74,7 @@ class Solar_Sql_Model_Cache extends Solar_Base
      * 
      * Constructor.
      * 
-     * @param array $config User-provided configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

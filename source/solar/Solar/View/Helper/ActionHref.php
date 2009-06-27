@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: ActionHref.php 3366 2008-08-26 01:36:49Z pmjones $
+ * @version $Id: ActionHref.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_View_Helper_ActionHref extends Solar_View_Helper
@@ -29,7 +29,7 @@ class Solar_View_Helper_ActionHref extends Solar_View_Helper
      * 
      * Constructor.
      * 
-     * @param array $config User-specified configuration.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

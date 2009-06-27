@@ -49,7 +49,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: RunTests.php 3617 2009-02-16 19:47:30Z pmjones $
+ * @version $Id: RunTests.php 3833 2009-06-12 02:18:00Z pmjones $
  * 
  */
 class Solar_Cli_RunTests extends Solar_Cli_Base
@@ -59,7 +59,7 @@ class Solar_Cli_RunTests extends Solar_Cli_Base
      * Runs the tests for a class, descending into subdirectories unless
      * otherwise specified.
      * 
-     * @param string $class The class to run tests for.
+     * @param string $spec The Test_Class or Test_Class::testMethod to run.
      * 
      * @return void
      * 

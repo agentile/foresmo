@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Exception.php 3450 2008-09-29 18:59:47Z pmjones $
+ * @version $Id: Exception.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Exception extends Exception
@@ -38,7 +38,7 @@ class Solar_Exception extends Exception
      * 
      * Constructor.
      * 
-     * @param array $config User-defined configuration with keys
+     * @param array $config Configuration value overrides, if any.
      * for 'class', 'code', 'text', and 'info'.
      * 
      */

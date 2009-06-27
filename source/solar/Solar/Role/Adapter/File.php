@@ -17,7 +17,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: File.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: File.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  * @todo rename to Unix, add Ini file handler as well
  * 
@@ -26,12 +26,9 @@ class Solar_Role_Adapter_File extends Solar_Role_Adapter
 {
     /**
      * 
-     * User-supplied configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `file`
-     * : (string) Where the roles file is located.
+     * @config string file Where the roles file is located.
      * 
      * @var array
      * 

@@ -18,19 +18,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Action.php 3244 2008-07-26 15:32:28Z pmjones $
+ * @version $Id: Action.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Uri_Action extends Solar_Uri
 {
     /**
      * 
-     * User-provided configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `path`
-     * : (string) A path prefix specifically for actions.  If Apache has used
+     * @config string path A path prefix specifically for actions.  If Apache has used
      *   `SetEnv SOLAR_URI_ACTION_PATH /`, then that is the default value for
      *   this item; otherwise, the default value is "/index.php".
      * 
@@ -45,7 +42,7 @@ class Solar_Uri_Action extends Solar_Uri
      * 
      * Constructor.
      * 
-     * @param array $config User-provided configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

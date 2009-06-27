@@ -13,7 +13,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Getopt.php 3617 2009-02-16 19:47:30Z pmjones $
+ * @version $Id: Getopt.php 3858 2009-06-25 22:57:34Z pmjones $
  * 
  * @todo Add load() method similar to Solar_Form::load(), for loading from 
  * external XML, PHP array, etc. files.
@@ -23,12 +23,9 @@ class Solar_Getopt extends Solar_Base
 {
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are:
-     * 
-     * `filter_class`
-     * : (string) The data-filter class to use when validating and sanitizing
+     * @config string filter_class The data-filter class to use when validating and sanitizing
      *   parameter values.  Default is 'Solar_Filter'.
      * 
      * @var array
@@ -58,8 +55,6 @@ class Solar_Getopt extends Solar_Base
     /**
      * 
      * Default option settings.
-     * 
-     * Keys are ...
      * 
      * `long`
      * : (string) The long-form of the option name (e.g., "--foo-bar" would
@@ -147,7 +142,7 @@ class Solar_Getopt extends Solar_Base
      * 
      * Constructor.
      * 
-     * @param array $config User-provided configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

@@ -13,19 +13,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Bookmarks.php 3732 2009-04-29 17:27:56Z pmjones $
+ * @version $Id: Bookmarks.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_App_Bookmarks extends Solar_App_Base
 {
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `area_name`
-     * : (string) The content area for the bookmarks app, default "default".
+     * @config string area_name The content area for the bookmarks app, default "default".
      *   Will be created automatically if it does not exist.
      * 
      * @var array
@@ -302,7 +299,7 @@ class Solar_App_Bookmarks extends Solar_App_Base
         
         // save?
         if ($this->_isProcess('save') && $item->save()) {
-            $this->_session->setFlash('add_ok', true);
+            $this->_session->setFlash('success_added', true);
             $this->_redirect("bookmarks/edit/{$item->id}");
         }
         

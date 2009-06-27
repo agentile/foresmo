@@ -11,19 +11,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Date.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: Date.php 3858 2009-06-25 22:57:34Z pmjones $
  * 
  */
 class Solar_View_Helper_Date extends Solar_View_Helper_Timestamp
 {
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are:
-     * 
-     * `format`
-     * : (string) The default output formatting using [[php:date() | ]] codes.
+     * @config string format The default output formatting using [[php:date() | ]] codes.
      *   Default is 'Y-m-d'.
      * 
      * @var array

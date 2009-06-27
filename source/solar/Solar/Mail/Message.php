@@ -13,35 +13,27 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Message.php 3748 2009-05-17 02:02:07Z pmjones $
+ * @version $Id: Message.php 3858 2009-06-25 22:57:34Z pmjones $
  * 
  */
 class Solar_Mail_Message extends Solar_Base
 {
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are:
+     * @config string boundary The default boundary value for separating message parts.
      * 
-     * `boundary`
-     * : (string) The default boundary value for separating message parts.
+     * @config string charset The character-set for messages; default is 'utf-8'.
      * 
-     * `charset`
-     * : (string) The character-set for messages; default is 'utf-8'.
+     * @config string encoding The encoding for messages; default is '8bit'.
      * 
-     * `encoding`
-     * : (string) The encoding for messages; default is '8bit'.
+     * @config string crlf The line-ending string to use; default is "\r\n".
      * 
-     * `crlf`
-     * : (string) The line-ending string to use; default is "\r\n".
-     * 
-     * `headers`
-     * : (array) An array of key-value pairs where the key is the header label
+     * @config array headers An array of key-value pairs where the key is the header label
      *   and the value is the header value.  Default null.
      * 
-     * `transport`
-     * : (dependency) A Solar_Mail_Transport dependency injection, for use 
+     * @config dependency transport A Solar_Mail_Transport dependency injection, for use 
      *   with the send() method.  Default null, which means you need to send
      *   this message through a separate transport object.
      * 
@@ -191,7 +183,7 @@ class Solar_Mail_Message extends Solar_Base
      * 
      * Constructor.
      * 
-     * @param array $config User-defined configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)
@@ -208,7 +200,7 @@ class Solar_Mail_Message extends Solar_Base
         
         // custom encoding
         if ($this->_config['encoding']) {
-            $this->_charset = $this->_config['encoding'];
+            $this->_encoding = $this->_config['encoding'];
         }
         
         // custom charset

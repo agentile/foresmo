@@ -10,9 +10,11 @@
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
+ * @author Jeff Moore <jeff@procata.com>
+ * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: BelongsTo.php 3716 2009-04-23 16:33:53Z pmjones $
+ * @version $Id: BelongsTo.php 3835 2009-06-12 20:05:36Z pmjones $
  * 
  */
 class Solar_Sql_Model_Related_BelongsTo extends Solar_Sql_Model_Related_ToOne
@@ -89,8 +91,20 @@ class Solar_Sql_Model_Related_BelongsTo extends Solar_Sql_Model_Related_ToOne
         }
     }
     
-    // in a belongs-to, the foreign value is stored in the native column.
-    // in "has"es, the native value is stored in the foreign column.
+    /**
+     * 
+     * Pre-save behavior when saving foreign records through this 
+     * relationship.
+     * 
+     * In a "belongs-to", the foreign value is stored in the native column,
+     * whereas in "has", the native value is stored in the foreign column.
+     * 
+     * @param Solar_Sql_Model_Record $native The native record that is trying
+     * to save a foreign record through this relationship.
+     * 
+     * @return void
+     * 
+     */
     public function preSave($native)
     {
         // see if we have the foreign record that the native record belongs to
@@ -106,12 +120,19 @@ class Solar_Sql_Model_Related_BelongsTo extends Solar_Sql_Model_Related_ToOne
         }
     }
     
-    // pre-save has already connected the records
+    /**
+     * 
+     * Save a foreign records through this relationship; the belongs-to
+     * relationship *does not* save the belonged-to record, to avoid
+     * recursion issues.
+     * 
+     * @param Solar_Sql_Model_Record $native The native record that is trying
+     * to save a foreign record through this relationship.
+     * 
+     * @return void
+     * 
+     */
     public function save($native)
     {
-        $foreign = $native->{$this->name};
-        if ($foreign) {
-            $foreign->save();
-        }
     }
 }

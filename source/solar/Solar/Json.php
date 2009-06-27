@@ -28,28 +28,23 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Json.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: Json.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Json extends Solar_Base
 {
     /**
      * 
-     * User-defined configuration, primarily of use in unit testing.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `bypass_ext`
-     * : (bool) Flag to instruct Solar_Json to bypass
+     * @config bool bypass_ext Flag to instruct Solar_Json to bypass
      *   native json extension, if installed.
      * 
-     * `bypass_mb`
-     * : (bool) Flag to instruct Solar_Json to bypass
+     * @config bool bypass_mb Flag to instruct Solar_Json to bypass
      *   native mb_convert_encoding() function, if
      *   installed.
      * 
-     * `noerror`
-     * : (bool) Flag to instruct Solar_Json to return null
+     * @config bool noerror Flag to instruct Solar_Json to return null
      *   for values it cannot encode rather than throwing
      *   an exceptions (PHP-only encoding) or PHP warnings
      *   (native json_encode() function).

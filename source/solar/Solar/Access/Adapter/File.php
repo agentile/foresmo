@@ -22,14 +22,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: File.php 3333 2008-08-05 22:57:09Z pmjones $
+ * @version $Id: File.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Access_Adapter_File extends Solar_Access_Adapter
 {
     /**
      * 
-     * User-provided configuration values.
+     * Default configuration values.
+     * 
+     * @config string file The path to the access file.
      * 
      * @var array
      * 

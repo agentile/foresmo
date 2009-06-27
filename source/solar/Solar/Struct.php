@@ -70,7 +70,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Struct.php 3693 2009-04-18 01:03:56Z pmjones $
+ * @version $Id: Struct.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterator {
@@ -95,12 +95,9 @@ class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterato
     
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `data`
-     * : (array) Key-value pairs.
+     * @config array data Key-value pairs.
      * 
      * @var array
      * 
@@ -129,15 +126,6 @@ class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterato
     
     /**
      * 
-     * The hierarchical parent of this struct, if any.
-     * 
-     * @var Solar_Struct
-     * 
-     */
-    protected $_parent;
-    
-    /**
-     * 
      * The status of the struct (clean/dirty).
      * 
      * @var string
@@ -149,7 +137,7 @@ class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterato
      * 
      * Constructor.
      * 
-     * @param array $config User-defined values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)
@@ -205,21 +193,9 @@ class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterato
      */
     public function __set($key, $val)
     {
-        // set self as parent to new value
-        if ($val instanceof Solar_Struct) {
-            $val->setParent($this);
-        }
-        
         // set the value and mark self as dirty
         $this->_data[$key] = $val;
         $this->setStatus(self::STATUS_DIRTY);
-        
-        // mark parent structs as dirty, too
-        $child = $this;
-        while ($parent = $child->getParent()) {
-            $parent->setStatus(self::STATUS_DIRTY);
-            $child = $parent;
-        }
     }
     
     /**
@@ -254,13 +230,6 @@ class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterato
         $this->_data[$key] = null;
         unset($this->_data[$key]);
         $this->setStatus(self::STATUS_DIRTY);
-        
-        // mark parent structs as dirty, too
-        $child = $this;
-        while ($parent = $child->getParent()) {
-            $parent->setStatus(self::STATUS_DIRTY);
-            $child = $parent;
-        }
     }
     
     /**
@@ -361,32 +330,6 @@ class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterato
     
     /**
      * 
-     * Sets the hierarchical parent struct.
-     * 
-     * @param Solar_Struct $parent The hierarchical parent of this struct.
-     * 
-     * @return void
-     * 
-     */
-    public function setParent(Solar_Struct $parent)
-    {
-        $this->_parent = $parent;
-    }
-    
-    /**
-     * 
-     * Returns the hierarchical parent struct, if any.
-     * 
-     * @return Solar_Struct The hierarchical parent of this struct.
-     * 
-     */
-    public function getParent()
-    {
-        return $this->_parent;
-    }
-    
-    /**
-     * 
      * Loads the struct with data from an array or another struct.
      * 
      * @param array|Solar_Struct $spec The data to load into the object.
@@ -419,17 +362,13 @@ class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterato
     
     /**
      * 
-     * Frees memory used by this struct, especially references to parent
-     * structs down the line.
+     * Frees memory used by this struct.
      * 
      * @return void
      * 
      */
     public function free()
     {
-        if ($this->_parent) {
-            unset($this->_parent);
-        }
         $this->_free($this->_data);
     }
     

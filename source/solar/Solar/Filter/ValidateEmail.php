@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: ValidateEmail.php 3732 2009-04-29 17:27:56Z pmjones $
+ * @version $Id: ValidateEmail.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Filter_ValidateEmail extends Solar_Filter_Abstract
@@ -29,7 +29,7 @@ class Solar_Filter_ValidateEmail extends Solar_Filter_Abstract
      * 
      * Constructor.
      * 
-     * @param array $config User-defined configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

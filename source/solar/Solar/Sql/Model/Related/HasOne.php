@@ -10,9 +10,11 @@
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
+ * @author Jeff Moore <jeff@procata.com>
+ * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: HasOne.php 3683 2009-04-13 18:20:57Z pmjones $
+ * @version $Id: HasOne.php 3835 2009-06-12 20:05:36Z pmjones $
  * 
  */
 class Solar_Sql_Model_Related_HasOne extends Solar_Sql_Model_Related_ToOne
@@ -73,6 +75,15 @@ class Solar_Sql_Model_Related_HasOne extends Solar_Sql_Model_Related_ToOne
         }
     }
     
+    /**
+     * 
+     * Saves a related record from a native record.
+     * 
+     * @param Solar_Sql_Model_Record $native The native record to save from.
+     * 
+     * @return void
+     * 
+     */
     public function save($native)
     {
         $foreign = $native->{$this->name};

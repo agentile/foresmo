@@ -29,28 +29,23 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Session.php 3686 2009-04-15 15:56:29Z pmjones $
+ * @version $Id: Session.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Session extends Solar_Base
 {
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `class`
-     * : (string) Store values in this top-level key in $_SESSION.  Default is
+     * @config string class Store values in this top-level key in $_SESSION.  Default is
      *   'Solar'.
      * 
-     * `handler`
-     * : (dependency) A Solar_Session_Handler dependency injection. Default
+     * @config dependency handler A Solar_Session_Handler dependency injection. Default
      *   is the string 'php', which means to use the native PHP session save.
      *   handler instead of a dependency injection.
      * 
-     * `P3P`
-     * : Compact [Platform for Privacy Preferences][] policy. Default is
+     * @config string P3P Compact [Platform for Privacy Preferences][] policy. Default is
      *   'CP="CAO COR CURa ADMa DEVa TAIa OUR BUS IND UNI COM NAV INT STA"',
      *   which translates to:
      *   
@@ -234,7 +229,7 @@ class Solar_Session extends Solar_Base
      * Constructor; lazy-starts the session (i.e., starts it only if one 
      * exists already).
      * 
-     * @param array $config User-defined configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)
@@ -275,6 +270,12 @@ class Solar_Session extends Solar_Base
     /**
      * 
      * Magic get for store and flash as a temporary measure.
+     * 
+     * @param string $key The session key to retrieve.
+     * 
+     * @return mixed The value of the key.
+     * 
+     * @deprecated
      * 
      */
     public function &__get($key)

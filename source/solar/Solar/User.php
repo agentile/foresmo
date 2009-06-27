@@ -13,14 +13,23 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: User.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: User.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_User extends Solar_Base
 {
     /**
      * 
-     * User-provided configuration values.
+     * Default configuration values.
+     * 
+     * @config dependency auth A Solar_Auth dependency injection to
+     * deal with user authentication and identification.
+     * 
+     * @config dependency role A Solar_Role dependency injection to
+     * read the user roles.
+     * 
+     * @config dependency access A Solar_Access dependency injection to
+     * deal with user authorization and access.
      * 
      * @var array
      * 
@@ -62,7 +71,7 @@ class Solar_User extends Solar_Base
      * 
      * Constructor.
      * 
-     * @param array $config User-provided configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      * @return void
      * 

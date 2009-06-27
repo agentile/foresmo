@@ -14,23 +14,19 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Bench.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: Bench.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Test_Bench extends Solar_Base
 {
     /**
      * 
-     * User-defined configuration.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `loop`
-     * : (int) The number of times the benchmarking methods
+     * @config int loop The number of times the benchmarking methods
      *   should be run when using loop().  Default 1000.
      * 
-     * `time`
-     * : (int) The time in minutes each method should run
+     * @config int time The time in minutes each method should run
      *   when using time().  Default 1.
      * 
      * @var array

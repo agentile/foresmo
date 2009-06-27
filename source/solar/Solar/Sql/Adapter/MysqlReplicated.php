@@ -16,23 +16,19 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: MysqlReplicated.php 3556 2008-10-31 21:49:33Z pmjones $
+ * @version $Id: MysqlReplicated.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Sql_Adapter_MysqlReplicated extends Solar_Sql_Adapter_Mysql
 {
     /**
      * 
-     * User-provided configuration.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `request`
-     * : (dependency) A Solar_Request dependecy.  Defaults to the 'request'
+     * @config dependency request A Solar_Request dependecy.  Defaults to the 'request'
      *   registry entry.
      * 
-     * `slaves`
-     * : (array) An array of arrays, each representing the connection values
+     * @config array slaves An array of arrays, each representing the connection values
      *   for a different slave server.
      * 
      * The non-slave connection values are for the master server.

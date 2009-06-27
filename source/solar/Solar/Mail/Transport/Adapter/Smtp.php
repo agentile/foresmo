@@ -11,19 +11,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Smtp.php 3380 2008-09-02 23:31:18Z pmjones $
+ * @version $Id: Smtp.php 3858 2009-06-25 22:57:34Z pmjones $
  * 
  */
 class Solar_Mail_Transport_Adapter_Smtp extends Solar_Mail_Transport_Adapter
 {
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are:
-     * 
-     * `smtp`
-     * : (dependency) A Solar_Smtp_Adapter dependency.  Default is 'smtp',
+     * @config dependency smtp A Solar_Smtp_Adapter dependency.  Default is 'smtp',
      *   which means to use the registered object named 'smtp'.
      * 
      * @var array

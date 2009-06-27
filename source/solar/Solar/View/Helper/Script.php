@@ -11,19 +11,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Script.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: Script.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_View_Helper_Script extends Solar_View_Helper
 {
     /**
      * 
-     * User-provided configuration values.
+     * Default configuration values.
      * 
-     * Keys are:
-     * 
-     * `anti_cache`
-     * : _(bool)_ When true, paths in the src attribute will have a
+     * @config bool anti_cache When true, paths in the src attribute will have a
      * cache-busting query string appended to them.
      * 
      * @var array

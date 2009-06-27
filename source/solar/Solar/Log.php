@@ -26,19 +26,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Log.php 3278 2008-07-30 12:47:02Z pmjones $
+ * @version $Id: Log.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Log extends Solar_Factory
 {
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `adapter`
-     * : (string) The adapter class to use, for example 'Solar_Log_Adapter_File'.
+     * @config string adapter The adapter class to use, for example 'Solar_Log_Adapter_File'.
      *   Default is 'Solar_Log_Adapter_None'.
      * 
      * @var array

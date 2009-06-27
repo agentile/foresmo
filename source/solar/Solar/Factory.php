@@ -11,19 +11,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Factory.php 3366 2008-08-26 01:36:49Z pmjones $
+ * @version $Id: Factory.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 abstract class Solar_Factory extends Solar_Base
 {
     /**
      * 
-     * User-provided configuration.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `adapter`
-     * : (string) The adapter class for the factory to generate.
+     * @config string adapter The adapter class for the factory to generate.
      * 
      * @var array
      * 

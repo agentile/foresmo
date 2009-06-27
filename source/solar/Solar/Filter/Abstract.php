@@ -11,19 +11,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Abstract.php 3103 2008-04-12 01:53:17Z pmjones $
+ * @version $Id: Abstract.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 abstract class Solar_Filter_Abstract extends Solar_Base {
     
     /**
      * 
-     * User-defined configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `filter`
-     * : (Solar_Filter) The "parent" Solar_Filter object.
+     * @config Solar_Filter filter The "parent" Solar_Filter object.
      * 
      * @var array
      * 
@@ -54,7 +51,7 @@ abstract class Solar_Filter_Abstract extends Solar_Base {
      * 
      * Constructor.
      * 
-     * @param array $config User-defined configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

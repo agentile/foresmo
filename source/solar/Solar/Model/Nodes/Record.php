@@ -3,6 +3,16 @@
  * 
  * A single Solar_Model_Nodes record.
  * 
+ * @category Solar
+ * 
+ * @package Solar_Model
+ * 
+ * @author Paul M. Jones <pmjones@solarphp.com>
+ * 
+ * @license http://opensource.org/licenses/bsd-license.php BSD
+ * 
+ * @version $Id: Record.php 3838 2009-06-18 23:50:36Z pmjones $
+ * 
  */
 class Solar_Model_Nodes_Record extends Solar_Model_Record {
     
@@ -57,7 +67,7 @@ class Solar_Model_Nodes_Record extends Solar_Model_Record {
     protected function _postDelete()
     {
         if ($this->taggings) {
-            $this->taggings->delete();
+            $this->taggings->deleteAll();
         }
     }
 }

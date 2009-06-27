@@ -18,19 +18,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Public.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: Public.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Uri_Public extends Solar_Uri
 {
     /**
      * 
-     * User-provided configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `path`
-     * : (string) A path prefix specifically for public resources, for example '/public/'.
+     * @config string path A path prefix specifically for public resources, for example '/public/'.
      * 
      * @var array
      * 

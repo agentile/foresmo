@@ -11,19 +11,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: GetTextRaw.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: GetTextRaw.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_View_Helper_GetTextRaw extends Solar_View_Helper
 {
     /**
      * 
-     * User-defined configuration.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `class`
-     * : (string) The class for locale translations.
+     * @config string class The class for locale translations.
      * 
      * @var array
      * 
@@ -45,7 +42,7 @@ class Solar_View_Helper_GetTextRaw extends Solar_View_Helper
      * 
      * Constructor.
      * 
-     * @param array $config User-defined configuration values.
+     * @param array $config Configuration value overrides, if any.
      * 
      */
     public function __construct($config = null)

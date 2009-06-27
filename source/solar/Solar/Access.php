@@ -11,19 +11,16 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Access.php 3333 2008-08-05 22:57:09Z pmjones $
+ * @version $Id: Access.php 3850 2009-06-24 20:18:27Z pmjones $
  * 
  */
 class Solar_Access extends Solar_Factory
 {
     /**
      * 
-     * User-supplied configuration values.
+     * Default configuration values.
      * 
-     * Keys are ...
-     * 
-     * `adapter`
-     * : (string) The adapter class, for example 'Solar_Access_Adapter_Open'.
+     * @config string adapter The adapter class, for example 'Solar_Access_Adapter_Open'.
      * 
      * @var array
      * 
