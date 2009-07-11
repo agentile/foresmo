@@ -105,13 +105,13 @@ class Foresmo_App_Base extends Solar_App_Base {
     }
 
     /**
-     * allowAction
+     * allowAjaxAction
      * Check user permissions for an action to be performed
      *
      * @param $action
      * @return bool
      */
-    public function allowAction($action)
+    public function allowAjaxAction($action)
     {
         $user_permissions = $this->session->get('Foresmo_permissions');
         if (!is_array($user_permissions)) {

@@ -17,6 +17,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
     public $form_success = false;
     public $msg;
     public $posts = array();
+    public $comments_disabled = false;
 
     /**
      * actionIndex
@@ -34,7 +35,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         }
 
         $posts = array();
-
+        // Is this a post?
         if (!empty($this->_info)) {
             $posts = $this->_model->posts->getPostBySlug($this->_info[0]);
         }
@@ -44,6 +45,21 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             $this->_setPostCommentForm($posts['id']);
             if ($this->form_success) {
                 $posts = $this->_model->posts->getPostBySlug($this->_info[0]);
+                $posts = $posts[0];
+            }
+        }
+
+        // Is it a page?
+        if (empty($posts) && !empty($this->_info)) {
+            $posts = $this->_model->posts->getPageBySlug($this->_info[0]);
+        }
+
+        if (!empty($posts)) {
+            $this->_view = 'page';
+            $posts = $posts[0];
+            $this->_setPostCommentForm($posts['id']);
+            if ($this->form_success) {
+                $posts = $this->_model->posts->getPageBySlug($this->_info[0]);
                 $posts = $posts[0];
             }
         }
@@ -180,6 +196,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
     {
         if ($this->_model->post_info->commentsDisabled($post_id)) {
             $this->msg = 'This post has commenting disabled.';
+            $this->comments_disabled = true;
             return;
         }
         $form = Solar::factory('Solar_Form');

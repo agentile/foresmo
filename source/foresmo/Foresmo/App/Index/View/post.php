@@ -16,7 +16,9 @@
     foreach ($this->posts['tags'] as $tag) {
         $tags[] = "<span class=\"tag\"><a href=\"/tag/{$tag['tag_slug']}\" alt=\"{$tag['tag']}\">{$tag['tag']}</a></span>";
     }
-    echo '<span>Tags: ' . implode(', ', $tags) . '</span>';
+    if (!empty($this->posts['tags'])) {
+        echo '<span>Tags: ' . implode(', ', $tags) . '</span>';
+    }
     ?>
 
 

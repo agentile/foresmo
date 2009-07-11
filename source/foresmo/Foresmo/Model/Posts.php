@@ -61,6 +61,43 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
+     * getPageBySlug
+     * get a specific page by slug and status of 1 (published),
+     * with all it's pertitent associated data (tags, comments,
+     * postinfo) as an array
+     *
+     * @param $slug_name
+     * @return array
+     */
+    public function getPageBySlug($slug_name)
+    {
+        $results = $this->fetchArray(
+            array(
+                'where'  => array(
+                    'status = ? AND slug = ? AND content_type = ?' => array(1, $slug_name, 2),
+                ),
+                'order'  => array (
+                    'id DESC'
+                ),
+                'paging' => $this->posts_per_page,
+                'page'   => 1,
+                'eager'  => array(
+                    'comments' => array(
+                        'eager' => array(
+                            'commentinfo'
+                        )
+                    ),
+                    'tags',
+                    'postinfo'
+                ),
+            )
+        );
+        Foresmo::dateFilter($results);
+        Foresmo::sanitize($results);
+        return $results;
+    }
+
+    /**
      * getPostBySlug
      * get a specific blog post by slug and status of 1 (published),
      * with all it's pertitent associated data (tags, comments,

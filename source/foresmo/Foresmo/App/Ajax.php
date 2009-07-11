@@ -40,7 +40,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
                     $this->_response->content = json_encode($ret);
                     return;
                 }
-                if (!$this->allowAction($post_data['ajax_action'])) {
+                if (!$this->allowAjaxAction($post_data['ajax_action'])) {
                     $ret = array(
                         'success' => false,
                         'message' => 'You are not authorized to perform this action.',
@@ -62,7 +62,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
      */
     public function ajax_admin_pages_new($post_data)
     {
-        $this->ajax_admin_new_content($post_data);
+        return $this->ajax_admin_new_content($post_data);
     }
 
     /**
@@ -74,7 +74,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
      */
     public function ajax_admin_post_new($post_data)
     {
-        $this->ajax_admin_new_content($post_data);
+        return $this->ajax_admin_new_content($post_data);
     }
 
     /**
