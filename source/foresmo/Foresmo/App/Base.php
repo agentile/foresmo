@@ -121,6 +121,9 @@ class Foresmo_App_Base extends Solar_App_Base {
             case 'admin_post_new':
                 return (in_array('create_post', $user_permissions)) ? true : false;
             break;
+            case 'admin_pages_new':
+                return (in_array('create_page', $user_permissions)) ? true : false;
+            break;
         }
         return false;
     }

@@ -17,6 +17,16 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
     public $recent_comments = array();
     public $quick_stats = array();
 
+    public function _setup()
+    {
+        parent::_setup();
+        if ($this->session->get('Foresmo_username', false) === false
+            || !$this->session->get('Foresmo_username')) {
+            $this->_redirect('/login');
+        }
+        $this->_layout_default = 'admin';
+    }
+
     /**
      * actionIndex
      * Default admin action/page
@@ -28,17 +38,33 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
      */
     public function actionIndex()
     {
-        if ($this->session->get('Foresmo_username', false) === false
-            || !$this->session->get('Foresmo_username')) {
-            $this->_redirect('/login');
-        }
-        $this->_layout = 'admin';
         $this->recent_comments = $this->_model->comments->getRecentComments(20);
         $this->quick_stats = array(
             'total_posts' => $this->_model->posts->getTotalCount(1, 1),
             'total_pages' => $this->_model->posts->getTotalCount(2, 1),
             'total_comments' => $this->_model->comments->getTotalCount(0, 1),
         );
+    }
+
+    /**
+     * actionPages
+     * Admin/pages action/page
+     *
+     * @return void
+     *
+     * @access public
+     * @since .09
+     */
+    public function actionPages($sub = null)
+    {
+        if ($sub !== null) {
+            $sub = strtolower($sub);
+            switch ($sub) {
+                case 'new':
+                    $this->_view = 'pages_new';
+                break;
+            }
+        }
     }
 
     /**
@@ -52,11 +78,6 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
      */
     public function actionPosts($sub = null)
     {
-        if ($this->session->get('Foresmo_username', false) === false
-            || !$this->session->get('Foresmo_username')) {
-            $this->_redirect('/login');
-        }
-        $this->_layout = 'admin';
         if ($sub !== null) {
             $sub = strtolower($sub);
             switch ($sub) {
@@ -78,11 +99,7 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
      */
     public function actionComments()
     {
-        if ($this->session->get('Foresmo_username', false) === false
-            || !$this->session->get('Foresmo_username')) {
-            $this->_redirect('/login');
-        }
-        $this->_layout = 'admin';
+
     }
 
     /**
@@ -96,11 +113,7 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
      */
     public function actionSettings()
     {
-        if ($this->session->get('Foresmo_username', false) === false
-            || !$this->session->get('Foresmo_username')) {
-            $this->_redirect('/login');
-        }
-        $this->_layout = 'admin';
+
     }
 
     /**
@@ -114,11 +127,7 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
      */
     public function actionModules()
     {
-        if ($this->session->get('Foresmo_username', false) === false
-            || !$this->session->get('Foresmo_username')) {
-            $this->_redirect('/login');
-        }
-        $this->_layout = 'admin';
+
     }
 
     /**
@@ -132,10 +141,6 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
      */
     public function actionUsers()
     {
-        if ($this->session->get('Foresmo_username', false) === false
-            || !$this->session->get('Foresmo_username')) {
-            $this->_redirect('/login');
-        }
-        $this->_layout = 'admin';
+
     }
 }

@@ -18,7 +18,7 @@ $config['Solar']['system']  = $system;
  */
 $config['Solar']['ini_set'] = array(
     'error_reporting'   => (E_ALL | E_STRICT),
-    'display_errors'    => false,
+    'display_errors'    => true,
     'html_errors'       => true,
     'session.save_path' => "$system/tmp/session/",
     'date.timezone'     => 'UTC',
@@ -44,14 +44,14 @@ $config['Solar_Sql']['adapter'] = 'Solar_Sql_Adapter_Mysql';
 
 $config['Solar_Sql_Adapter_Mysql'] = array(
     'host' => 'localhost',
-    'user' => 'test',
-    'pass' => 'testpass',
+    'user' => 'taint',
+    'pass' => 'taintpass',
     'name' => 'foresmo',
     'prefix' => 'foresmo_'
 );
 
 // Foresmo settings
-$config['Foresmo']['installed'] = false;
+$config['Foresmo']['installed'] = true;
 
 // Authentication source
 $config['Solar_Auth'] = array(
@@ -59,7 +59,7 @@ $config['Solar_Auth'] = array(
 );
 
 // Salt for password - change to something unique and strong.
-$config['Solar_Auth_Adapter_Sql']['salt'] = 'dgjaogu9ye1oufkwhh';
+$config['Solar_Auth_Adapter_Sql']['salt'] = '6ookwbgu2i4x2458k5';
 
 
 /**

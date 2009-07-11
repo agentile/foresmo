@@ -59,7 +59,7 @@
                 <h2>Posting Options</h2>
                 <div class="block">
 
-                    <label for="post_status">Post type</label><br/>
+                    <label for="post_status">Status</label><br/>
                     <select name="post_status">
                         <option value="1">Publish</option>
                         <option value="2">Save as draft</option>
@@ -77,6 +77,7 @@
             <label for="post_title">Post Title</label><br/>
             <input type="text" name="post_title" class="input" style="width: 694px;"/><br/><br/>
             <input type="hidden" name="ajax_action" value="admin_post_new" />
+            <input type="hidden" name="post_type" value="1" />
             <input type="textarea" id="post_content" name="post_content" /><br/>
             <input type="submit" id="post_new_submit" name="submit" value="Submit" class="submit_input"/>
 

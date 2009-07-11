@@ -36,7 +36,7 @@ foreach($this->posts['comments'] as $key => $comment){
         }
     }
     echo '<a name="comment-'.$comment['id'].'"></a>';
-    $default = $this->web_root . "public/Foresmo/{$this->blog_theme}/images/contact_grey.png";
+    $default = 'http://' . $_SERVER['SERVER_NAME'] . "/public/Foresmo/{$this->blog_theme}/images/contact_grey.png";
     $size = 50;
     $grav_url = "http://www.gravatar.com/avatar.php?gravatar_id=".md5($comment['email'])."&default=".urlencode($default)."&size=".$size;
 

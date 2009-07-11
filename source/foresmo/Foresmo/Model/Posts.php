@@ -251,11 +251,12 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
             // if unexpected int, default to 1 (published)
             $post_data['post_status'] = 1;
         }
+        $type = (int) $post_data['post_type'];
 
         $cur_time = time();
         $data = array(
             'slug' => $post_data['post_slug'],
-            'content_type' => 1,
+            'content_type' => $type,
             'title' => $post_data['post_title'],
             'content' => $post_data['post_content'],
             'user_id' => $_SESSION['Foresmo_App']['Foresmo_user_id'],

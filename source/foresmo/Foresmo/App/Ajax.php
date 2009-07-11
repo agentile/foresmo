@@ -33,16 +33,36 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             if (stristr($post_data['ajax_action'], 'admin_')) {
                 if ($this->session->get('Foresmo_username', false) === false
                     || !$this->session->get('Foresmo_username')) {
-                    $this->_response->content = 'Please login <a href="/login">here</a>.';
+                    $ret = array(
+                        'success' => false,
+                        'message' => 'Please login <a href="/login">here</a>.',
+                    );
+                    $this->_response->content = json_encode($ret);
                     return;
                 }
                 if (!$this->allowAction($post_data['ajax_action'])) {
-                    $this->_response->content = 'You are not authorized to perform this action.';
+                    $ret = array(
+                        'success' => false,
+                        'message' => 'You are not authorized to perform this action.',
+                    );
+                    $this->_response->content = json_encode($ret);
                     return;
                 }
             }
             $this->_response->content = self::$method($post_data);
         }
+    }
+
+    /**
+     * ajax_admin_pages_new
+     * New page post
+     *
+     * @param $post_data
+     * @return string
+     */
+    public function ajax_admin_pages_new($post_data)
+    {
+        $this->ajax_admin_new_content($post_data);
     }
 
     /**
@@ -53,6 +73,18 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
      * @return string
      */
     public function ajax_admin_post_new($post_data)
+    {
+        $this->ajax_admin_new_content($post_data);
+    }
+
+    /**
+     * ajax_admin_new_content
+     * New blog post
+     *
+     * @param $post_data
+     * @return string
+     */
+    public function ajax_admin_new_content($post_data)
     {
         $errors = array();
         if (!isset($post_data['post_title']) || $this->validate('validateBlank', $post_data['post_title'])) {
@@ -68,7 +100,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
                 'message' => $message,
             );
         } else {
-            $post_data['post_slug'] = $this->_model->posts->makeSlug($post_data['post_title']);
+            $post_data['post_slug'] = Foresmo::makeSlug($post_data['post_title']);
             $last_insert_id = $this->_model->posts->newPost($post_data);
             if (!$this->validate('validateBlank', $post_data['post_tags'])) {
                 $tags = explode(',', rtrim(trim($post_data['post_tags']), ','));
@@ -186,24 +218,40 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             'name' => 'Admin',
         );
 
-        $last_insert_id = $adapter->insert($table, $data);
+        $adapter->insert($table, $data);
+        $last_insert_id = $adapter->lastInsertId($table, 'id');
         $permissions = array();
         $table = $post_data['db_prefix'] . 'permissions';
 
         $data = array('name' => 'create_post');
-        $permissions[] = $adapter->insert($table, $data);
+        $adapter->insert($table, $data);
+        $permissions[] = $adapter->lastInsertId($table, 'id');
 
         $data = array('name' => 'edit_post');
-        $permissions[] = $adapter->insert($table, $data);
+        $adapter->insert($table, $data);
+        $permissions[] = $adapter->lastInsertId($table, 'id');
 
         $data = array('name' => 'delete_post');
-        $permissions[] = $adapter->insert($table, $data);
+        $adapter->insert($table, $data);
+        $permissions[] = $adapter->lastInsertId($table, 'id');
+
+        $data = array('name' => 'create_page');
+        $adapter->insert($table, $data);
+        $permissions[] = $adapter->lastInsertId($table, 'id');
+
+        $data = array('name' => 'edit_page');
+        $adapter->insert($table, $data);
+        $permissions[] = $adapter->lastInsertId($table, 'id');
+
+        $data = array('name' => 'delete_page');
+        $adapter->insert($table, $data);
+        $permissions[] = $adapter->lastInsertId($table, 'id');
 
         $table = $post_data['db_prefix'] . 'groups_permissions';
         foreach($permissions as $permission) {
             $data = array(
                 'group_id' => $last_insert_id,
-                'permission_id' => $permission,
+                'permission_id' => (int) $permission,
             );
             $adapter->insert($table, $data);
         }
@@ -295,6 +343,22 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         $data = array(
             'post_id' => 1,
             'tag_id' => 1,
+        );
+        $adapter->insert($table, $data);
+        $table = $post_data['db_prefix'] . 'modules';
+        $data = array(
+            'name' => 'Pages',
+            'enabled' => 1,
+        );
+        $adapter->insert($table, $data);
+        $data = array(
+            'name' => 'Search',
+            'enabled' => 1,
+        );
+        $adapter->insert($table, $data);
+        $data = array(
+            'name' => 'Calendar',
+            'enabled' => 1,
         );
         $adapter->insert($table, $data);
         return 'Foresmo installed! Click <a href="/">here</a> to check it out! Also, don\'t forget to change the permissions of the config back to read only.';

@@ -18,6 +18,13 @@ echo $this->script('Foresmo/default/scripts/admin.js')."\n";
                 <a href="/admin">Home</a>
             </li>
             <li>
+                <a href="/admin/pages">Pages</a>
+                <ul>
+                    <li><a href="/admin/pages/new">Create New Page</a></li>
+                    <li><a href="#">Manage Pages</a></li>
+                </ul>
+            </li>
+            <li>
                 <a href="/admin/posts">Posts</a>
                 <ul>
                     <li><a href="/admin/posts/new">Create New Post</a></li>
