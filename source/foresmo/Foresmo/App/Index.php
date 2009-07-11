@@ -260,6 +260,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
                         || $this->session->get('Foresmo_user_id') !== $registered['id']) {
                         $form->feedback = 'This e-mail address is registered, if you are this user, please login to comment.';
                     } else {
+                        // TODO: check to make sure there current logged in user has entered his/her own e-mail
                         $registered_check = true;
                     }
                 } else {

@@ -39,6 +39,10 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
             'foreign_class' => 'Foresmo_Model_CommentInfo',
             'foreign_key' => 'comment_id',
         ));
+        $this->_hasOne('posts', array(
+            'foreign_class' => 'Foresmo_Model_Posts',
+            'foreign_key' => 'id',
+        ));
     }
 
     /**
@@ -98,7 +102,7 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
      * @param $comment_data
      * @param $spam default false
      *
-     * @return array affected rows
+     * @return mixed last insert id
      */
     public function insertComment($comment_data, $spam = false)
     {
@@ -117,7 +121,6 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
         }
 
         $data = array(
-            'id' => '',
             'post_id' => $comment_data['post_id'],
             'name' => $comment_data['name'],
             'email' => $comment_data['email'],
@@ -128,32 +131,7 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
             'date' => time(),
             'type' => $type,
         );
-        $result = $this->insert($data);
-        return $result;
-    }
-
-    /**
-    * sanitize
-    * Sanitize text output within arrays
-    *
-    * @param $post
-    * @return void
-    */
-    private function _sanitize(&$data)
-    {
-        foreach ($data as $k => $v) {
-            if (is_array($v)) {
-                $this->_sanitize($data[$k]);
-            }
-            if ($k ==='title'
-                || $k === 'content'
-                || $k === 'modified'
-                || $k === 'name'
-                || $k === 'email'
-                || $k === 'tag') {
-                $data[$k] = htmlentities($data[$k], ENT_QUOTES, 'UTF-8');
-            }
-        }
+        return $this->insert($data);
     }
 
     /**
@@ -177,5 +155,62 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
             $url = 'http://' . $url;
         }
         return $url;
+    }
+
+    /**
+     * getRecentComments
+     * Get recent comments
+     *
+     * @param int $limit limit (default 10)
+     * @return array result set
+     */
+    public function getRecentComments($limit = null)
+    {
+        if (is_null($limit)) {
+            $limit = 10;
+        }
+        $limit = (int) $limit;
+
+        $results = $this->fetchArray(
+            array(
+                'where' => array(
+                    'type = ?' => 0
+                ),
+                'eager' => array(
+                    'commentinfo', 'posts'
+                ),
+                'order'  => array (
+                    'id DESC'
+                ),
+                'limit'  => $limit,
+            )
+        );
+        Foresmo::dateFilter($results);
+        Foresmo::sanitize($results);
+        return $results;
+    }
+
+    /**
+     * getTotalCount
+     * Get count of certain type and status
+     *
+     * $param int $type
+     * $param int $status
+     * @return int count
+     */
+    public function getTotalCount($type, $status)
+    {
+        $result = $this->fetchArray(
+            array(
+                'cols' => array(
+                    'COUNT(*) as count'
+                ),
+                'where' => array(
+                    'type = ?' => $type,
+                    'status = ?' => $status,
+                ),
+            )
+        );
+        return (int) $result[0]['count'];
     }
 }

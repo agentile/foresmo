@@ -73,7 +73,9 @@ class Foresmo_App_Base extends Solar_App_Base {
                     break;
                 }
             }
-
+            $time_info = Foresmo::getTimeInfo();
+            Foresmo::$date_format = $time_info['blog_date_format'];
+            Foresmo::$timezone = $time_info['blog_timezone'];
             $this->_model->posts->published_posts_count = $this->_model->posts->getPublishedPostsCount();
             $this->_setPagesCount();
             $this->_layout_default = $this->blog_theme;

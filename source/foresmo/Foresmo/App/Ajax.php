@@ -183,36 +183,25 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
 
         $table = $post_data['db_prefix'] . 'groups';
         $data = array(
-            'id' => '',
             'name' => 'Admin',
         );
 
-        $adapter->insert($table, $data);
-        $last_insert_id = $adapter->lastInsertId($table, 'id');
+        $last_insert_id = $adapter->insert($table, $data);
         $permissions = array();
         $table = $post_data['db_prefix'] . 'permissions';
-        $data = array(
-            'id' => '',
-            'name' => 'create_post',
-        );
-        $adapter->insert($table, $data);
-        $permissions[] = $adapter->lastInsertId($table, 'id');
-        $data = array(
-            'id' => '',
-            'name' => 'edit_post',
-        );
-        $adapter->insert($table, $data);
-        $permissions[] = $adapter->lastInsertId($table, 'id');
-        $data = array(
-            'id' => '',
-            'name' => 'delete_post',
-        );
-        $adapter->insert($table, $data);
-        $permissions[] = $adapter->lastInsertId($table, 'id');
+
+        $data = array('name' => 'create_post');
+        $permissions[] = $adapter->insert($table, $data);
+
+        $data = array('name' => 'edit_post');
+        $permissions[] = $adapter->insert($table, $data);
+
+        $data = array('name' => 'delete_post');
+        $permissions[] = $adapter->insert($table, $data);
+
         $table = $post_data['db_prefix'] . 'groups_permissions';
         foreach($permissions as $permission) {
             $data = array(
-                'id' => '',
                 'group_id' => $last_insert_id,
                 'permission_id' => $permission,
             );
@@ -221,7 +210,6 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
 
         $table = $post_data['db_prefix'] . 'users';
         $data = array(
-            'id' => '',
             'group_id' => $last_insert_id,
             'username'=> $username,
             'password' => $password,
@@ -231,49 +219,42 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
 
         $table = $post_data['db_prefix'] . 'options';
         $data = array(
-            'id' => '',
             'name' => 'blog_installed',
             'type' => 1,
             'value' => time(),
         );
         $adapter->insert($table, $data);
         $data = array(
-            'id' => '',
             'name' => 'blog_theme',
             'type' => 0,
             'value' => 'default',
         );
         $adapter->insert($table, $data);
         $data = array(
-            'id' => '',
             'name' => 'blog_title',
             'type' => 0,
             'value' => $post_data['blog_title'],
         );
         $adapter->insert($table, $data);
         $data = array(
-            'id' => '',
             'name' => 'blog_date_format',
             'type' => 0,
             'value' => 'F j, Y, g:ia',
         );
         $adapter->insert($table, $data);
         $data = array(
-            'id' => '',
             'name' => 'blog_timezone',
             'type' => 0,
             'value' => '-4:00',
         );
         $adapter->insert($table, $data);
         $data = array(
-            'id' => '',
             'name' => 'blog_posts_per_page',
             'type' => 0,
             'value' => 10,
         );
         $adapter->insert($table, $data);
         $data = array(
-            'id' => '',
             'name' => 'blog_comment_link_limit',
             'type' => 0,
             'value' => 3,
@@ -281,7 +262,6 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         $adapter->insert($table, $data);
         $table = $post_data['db_prefix'] . 'posts';
         $data = array(
-            'id' => '',
             'slug' => 'my-first-post',
             'content_type' => 1,
             'title' => 'My first post!',
@@ -294,7 +274,6 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         $adapter->insert($table, $data);
         $table = $post_data['db_prefix'] . 'comments';
         $data = array(
-            'id' => '',
             'post_id' => 1,
             'name' => 'Foresmo',
             'email' => 'foresmo@foresmo.com',
@@ -308,14 +287,12 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         $adapter->insert($table, $data);
         $table = $post_data['db_prefix'] . 'tags';
         $data = array(
-            'id' => '',
             'tag' => 'Foresmo',
             'tag_slug' => 'foresmo',
         );
         $adapter->insert($table, $data);
         $table = $post_data['db_prefix'] . 'posts_tags';
         $data = array(
-            'id' => '',
             'post_id' => 1,
             'tag_id' => 1,
         );

@@ -61,13 +61,11 @@ class Foresmo_Model_PostInfo extends Solar_Sql_Model {
     public function setCommentsDisabled($post_id, $value)
     {
         $data = array(
-            'id' => '',
             'post_id' => $post_id,
             'name' => 'comments_disabled',
             'type' => 0,
             'value' => $value
         );
-        $result = $this->insert($data);
-        return $result;
+        $this->insert($data);
     }
 }

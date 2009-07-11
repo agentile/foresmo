@@ -14,6 +14,9 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
     protected $_layout_default = 'admin';
     protected $_action_default = 'index';
 
+    public $recent_comments = array();
+    public $quick_stats = array();
+
     /**
      * actionIndex
      * Default admin action/page
@@ -30,6 +33,12 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
             $this->_redirect('/login');
         }
         $this->_layout = 'admin';
+        $this->recent_comments = $this->_model->comments->getRecentComments(20);
+        $this->quick_stats = array(
+            'total_posts' => $this->_model->posts->getTotalCount(1, 1),
+            'total_pages' => $this->_model->posts->getTotalCount(2, 1),
+            'total_comments' => $this->_model->comments->getTotalCount(0, 1),
+        );
     }
 
     /**

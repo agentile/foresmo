@@ -49,22 +49,19 @@ class Foresmo_Model_PostsTags extends Solar_Sql_Model {
         foreach ($tags as $tag) {
             if (array_key_exists($tag, $tag_map)) {
                 $data = array(
-                    'id' => '',
                     'post_id' => $post_id,
                     'tag_id' => $tag_map[$tag],
                 );
                 $this->insert($data);
             } else {
                 $data = array(
-                    'id' => '',
                     'tag' => $tag,
                     'tag_slug' => $this->makeSlug($tag),
                 );
-                $result = $tags_table->insert($data);
+                $last_insert_id = $tags_table->insert($data);
                 $data = array(
-                    'id' => '',
                     'post_id' => $post_id,
-                    'tag_id' => $result['id'],
+                    'tag_id' => $last_insert_id,
                 );
                 $this->insert($data);
             }

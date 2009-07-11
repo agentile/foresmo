@@ -18,8 +18,6 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     public $posts_per_page = 10;
     public $page_count;
     public $published_posts_count = 1;
-    public $date_format;
-    public $timezone;
 
     /**
      *
@@ -60,10 +58,6 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
              'through'       => 'posts_tags',
              'through_key'   => 'tag_id',
         ));
-
-        $time_info = Foresmo::getTimeInfo();
-        $this->date_format = $time_info['blog_date_format'];
-        $this->timezone = $time_info['blog_timezone'];
     }
 
     /**
@@ -98,8 +92,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 ),
             )
         );
-        $this->_dateFilter($results);
-        $this->_sanitize($results);
+        Foresmo::dateFilter($results);
+        Foresmo::sanitize($results);
         return $results;
     }
 
@@ -133,8 +127,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 ),
             )
         );
-        $this->_dateFilter($results);
-        $this->_sanitize($results);
+        Foresmo::dateFilter($results);
+        Foresmo::sanitize($results);
         return $results;
     }
 
@@ -169,8 +163,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 ),
             )
         );
-        $this->_dateFilter($results);
-        $this->_sanitize($results);
+        Foresmo::dateFilter($results);
+        Foresmo::sanitize($results);
         return $results;
     }
 
@@ -216,8 +210,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 ),
             )
         );
-        $this->_dateFilter($results);
-        $this->_sanitize($results);
+        Foresmo::dateFilter($results);
+        Foresmo::sanitize($results);
         return $results;
     }
 
@@ -248,7 +242,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
      * Insert a new post from post data
      *
      * @param $post_data
-     * @return void
+     * @return mixed last insert id
      */
     public function newPost($post_data)
     {
@@ -260,7 +254,6 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
 
         $cur_time = time();
         $data = array(
-            'id' => '',
             'slug' => $post_data['post_slug'],
             'content_type' => 1,
             'title' => $post_data['post_title'],
@@ -270,86 +263,31 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
             'pubdate' => $cur_time,
             'modified' => $cur_time,
         );
-        $result = $this->insert($data);
-        return $result['id'];
+
+        return $this->insert($data);
     }
 
     /**
-     * makeSlug
-     * Change string to url friendly slug
+     * getTotalCount
+     * Get count of certain type and status
      *
-     * @param $str
-     * @param $delim  default '-'
-     *
-     * @return string
+     * $param int $type
+     * $param int $status
+     * @return int count
      */
-    public function makeSlug($str, $delim = '-')
+    public function getTotalCount($type, $status)
     {
-        $str = preg_replace('/[^a-z0-9-]/', $delim, strtolower(trim($str)));
-        $str = preg_replace("/{$delim}+/", $delim, trim($str, $delim));
-        return $str;
-    }
-
-    /**
-     * dateFilter
-     * Modify datetime fields for timezone and date format settings
-     *
-     * @param $posts
-     *
-     * @return void
-     */
-     private function _dateFilter(&$posts)
-     {
-         foreach ($posts as $k => $v) {
-             if (is_array($v)) {
-                 $this->_dateFilter($posts[$k]);
-             }
-             if ($k === 'date' || $k === 'pubdate' || $k === 'modified') {
-                 $fetched_time = (int) $v;
-                 $timezone = explode(':', $this->timezone);
-                 if ($timezone[0][0] == '-') {
-                     $first = substr($timezone[0], 1);
-                     $change = $first * 60 * 60;
-                     if ($timezone[1] == '30') {
-                         $change = $change + 1800;
-                     }
-                     $time = date($this->date_format, $fetched_time - $change);
-                 } else {
-                     $change = $timezone[0] * 60 * 60;
-                     if ($timezone[1] == '30') {
-                         $change = $change + 1800;
-                     }
-                     $time = date($this->date_format, $fetched_time + $change);
-                 }
-                 $posts[$k] = $time;
-             }
-         }
-     }
-
-    /**
-    * sanitize
-    * Sanitize text output within arrays
-    *
-    * @param $post
-    * @param $track
-    * @return void
-    */
-    private function _sanitize(&$posts, $track = array())
-    {
-        foreach ($posts as $k => $v) {
-            if (is_array($v)) {
-                $track[] = $k;
-                $this->_sanitize($posts[$k], $track);
-                array_pop($track);
-            } elseif ($k === 'title'
-                || ($k === 'content' && (count($track) > 1))
-                || $k === 'modified'
-                || $k === 'name'
-                || $k === 'email'
-                || $k === 'tag') {
-
-                $posts[$k] = htmlentities($posts[$k], ENT_QUOTES, 'UTF-8');
-            }
-        }
+        $result = $this->fetchArray(
+            array(
+                'cols' => array(
+                    'COUNT(*) as count'
+                ),
+                'where' => array(
+                    'content_type = ?' => $type,
+                    'status = ?' => $status,
+                ),
+            )
+        );
+        return (int) $result[0]['count'];
     }
 }
