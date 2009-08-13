@@ -42,6 +42,12 @@ echo $this->script('Foresmo/default/scripts/admin.js')."\n";
             </li>
             <li>
                 <a href="/admin/users">Users</a>
+                <ul>
+                    <li><a href="#">Add user</a></li>
+                    <li><a href="#">Manage users</a></li>
+                    <li><a href="#">Add role</a></li>
+                    <li><a href="#">Manage roles</a></li>
+                </ul>
             </li>
             <li>
                 <a href="/admin/settings">Settings</a>

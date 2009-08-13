@@ -2,12 +2,16 @@
 /**
  * Foresmo_Modules_Pages
  *
- *
+ * Pages Module: Provides links to published pages.
  *
  */
 class Foresmo_Modules_Pages extends Solar_Base {
 
     protected $_model;
+    protected $_name = 'Pages';
+    protected $_view;
+    protected $_view_path;
+    protected $_view_file;
 
     public $output = '';
 
@@ -18,7 +22,10 @@ class Foresmo_Modules_Pages extends Solar_Base {
      */
     public function __construct($model)
     {
-        $this->model = $model;
+        $this->_model = $model;
+        $this->_view_path = Solar_Config::get('Solar', 'system') . '/source/foresmo/Foresmo/Modules/' . $this->_name . '/View/';
+        $this->_view_file = 'index.php';
+        $this->_view = Solar::factory('Solar_View', array('template_path' => $this->_view_path));
     }
 
     /**
@@ -29,7 +36,10 @@ class Foresmo_Modules_Pages extends Solar_Base {
      */
     public function start()
     {
+        $pages = $this->_model->posts->getAllPublishedPages();
+        $this->_view->assign('pages', $pages);
 
+        $this->output = $this->_view->fetch($this->_view_file);
     }
 
 }

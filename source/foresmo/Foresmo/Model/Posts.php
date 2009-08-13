@@ -170,6 +170,41 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
+     * getAllPublishedPages
+     * get all pages with status of 1 (published), with all it's
+     * pertitent associated data (tags, comments, postinfo) as an array
+     *
+     * @return array
+     */
+    public function getAllPublishedPages()
+    {
+        $results = $this->fetchArray(
+            array(
+                'where'  => array(
+                    'status = ? AND content_type = ?' => array(1, 2)
+                ),
+                'order'  => array (
+                    'id DESC'
+                ),
+                'paging' => $this->posts_per_page,
+                'page'   => 1,
+                'eager'  => array(
+                    'comments' => array(
+                        'eager' => array(
+                            'commentinfo'
+                        )
+                    ),
+                    'tags',
+                    'postinfo'
+                ),
+            )
+        );
+        Foresmo::dateFilter($results);
+        Foresmo::sanitize($results);
+        return $results;
+    }
+
+    /**
      * getAllPublishedPostsByPage
      * get all posts with status of 1 (published) and page, with all
      * pertitent associated data (tags, comments, postinfo) as an array

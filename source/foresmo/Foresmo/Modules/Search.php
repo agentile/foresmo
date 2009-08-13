@@ -18,7 +18,7 @@ class Foresmo_Modules_Search extends Solar_Base {
      */
     public function __construct($model)
     {
-        $this->model = $model;
+        $this->_model = $model;
     }
 
     /**
@@ -29,7 +29,7 @@ class Foresmo_Modules_Search extends Solar_Base {
      */
     public function start()
     {
-        $this->output = 'blah';
+        $this->output = '';
     }
 
 }

@@ -14,6 +14,7 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
     protected $_layout_default = 'admin';
     protected $_action_default = 'index';
 
+    public $users = array();
     public $recent_comments = array();
     public $quick_stats = array();
 
@@ -141,6 +142,9 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
      */
     public function actionUsers()
     {
-
+        $this->users = $this->_model->users->getUsers();
+        $this->quick_stats = array(
+            'total_users' => count($this->users),
+        );
     }
 }

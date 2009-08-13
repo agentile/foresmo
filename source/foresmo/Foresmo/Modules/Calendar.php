@@ -18,7 +18,7 @@ class Foresmo_Modules_Calendar extends Solar_Base {
      */
     public function __construct($model)
     {
-        $this->model = $model;
+        $this->_model = $model;
     }
 
     /**

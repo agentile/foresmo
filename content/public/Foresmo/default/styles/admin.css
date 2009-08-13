@@ -1374,6 +1374,7 @@ option {
     letter-spacing:.12em;
     font-family: Verdana,Arial,Helvetica,sans-serif;
     font-size: 10px;
+    font-weight:bold;
     border-top: 1px solid #ccc;
     background-color:#222;
 }
@@ -1543,4 +1544,18 @@ option {
 
 .message {
     color:#990000;
+}
+
+/* login
+----------------------------------------------- */
+#login_box {
+    width:200px;
+    margin:10px auto;
+    padding:10px;
+    color:#eee;
+    font-family:verdana;
+    font-size:14px;
+    font-weight: bold;
+    border:4px solid #eee;
+    background: #6c6c6c;
 }

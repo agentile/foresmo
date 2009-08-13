@@ -4,28 +4,23 @@
         </div>
         <div class="clear"></div>
         <div class="grid_4">
-
-        <div class="box menu">
+            <div class="box menu">
                 <h2>Left Nav</h2>
                 <div class="block" id="section-menu">
-
                     <ul class="section menu">
                         <li>
                             <a href="#" class="menuitem">Something</a>
-
                             <ul class="submenu">
                                 <li>
                                     <a href="#">hola</a>
                                 </li>
                             </ul>
                         </li>
-
                         <li>
                             <a href="#" class="menuitem">Another thing</a>
                             <ul class="submenu">
                                 <li>
                                     <a href="#">blah</a>
-
                                 </li>
                             </ul>
                         </li>
@@ -69,9 +64,9 @@
                 <h2>Quick Stats</h2>
                 <div class="block">
                 <p>
-                Total Blog Posts: <?php echo $this->quick_stats['total_posts']?><br/>
-                Total Pages: <?php echo $this->quick_stats['total_pages']?><br/>
-                Total Comments: <?php echo $this->quick_stats['total_comments']?><br/>
+                Total Blog Posts: <?php echo $this->quick_stats['total_posts'];?><br/>
+                Total Pages: <?php echo $this->quick_stats['total_pages'];?><br/>
+                Total Comments: <?php echo $this->quick_stats['total_comments'];?><br/>
                 </p>
                 </div>
             </div>

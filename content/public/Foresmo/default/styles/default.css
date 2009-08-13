@@ -694,3 +694,13 @@ ol.code li code
 {
   color:#c30;
 }
+
+/* Module ---------*/
+
+#module{
+    border: 1px dashed #222;
+    padding:2px 3px;
+    text-align:right;
+    margin-top: 10px;
+}
+

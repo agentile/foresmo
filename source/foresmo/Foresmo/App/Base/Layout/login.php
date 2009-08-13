@@ -2,11 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Foresmo - Dev</title>
+<title><?php echo $this->blog_title; ?> - Login</title>
+<?php
+echo $this->style('Foresmo/default/styles/admin.css')."\n";
+?>
 </head>
 <body>
 
-<?php echo $this->layout_content; ?>
+<div id="login_box">
+    <?php
+        echo $this->blog_title;
+        echo $this->layout_content;
+    ?>
+</div>
 
 </body>
 </html>
