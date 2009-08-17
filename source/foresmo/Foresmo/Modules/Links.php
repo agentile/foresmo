@@ -1,13 +1,13 @@
 <?php
 /**
- * Foresmo_Modules_Calendar
+ * Foresmo_Modules_Links
  *
  *
  */
-class Foresmo_Modules_Calendar extends Solar_Base {
+class Foresmo_Modules_Links extends Solar_Base {
 
     protected $_model;
-    protected $_name = 'Calendar';
+    protected $_name = 'Links';
     protected $_view;
     protected $_view_path;
     protected $_view_file;

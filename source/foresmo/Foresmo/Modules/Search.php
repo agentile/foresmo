@@ -3,11 +3,14 @@
  * Foresmo_Modules_Search
  *
  *
- *
  */
 class Foresmo_Modules_Search extends Solar_Base {
 
     protected $_model;
+    protected $_name = 'Search';
+    protected $_view;
+    protected $_view_path;
+    protected $_view_file;
 
     public $output = '';
 
@@ -16,9 +19,12 @@ class Foresmo_Modules_Search extends Solar_Base {
      *
      * @param $model
      */
-    public function __construct($model)
+    public function __construct($model = null)
     {
         $this->_model = $model;
+        $this->_view_path = Solar_Config::get('Solar', 'system') . '/source/foresmo/Foresmo/Modules/' . $this->_name . '/View/';
+        $this->_view_file = 'index.php';
+        $this->_view = Solar::factory('Solar_View', array('template_path' => $this->_view_path));
     }
 
     /**
@@ -29,7 +35,7 @@ class Foresmo_Modules_Search extends Solar_Base {
      */
     public function start()
     {
-        $this->output = '';
+        $this->output = $this->_view->fetch($this->_view_file);
     }
 
 }

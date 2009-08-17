@@ -53,6 +53,7 @@ $config['Solar_Sql_Adapter_Mysql'] = array(
 // Foresmo settings
 $config['Foresmo']['installed'] = true;
 
+// Foresmo cache
 $config['Foresmo']['cache'] = array(
     // which adapter class to use
     'adapter' => 'Solar_Cache_Adapter_File',

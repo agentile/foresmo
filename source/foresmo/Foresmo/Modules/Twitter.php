@@ -1,13 +1,13 @@
 <?php
 /**
- * Foresmo_Modules_Calendar
+ * Foresmo_Modules_Twitter
  *
  *
  */
-class Foresmo_Modules_Calendar extends Solar_Base {
+class Foresmo_Modules_Twitter extends Solar_Base {
 
     protected $_model;
-    protected $_name = 'Calendar';
+    protected $_name = 'Twitter';
     protected $_view;
     protected $_view_path;
     protected $_view_file;

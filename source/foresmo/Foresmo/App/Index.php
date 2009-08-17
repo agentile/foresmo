@@ -35,6 +35,8 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         }
 
         $posts = array();
+        $is_post = false;
+
         // Is this a post?
         if (!empty($this->_info)) {
             $posts = $this->_model->posts->getPostBySlug($this->_info[0]);
@@ -47,14 +49,15 @@ class Foresmo_App_Index extends Foresmo_App_Base {
                 $posts = $this->_model->posts->getPostBySlug($this->_info[0]);
                 $posts = $posts[0];
             }
+            $is_post = true;
         }
 
         // Is it a page?
-        if (empty($posts) && !empty($this->_info)) {
+        if (empty($posts) && !$is_post && !empty($this->_info)) {
             $posts = $this->_model->posts->getPageBySlug($this->_info[0]);
         }
 
-        if (!empty($posts)) {
+        if (!empty($posts) && !$is_post) {
             $this->_view = 'page';
             $posts = $posts[0];
             $this->_setPostCommentForm($posts['id']);
@@ -88,7 +91,11 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         }
 
         $this->posts = $this->_model->posts->getAllPublishedPostsByPage($page);
-        $this->_view = 'index';
+        if (empty($this->posts)) {
+            $this->_view = 'notfound';
+        } else {
+            $this->_view = 'index';
+        }
     }
 
     /**
@@ -108,7 +115,11 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         }
 
         $this->posts = $this->_model->posts->getPostsByTag($tags);
-        $this->_view = 'index';
+        if (empty($this->posts)) {
+            $this->_view = 'notfound';
+        } else {
+            $this->_view = 'index';
+        }
     }
 
     /**
