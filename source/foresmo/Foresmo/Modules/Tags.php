@@ -1,14 +1,14 @@
 <?php
 /**
- * Foresmo_Modules_Pages
+ * Foresmo_Modules_Tags
  *
- * Pages Module: Provides links to published pages.
+ * Tags Module: Show available tags and count
  *
  */
-class Foresmo_Modules_Pages extends Solar_Base {
+class Foresmo_Modules_Tags extends Solar_Base {
 
     protected $_model;
-    protected $_name = 'Pages';
+    protected $_name = 'Tags';
     protected $_view;
     protected $_view_path;
     protected $_view_file;
@@ -36,8 +36,8 @@ class Foresmo_Modules_Pages extends Solar_Base {
      */
     public function start()
     {
-        $pages = $this->_model->posts->getAllPublishedPages();
-        $this->_view->assign('pages', $pages);
+        $tags = $this->_model->tags->getTags();
+        $this->_view->assign('tags', $tags);
 
         $this->output = $this->_view->fetch($this->_view_file);
     }

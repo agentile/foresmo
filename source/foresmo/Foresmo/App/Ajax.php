@@ -429,6 +429,16 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
 // Foresmo settings
 \$config['Foresmo']['installed'] = true;
 
+// Foresmo Cache
+\$config['Foresmo']['cache'] = array(
+    // which adapter class to use
+    'adapter' => 'Solar_Cache_Adapter_File',
+    // where the cache files will be stored
+    'path' => '/tmp/Solar_Cache/',
+    // the cache entry lifetime in seconds
+    'life' => 1800,
+);
+
 // Authentication source
 \$config['Solar_Auth'] = array(
     'adapter' => 'Solar_Auth_Adapter_Sql',

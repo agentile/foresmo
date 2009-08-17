@@ -15,6 +15,7 @@ class Foresmo_App_Base extends Solar_App_Base {
     protected $_model;
     protected $_adapter;
     protected $_modules;
+    protected $_cache = null;
 
     public $session;
     public $connect = true;
@@ -48,6 +49,10 @@ class Foresmo_App_Base extends Solar_App_Base {
             }
             $this->web_root = Solar_Config::get('Solar', 'system') . '/content/';
             $this->_model = Solar_Registry::get('model_catalog');
+            $cache_settings = Solar_Config::get('Foresmo', 'cache');
+            if (isset($cache_settings['adapter'])) {
+                $this->_cache = Solar::factory('Solar_Cache', $cache_settings);
+            }
 
             $results = $this->_model->options->fetchArray(
                 array(

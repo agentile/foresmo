@@ -8,4 +8,4 @@ foreach ($this->pages as $page) {
 <?php
 }
 ?>
-<div>
+</div>
