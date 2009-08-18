@@ -28,4 +28,28 @@ class Foresmo_Model_Modules extends Solar_Sql_Model {
             'foreign_key' => 'module_id',
         ));
     }
+
+    /**
+     * getModuleInfoByName
+     *
+     * get Module Info Rows by Module Name
+     *
+     * @param string $name module name
+     * @return array
+     */
+    public function getModuleInfoByName($name)
+    {
+        $results = $this->fetchArray(
+            array(
+                'where' => array(
+                    'name = ?' => array($name),
+                ),
+                'eager' => array(
+                    'moduleinfo'
+                )
+            )
+        );
+
+        return $results;
+    }
 }

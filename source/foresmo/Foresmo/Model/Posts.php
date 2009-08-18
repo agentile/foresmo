@@ -135,13 +135,13 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getAllPublishedPosts
+     * getPublishedPosts
      * get all posts with status of 1 (published), with all it's
      * pertitent associated data (tags, comments, postinfo) as an array
      *
      * @return array
      */
-    public function getAllPublishedPosts()
+    public function getPublishedPosts()
     {
         $results = $this->fetchArray(
             array(
@@ -170,13 +170,13 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getAllPublishedPages
+     * getPublishedPages
      * get all pages with status of 1 (published), with all it's
      * pertitent associated data (tags, comments, postinfo) as an array
      *
      * @return array
      */
-    public function getAllPublishedPages()
+    public function getPublishedPages()
     {
         $results = $this->fetchArray(
             array(
@@ -205,13 +205,108 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getAllPublishedPostsByPage
+     * getPublishedPostsByDate
+     * get all posts with status of 1 (published) and corresponding year, month, date
+     * with all pertitent associated data (tags, comments, postinfo) as an array
+     *
+     * @return array
+     */
+    public function getPublishedPostsByDate($year = null, $month = null, $day = null)
+    {
+        if (is_null($year) && is_null($month) && is_null($day)) {
+            // If all is null then get posts made today.
+            $date = getdate();
+            $start = gmmktime(0, 0, 0, $date['mon'], $date['mday'], $date['year']);
+            $end = gmmktime(23, 59, 59, $date['mon'], $date['mday'], $date['year']);
+        } elseif (is_null($year) && is_null($month)) {
+            // If only day if given than grab all posts
+            // for that day from current month of current year
+            $date = getdate();
+            $start = gmmktime(0, 0, 0, $date['mon'], (int) $day, $date['year']);
+            $end = gmmktime(23, 59, 59, $date['mon'], (int) $day, $date['year']);
+        } elseif (is_null($year) && is_null($day)) {
+            // Only month is given, get all posts for current year.
+            $date = getdate();
+            $start = gmmktime(0, 0, 0, (int) $month, 1, (int) $date['year']);
+            if ($month == 12) {
+                $next_month = 1;
+                $next_year = $date['year'] + 1;
+            } else {
+                $next_month = $month + 1;
+                $next_year = $date['year'];
+            }
+            // Get the numeric last day of month.
+            $last_of_month = gmstrftime("%d", gmmktime(0, 0, 0, $next_month, 0, $next_year));
+            $end = gmmktime(23, 59, 59, (int) $month, (int) $last_of_month, (int) $date['year']);
+        } elseif (is_null($month) && is_null($day)) {
+            // only year is given, get all posts for year
+            $start = gmmktime(0, 0, 0, 1, 1, (int) $year);
+            $last_of_month = gmstrftime("%d", gmmktime(0, 0, 0, 1, 0, ((int) $year) + 1));
+            $end = gmmktime(23, 59, 59, 12, (int) $last_of_month, (int) $year);
+        } elseif (is_null($day)) {
+            // Year and month are given, get all posts for month
+            $start = gmmktime(0, 0, 0, (int) $month, 1, (int) $year);
+            if ($month == 12) {
+                $next_month = 1;
+                $next_year = $year + 1;
+            } else {
+                $next_month = $month + 1;
+                $next_year = $year;
+            }
+            // Get the numeric last day of month.
+            $last_of_month = gmstrftime("%d", gmmktime(0, 0, 0, $next_month, 0, $next_year));
+            $end = gmmktime(23, 59, 59, (int) $month, (int) $last_of_month, (int) $year);
+
+        } elseif (is_null($month)) {
+            // Year and day are given, set month to current
+            $date = getdate();
+            $start = gmmktime(0, 0, 0, $date['mon'], (int) $day, (int) $year);
+            $end = gmmktime(23, 59, 59, $date['mon'], (int) $day, (int) $year);
+        } elseif (is_null($year)) {
+            // Month and day are given, set year to current
+            $date = getdate();
+            $start = gmmktime(0, 0, 0, (int) $month, (int) $day, $date['year']);
+            $end = gmmktime(23, 59, 59, (int) $month, (int) $day, $date['year']);
+        } else {
+            // Nothing is null, be specific to parameters.
+            $start = gmmktime(0, 0, 0, (int) $month, (int) $day, (int) $year);
+            $end = gmmktime(23, 59, 59, (int) $month, (int) $day, (int) $year);
+
+        }
+        $results = $this->fetchArray(
+            array(
+                'where'  => array(
+                    'status = ? AND content_type = ? AND pubdate BETWEEN \''.$start.'\' AND \''.$end.'\'' => array(1, 1)
+                ),
+                'order'  => array (
+                    'id DESC'
+                ),
+                'paging' => $this->posts_per_page,
+                'page'   => 1,
+                'eager'  => array(
+                    'comments' => array(
+                        'eager' => array(
+                            'commentinfo'
+                        )
+                    ),
+                    'tags',
+                    'postinfo'
+                ),
+            )
+        );
+        Foresmo::dateFilter($results);
+        Foresmo::sanitize($results);
+        return $results;
+    }
+
+    /**
+     * getPublishedPostsByPage
      * get all posts with status of 1 (published) and page, with all
      * pertitent associated data (tags, comments, postinfo) as an array
      *
      * @return array
      */
-    public function getAllPublishedPostsByPage($page_num)
+    public function getPublishedPostsByPage($page_num)
     {
         $page_num = (int) $page_num;
         $results = $this->fetchArray(

@@ -70,7 +70,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         if (empty($posts) && !empty($this->_info)) {
             $this->_view = 'notfound';
         } elseif (empty($posts) && empty($this->_info)) {
-            $posts = $this->_model->posts->getAllPublishedPosts();
+            $posts = $this->_model->posts->getPublishedPosts();
         }
         $this->posts = $posts;
     }
@@ -90,7 +90,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             $this->_redirect('/');
         }
 
-        $this->posts = $this->_model->posts->getAllPublishedPostsByPage($page);
+        $this->posts = $this->_model->posts->getPublishedPostsByPage($page);
         if (empty($this->posts)) {
             $this->_view = 'notfound';
         } else {

@@ -361,6 +361,44 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             'enabled' => 1,
         );
         $adapter->insert($table, $data);
+        $data = array(
+            'name' => 'Tags',
+            'enabled' => 1,
+        );
+        $adapter->insert($table, $data);
+        $data = array(
+            'name' => 'Links',
+            'enabled' => 1,
+        );
+        $adapter->insert($table, $data);
+        $data = array(
+            'name' => 'Archives',
+            'enabled' => 1,
+        );
+        $adapter->insert($table, $data);
+        $data = array(
+            'name' => 'Flickr',
+            'enabled' => 0,
+        );
+        $adapter->insert($table, $data);
+        $data = array(
+            'name' => 'Twitter',
+            'enabled' => 0,
+        );
+        $adapter->insert($table, $data);
+        $data = array(
+            'name' => 'Sections',
+            'enabled' => 0,
+        );
+        $adapter->insert($table, $data);
+        $table = $post_data['db_prefix'] . 'modules_info';
+        $data = array(
+            'module_id' => 3,
+            'name' => 'start_of_week',
+            'type' => 0,
+            'value' => 0,
+        );
+        $adapter->insert($table, $data);
         return 'Foresmo installed! Click <a href="/">here</a> to check it out! Also, don\'t forget to change the permissions of the config back to read only.';
     }
 

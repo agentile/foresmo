@@ -36,7 +36,7 @@ class Foresmo_Modules_Pages extends Solar_Base {
      */
     public function start()
     {
-        $pages = $this->_model->posts->getAllPublishedPages();
+        $pages = $this->_model->posts->getPublishedPages();
         $this->_view->assign('pages', $pages);
 
         $this->output = $this->_view->fetch($this->_view_file);

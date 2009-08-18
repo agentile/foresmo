@@ -24,4 +24,5 @@ class Foresmo_Model_ModuleInfo extends Solar_Sql_Model {
         $this->_table_name = Solar_Config::get($adapter, 'prefix') . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
     }
+
 }
