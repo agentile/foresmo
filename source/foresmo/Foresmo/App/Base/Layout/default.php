@@ -21,8 +21,8 @@
             </div>
             <div id="content-right">
                 <?php
-                    foreach($this->enabled_modules as $module) {
-                        echo $module->output;
+                    foreach($this->enabled_modules_data as $module) {
+                        echo $module['output'];
                     }
                 ?>
             </div>

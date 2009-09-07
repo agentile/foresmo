@@ -31,13 +31,39 @@ class Foresmo_Modules_Calendar extends Solar_Base {
     }
 
     /**
+     * request
+     * module request
+     *
+     * @param array $data
+     * @return void
+     */
+    public function request($data)
+    {
+        $month = (isset($data['PARAMS'][0])) ? (int) $data['PARAMS'][0] : null;
+        $year = (isset($data['PARAMS'][1])) ? (int) $data['PARAMS'][1] : null;
+        if ($month < 1 || $month > 12) {
+            $month = null;
+        }
+        $this->start($month, $year);
+    }
+
+    /**
      * start
      * Begin Module Work
      *
      * @return void
      */
-    public function start()
+    public function start($month = null, $year = null)
     {
+        $current_time_info = getdate();
+        if (is_null($month) || !is_int($month)) {
+            $month = $current_time_info['mon'];
+        }
+
+        if (is_null($year) || !is_int($year)) {
+            $year = $current_time_info['year'];
+        }
+
         $start_day = 0;
 
         if (isset($this->_module_info[0]['moduleinfo'])) {
@@ -72,8 +98,8 @@ class Foresmo_Modules_Calendar extends Solar_Base {
             11 => array('full' => 'November', 'short' => 'Nov'),
             12 => array('full' => 'December', 'short' => 'Dec'),
         );
-        $this->_view->assign('calendar', $this->getCalendar());
-        $this->_view->assign('start_day', 3);
+        $this->_view->assign('calendar', $this->getCalendar($month, $year));
+        $this->_view->assign('start_day', $start_day);
         $this->_view->assign('days_of_week', $days_of_week);
         $this->_view->assign('months_of_year', $months_of_year);
         $this->_view->assign('posts', $this->posts);

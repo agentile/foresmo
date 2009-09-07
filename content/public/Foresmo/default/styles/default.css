@@ -283,12 +283,17 @@ hr
 
 .comment-author {
     float:left;
-    width:20px;
+    width:20%;
 }
 
 .comment-message {
+    float:left;
+    width:70%;
+}
+
+.comment-link {
     float:right;
-    width:80%;
+    width:10%;
 }
 
 .comment a

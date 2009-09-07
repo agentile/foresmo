@@ -5,7 +5,7 @@
  *
  * @category  App
  * @package   Foresmo
- * @author    Anthony Gentile, Bryden Tweedy
+ * @author    Anthony Gentile
  * @version   0.09
  * @since     0.05
  */
@@ -17,6 +17,29 @@ class Foresmo_App_Base extends Solar_App_Base {
     protected $_modules;
     protected $_cache = null;
 
+    /**
+     * _restricted_names
+     *
+     * Disallowed slug values for post/pages
+     *
+     * @var array
+     * @access protected
+     */
+    protected $_restricted_names = array(
+        'admin',
+        'base',
+        'index',
+        'install',
+        'login',
+        'logout',
+        'module',
+        'page',
+        'tag',
+        'search',
+        'ajax',
+        'sort',
+    );
+
     public $session;
     public $connect = true;
     public $installed = false;
@@ -24,7 +47,7 @@ class Foresmo_App_Base extends Solar_App_Base {
     public $blog_title = 'Foresmo Blog';
     public $pages_count;
     public $web_root;
-    public $enabled_modules = array();
+    public $enabled_modules_data = array();
 
     /**
      * _setup
@@ -87,7 +110,7 @@ class Foresmo_App_Base extends Solar_App_Base {
             $this->_layout_default = $this->blog_theme;
             $this->_setToken();
             $this->_modules = Solar::factory('Foresmo_Modules', $this->_model);
-            $this->enabled_modules = $this->_modules->getEnabledModules();
+            $this->enabled_modules_data = $this->_modules->getEnabledModulesData();
         }
     }
 

@@ -5,7 +5,7 @@
  *
  * @category  App
  * @package   Foresmo
- * @author    Anthony Gentile, Bryden Tweedy
+ * @author    Anthony Gentile
  * @version   0.09
  * @since     0.05
  */
@@ -18,6 +18,16 @@ class Foresmo_App_Index extends Foresmo_App_Base {
     public $msg;
     public $posts = array();
     public $comments_disabled = false;
+
+    protected function _postRun()
+    {
+        parent::_postRun();
+        $this->session->setFlash('redirect', array(
+            'controller' => $this->_controller,
+            'action' => $this->_action,
+            'params' => $this->_info,
+        ));
+    }
 
     /**
      * actionIndex
@@ -72,6 +82,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         } elseif (empty($posts) && empty($this->_info)) {
             $posts = $this->_model->posts->getPublishedPosts();
         }
+
         $this->posts = $posts;
     }
 
@@ -115,6 +126,41 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         }
 
         $this->posts = $this->_model->posts->getPostsByTag($tags);
+        if (empty($this->posts)) {
+            $this->_view = 'notfound';
+        } else {
+            $this->_view = 'index';
+        }
+    }
+
+    /**
+     * actionSort
+     * Sort/Get posts by date (month, day, year)
+     * URL structure:
+     * /sort/04/2009
+     * /sort/04/11/2009
+     *
+     * @return void
+     *
+     * @access public
+     * @since  0.05
+     */
+    public function actionSort()
+    {
+        $params = func_get_args();
+        if (empty($params)) {
+            $this->_redirect('/');
+        }
+        $month = (isset($params[0])) ? $params[0] : null;
+        $year = (isset($params[1])) ? $params[1] : null;
+        $day = null;
+        // is this m/d/y format?
+        if (strlen($year) == 2) {
+            $day = $year;
+            $year = (isset($params[2])) ? $params[2] : null;
+        }
+
+        $this->posts = $this->_model->posts->getPublishedPostsByDate($year, $month, $day);
         if (empty($this->posts)) {
             $this->_view = 'notfound';
         } else {

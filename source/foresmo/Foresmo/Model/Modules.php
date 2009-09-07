@@ -30,6 +30,44 @@ class Foresmo_Model_Modules extends Solar_Sql_Model {
     }
 
     /**
+     * getEnablesModules
+     *
+     * get modules that are enabled
+     *
+     * @return array
+     */
+    public function getEnabledModules()
+    {
+        $where = array('enabled = ?' => 1);
+        $results = $this->fetchArray(
+            array(
+                'where' => $where,
+                'eager' => 'moduleinfo'
+            )
+        );
+        return $results;
+    }
+
+    /**
+     * isEnabled
+     *
+     * is module enabled?
+     *
+     * @param string $name module name
+     * @return bool
+     */
+    public function isEnabled($name)
+    {
+        $enabled_modules = $this->getEnabledModules();
+        foreach ($enabled_modules as $enabled_module) {
+            if (strtolower($enabled_module['name']) == strtolower($name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * getModuleInfoByName
      *
      * get Module Info Rows by Module Name

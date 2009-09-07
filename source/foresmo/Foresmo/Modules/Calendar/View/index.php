@@ -32,9 +32,9 @@
         } else {
             $year = $this->calendar['year'];
         }
-            echo '<td abbr="'.$this->months_of_year[$prev]['short'].'" colspan="3" id="prev"><a href="/#" title="View posts for '.$this->months_of_year[$prev]['full'].' '.$year.'">&laquo; '.$this->months_of_year[$prev]['short'].'</a></td>';
+            echo '<td abbr="'.$this->months_of_year[$prev]['short'].'" colspan="3" id="prev"><a href="/module/calendar/'.$prev.'/'.$year.'" title="View posts for '.$this->months_of_year[$prev]['full'].' '.$year.'">&laquo; '.$this->months_of_year[$prev]['short'].'</a></td>';
             echo '<td class="pad">&nbsp;</td>';
-            echo '<td abbr="'.$this->months_of_year[$next]['short'].'" colspan="3" id="next"><a href="/#" title="View posts for '.$this->months_of_year[$next]['full'].' '.$year.'">'.$this->months_of_year[$next]['short'].' &raquo;</a></td>';
+            echo '<td abbr="'.$this->months_of_year[$next]['short'].'" colspan="3" id="next"><a href="/module/calendar/'.$next.'/'.$year.'" title="View posts for '.$this->months_of_year[$next]['full'].' '.$year.'">'.$this->months_of_year[$next]['short'].' &raquo;</a></td>';
         ?>
     </tr>
     </tfoot>
@@ -42,6 +42,17 @@
 
     <tbody>
     <?php
+        $calendar_posts = array();
+        foreach ($this->posts as $post) {
+            if (isset($post['pubdate_ts'])) {
+                $date = explode('/', date('n/j/Y', $post['pubdate_ts']));
+                $m = $date[0];
+                $d = $date[1];
+                $y = $date[2];
+                $calendar_posts[$m][$d][$y] = true;
+            }
+        }
+
         $col_count = 0;
         for ($i = 1; $i <= $this->calendar['last_day']; $i++) {
             if ($col_count == 0) {
@@ -52,22 +63,27 @@
             } else {
                 $str = '';
             }
+            if (isset($calendar_posts[$this->calendar['month']][$i][$this->calendar['year']])) {
+                $day = '<a href="/sort/'.$this->calendar['month'].'/'.$i.'/'.$this->calendar['year'].'">' . $i . '</a>';
+            } else {
+                $day = $i;
+            }
             if ($i == 1) {
                 $pad =  abs($this->start_day - $this->calendar['first_day']);
                 $col_count += $pad;
                 if ($pad > 0) {
                     echo '<td colspan="' . $pad . '" class="pad">&nbsp;</td>';
                 }
-                echo '<td' . $str . '>' . $i . '</td>';
+                echo '<td' . $str . '>' . $day . '</td>';
             } elseif ($i == $this->calendar['last_day']) {
-                echo '<td' . $str . '>' . $i . '</td>';
+                echo '<td' . $str . '>' . $day . '</td>';
                 $pad = 6 - $col_count;
                 if ($pad > 0) {
                     echo '<td colspan="' . $pad . '" class="pad">&nbsp;</td>';
                 }
                 $col_count = 6;
             } else {
-                echo '<td' . $str . '>' . $i . '</td>';
+                echo '<td' . $str . '>' . $day . '</td>';
             }
             ++$col_count;
             if ($col_count == 7) {

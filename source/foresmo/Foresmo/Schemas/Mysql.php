@@ -7,7 +7,7 @@ CREATE TABLE  [prefix]users (
   email VARCHAR(255) NOT NULL,
   password VARCHAR(255) NOT NULL,
   PRIMARY KEY (id),
-  KEY group_ip(group_id),
+  KEY group_id(group_id),
   UNIQUE KEY username (username)
 ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 

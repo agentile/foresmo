@@ -24,18 +24,12 @@ class Foresmo_Modules extends Solar_Base {
      *
      * @return array
      */
-    public function getEnabledModules()
+    public function getEnabledModulesData()
     {
-        $where = array('enabled = ?' => 1);
-        $results = $this->_model->modules->fetchAll(
-            array(
-                'where' => $where,
-                'eager' => 'moduleinfo'
-            )
-        );
+        $results = $this->_model->modules->getEnabledModules();
 
         foreach ($results as $key => $result) {
-            $results[$key]->output = $this->getModuleData($result->name);
+            $results[$key]['output'] = $this->getModuleData($result['name']);
         }
         return $results;
     }
@@ -43,7 +37,7 @@ class Foresmo_Modules extends Solar_Base {
     /**
      * getModuleData
      *
-     * @param $name
+     * @param string $name
      * @return string
      */
     public function getModuleData($name)
@@ -51,5 +45,61 @@ class Foresmo_Modules extends Solar_Base {
         $module = Solar::factory("Foresmo_Modules_{$name}", $this->_model);
         $module->start();
         return $module->output;
+    }
+
+    /**
+     * processRequest
+     *
+     * handle module request, and return output
+     *
+     * @param string $name module name
+     * @param array $data request data: POST, GET, PARAMS(from url)
+     *
+     * @return mixed;
+     */
+    public function processRequest($name, $data)
+    {
+        $module = Solar::factory("Foresmo_Modules_{$name}", $this->_model);
+        if (method_exists($module, 'request')) {
+            try {
+                $module->request($data);
+                if (isset($module->output)) {
+                    return $module->output;
+                } else {
+                    return null;
+                }
+            } catch (Exception $e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * processAjaxRequest
+     *
+     * handle module ajax request, and return output
+     *
+     * @param string $name module name
+     * @param array $data request data: POST, GET, PARAMS(from url)
+     *
+     * @return mixed;
+     */
+    public function processAjaxRequest($name, $data)
+    {
+        $module = Solar::factory("Foresmo_Modules_{$name}", $this->_model);
+        if (method_exists($module, 'ajaxRequest')) {
+            try {
+                $module->ajaxRequest($data);
+                if (isset($module->output)) {
+                    return $module->output;
+                } else {
+                    return null;
+                }
+            } catch (Exception $e) {
+                return null;
+            }
+        }
+        return null;
     }
 }

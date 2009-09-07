@@ -5,7 +5,7 @@
  *
  * @category  App
  * @package   Foresmo
- * @author    Anthony Gentile, Bryden Tweedy
+ * @author    Anthony Gentile
  * @version   0.09
  * @since     0.05
  */
@@ -93,6 +93,10 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         if (!isset($post_data['post_content']) || $this->validate('validateBlank', $post_data['post_title'])) {
             $errors[] = 'Content cannot be blank.';
         }
+        $post_data['post_slug'] = Foresmo::makeSlug($post_data['post_title']);
+        if (in_array(strtolower($post_data['post_slug'])), $this->_restricted_names) {
+            $errors[] = 'The slug for this post/page "'.$post_data['post_slug'].'" is restricted. Please choose a different slug/title';
+        }
         if (count($errors) > 0) {
             $message = implode('<br/>', $errors);
             $ret = array(
@@ -100,7 +104,6 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
                 'message' => $message,
             );
         } else {
-            $post_data['post_slug'] = Foresmo::makeSlug($post_data['post_title']);
             $last_insert_id = $this->_model->posts->newPost($post_data);
             if (!$this->validate('validateBlank', $post_data['post_tags'])) {
                 $tags = explode(',', rtrim(trim($post_data['post_tags']), ','));

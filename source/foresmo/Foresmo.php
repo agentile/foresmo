@@ -77,6 +77,9 @@ class Foresmo extends Solar_Base {
             }
             if ($k === 'date' || $k === 'pubdate' || $k === 'modified') {
                 $fetched_time = (int) $v;
+                if ($k === 'pubdate') {
+                    $posts['pubdate_ts'] = $fetched_time;
+                }
                 $timezone = explode(':', self::$timezone);
                 if ($timezone[0][0] == '-') {
                     $first = substr($timezone[0], 1);

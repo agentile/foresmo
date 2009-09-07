@@ -58,6 +58,9 @@ foreach($this->posts['comments'] as $key => $comment){
     echo "<span style=\"font-size:0.6em;\">{$comment['date']}</span><br/>";
     echo "<span style=\"font-size:0.9em;\">".$comment['content']."</span><br />";
     echo "</div>";
+    echo "<div class=\"comment-link\">";
+    echo "<a href=\"/".$this->posts['slug']."#comment-".$comment['id']."\">link</a>";
+    echo "</div>";
     echo "</div>";
 }
 ?>

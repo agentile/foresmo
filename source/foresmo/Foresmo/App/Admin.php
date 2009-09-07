@@ -5,7 +5,7 @@
  *
  * @category  App
  * @package   Foresmo
- * @author    Anthony Gentile, Bryden Tweedy
+ * @author    Anthony Gentile
  * @version   0.09
  * @since     0.05
  */
