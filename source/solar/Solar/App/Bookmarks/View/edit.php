@@ -13,7 +13,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: edit.php 3015 2008-03-18 04:12:42Z pmjones $
+ * @version $Id: edit.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 ?>
@@ -35,7 +35,3 @@
                   'delete' => array('attribs' => $attribs)
               ))
               ->fetch();
-    
-    // javascript highlight effects
-    $this->jsHighlight("#form-bookmark ul.success");
-    $this->jsHighlight("#form-bookmark ul.failure");

@@ -30,7 +30,7 @@ class Foresmo extends Solar_Base {
                 'blog_timezone'
             )
         );
-        $results = $options->fetchArray(array('where' => $where));
+        $results = $options->fetchAllAsArray(array('where' => $where));
         foreach ($results as $result) {
             if ($result['name'] == 'blog_timezone') {
                 $arr['blog_timezone'] = $result['value'];

@@ -13,7 +13,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Bookmarks.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Bookmarks.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_App_Bookmarks extends Solar_App_Base
@@ -309,7 +309,7 @@ class Solar_App_Bookmarks extends Solar_App_Base
         }
         
         // assign data for the view, and done
-        $this->formdata = $item->form($cols);
+        $this->formdata = $item->newForm($cols);
         $this->backlink = $href;
     }
     
@@ -418,11 +418,11 @@ class Solar_App_Bookmarks extends Solar_App_Base
         // 
         
         // get the form
-        $form = $item->form($cols);
+        $form = $item->newForm($cols);
         
         // was this from a quickmark or an "add" process request?
         if ($this->_session->getFlash('success_added')) {
-            $form->setStatus(true);
+            $form->setStatus(Solar_Form::STATUS_SUCCESS);
             $form->feedback = $this->locale('SUCCESS_ADDED');
         }
         
@@ -494,7 +494,7 @@ class Solar_App_Bookmarks extends Solar_App_Base
         }
         
         // assign data for the view, and done
-        $this->formdata = $item->form($cols);
+        $this->formdata = $item->newForm($cols);
         $this->backlink = $uri;
     }
     

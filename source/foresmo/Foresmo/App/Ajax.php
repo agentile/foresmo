@@ -450,7 +450,17 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
     'sql'           => 'Solar_Sql',
     'user'          => 'Solar_User',
     'model_catalog' => 'Solar_Sql_Model_Catalog',
+    'model_cache'   => array(
+        // which adapter class to use
+        'adapter' => 'Solar_Cache_Adapter_File',
+        // where the cache files will be stored
+        'path' => '/tmp/Solar_Cache/',
+        // the cache entry lifetime in seconds
+        'life' => 1800,
+    ),
 );
+
+\$config['Solar_Sql_Model']['cache'] = 'model_cache';
 
 \$config['Solar_Sql_Model_Catalog']['classes'] = array('Foresmo_Model');
 

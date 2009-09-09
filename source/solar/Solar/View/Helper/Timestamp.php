@@ -33,7 +33,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Timestamp.php 3858 2009-06-25 22:57:34Z pmjones $
+ * @version $Id: Timestamp.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_View_Helper_Timestamp extends Solar_View_Helper
@@ -98,14 +98,14 @@ class Solar_View_Helper_Timestamp extends Solar_View_Helper
     
     /**
      * 
-     * Constructor.
+     * Post-construction tasks to complete object construction.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _postConstruct()
     {
-        parent::__construct($config);
+        parent::_postConstruct();
         
         // set the origin timezone
         $this->_tz_origin = $this->_config['tz_origin'];

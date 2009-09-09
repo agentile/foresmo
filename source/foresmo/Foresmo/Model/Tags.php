@@ -43,7 +43,7 @@ class Foresmo_Model_Tags extends Solar_Sql_Model {
      */
     public function getTags()
     {
-        $results = $this->fetchArray(
+        $results = $this->fetchAllAsArray(
             array(
                 'order'  => array (
                     'tag ASC'

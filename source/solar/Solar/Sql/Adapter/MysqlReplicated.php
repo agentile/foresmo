@@ -16,7 +16,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: MysqlReplicated.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: MysqlReplicated.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_Sql_Adapter_MysqlReplicated extends Solar_Sql_Adapter_Mysql
@@ -93,7 +93,7 @@ class Solar_Sql_Adapter_MysqlReplicated extends Solar_Sql_Adapter_Mysql
      * @var array
      * 
      */
-    protected $_slaves;
+    protected $_slaves = array();
     
     /**
      * 

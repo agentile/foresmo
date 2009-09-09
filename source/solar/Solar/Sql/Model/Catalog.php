@@ -10,9 +10,11 @@
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
+ * @author Jeff Moore <jeff@procata.com>
+ * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id$
+ * @version $Id: Catalog.php 3995 2009-09-08 18:49:24Z pmjones $
  * 
  */
 class Solar_Sql_Model_Catalog extends Solar_Base
@@ -69,14 +71,14 @@ class Solar_Sql_Model_Catalog extends Solar_Base
     
     /**
      * 
-     * Constructor.
+     * Post-construction tasks to complete object construction.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _postConstruct()
     {
-        parent::__construct($config);
+        parent::_postConstruct();
         
         // inflection dependency
         $this->_inflect = Solar::dependency(

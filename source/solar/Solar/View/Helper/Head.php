@@ -13,7 +13,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Head.php 3401 2008-09-17 00:26:49Z pmjones $
+ * @version $Id: Head.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_View_Helper_Head extends Solar_View_Helper
@@ -149,6 +149,48 @@ class Solar_View_Helper_Head extends Solar_View_Helper
     {
         $this->_title = $title;
         return $this;
+    }
+    
+    /**
+     * 
+     * Appends to the end of the current <title> string.
+     * 
+     * @param string $text The string to be appended to the title.
+     * 
+     * @return Solar_View_Helper_Head
+     * 
+     */
+    public function addTitle($text)
+    {
+        $this->_title .= $text;
+        return $this;
+    }
+    
+    /**
+     * 
+     * Prepends to the beginning of the current <title> string.
+     * 
+     * @param string $text The string to be appended to the title.
+     * 
+     * @return Solar_View_Helper_Head
+     * 
+     */
+    public function preTitle($text)
+    {
+        $this->_title = $text . $this->_title;
+        return $this;
+    }
+    
+    /**
+     * 
+     * Returns the current title string.
+     * 
+     * @return string The current title string.
+     * 
+     */
+    public function getTitle()
+    {
+        return $this->_title;
     }
     
     /**

@@ -39,7 +39,7 @@ class Foresmo_Model_Modules extends Solar_Sql_Model {
     public function getEnabledModules()
     {
         $where = array('enabled = ?' => 1);
-        $results = $this->fetchArray(
+        $results = $this->fetchAllAsArray(
             array(
                 'where' => $where,
                 'eager' => 'moduleinfo'
@@ -77,7 +77,7 @@ class Foresmo_Model_Modules extends Solar_Sql_Model {
      */
     public function getModuleInfoByName($name)
     {
-        $results = $this->fetchArray(
+        $results = $this->fetchAllAsArray(
             array(
                 'where' => array(
                     'name = ?' => array($name),

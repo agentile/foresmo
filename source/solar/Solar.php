@@ -10,7 +10,7 @@
  * 
  * @author Paul M. Jones <pmjones@solarphp.net>
  * 
- * @version $Id: Solar.php 3858 2009-06-25 22:57:34Z pmjones $
+ * @version $Id: Solar.php 3991 2009-09-08 01:01:43Z pmjones $
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
@@ -364,12 +364,6 @@ class Solar
         if ($obj instanceof Solar_Factory) {
             // return an instance from the object factory
             return $obj->factory();
-        }
-        
-        // "the old way" so we can ease transition to "the new way"
-        if (method_exists($obj, 'solarFactory')) {
-            // return an instance from the object factory
-            return $obj->solarFactory();
         }
         
         // return the object itself

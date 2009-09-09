@@ -14,7 +14,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Form.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Form.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_View_Helper_Form extends Solar_View_Helper
@@ -25,19 +25,35 @@ class Solar_View_Helper_Form extends Solar_View_Helper
      * 
      * @config array attribs Default attributes to use in the <form> tag.
      * 
-     * @config string descr_elem The tag to use for description elements.
+     * @config array request A Solar_Request dependency injection.
      * 
-     * @config string descr_tag Put description inside this tag.
+     * @config string descr_part Where to place descriptions (in the 'label'
+     * or the 'value').
      * 
-     * @config string descr_class Use this CSS class for descriptions.
+     * @config array decorators Use these decorators around form parts.
+     * 
+     * @config array css_classes Use these CSS classes for form elements.
+     * 
+     * @config string label_suffix Attach this suffix to all labels.
      * 
      * @var array
+     * 
+     * @see setDecorators()
+     * 
+     * @see setCssClasses()
+     * 
+     * @see setDescrPart()
+     * 
+     * @see setLabelSuffix()
+     * 
      */
     protected $_Solar_View_Helper_Form = array(
-        'attribs' => array(),
-        'descr_elem' => 'dd',
-        'descr_tag' => 'div',
-        'descr_class' => 'descr',
+        'attribs'      => array(),
+        'request'      => 'request',
+        'descr_part'   => 'value',
+        'decorators'   => array(),
+        'css_classes'  => array(),
+        'label_suffix' => null,
     );
     
     /**
@@ -113,6 +129,8 @@ class Solar_View_Helper_Form extends Solar_View_Helper
         'failure'   => 'failure',
         'success'   => 'success',
         'require'   => 'require',
+        'invalid'   => 'invalid',
+        'descr'     => 'descr',
     );
     
     /**
@@ -169,37 +187,6 @@ class Solar_View_Helper_Form extends Solar_View_Helper
     
     /**
      * 
-     * When the raw description XHTML is rendered, do so within this type of
-     * tag block (default is 'div' for a `<div>...</div>` tag block.)
-     * 
-     * @var string
-     * 
-     */
-    protected $_descr_tag = 'div';
-    
-    /**
-     * 
-     * Use this class attribute when rendering the raw descripton XHTML.
-     * Default is 'descr'; e.g., `<div class="descr">...</div>`.
-     * 
-     * @var string
-     * 
-     */
-    protected $_descr_class = 'descr';
-    
-    /**
-     * 
-     * When rendering the raw description XHTML, do so within this structural
-     * element; default is 'dd' for the value portion (as vs 'dl' for the
-     * label portion).
-     * 
-     * @var string
-     * 
-     */
-    protected $_descr_elem = 'dd';
-    
-    /**
-     * 
      * When building the form, are we currently in an element list?
      * 
      * @var bool
@@ -236,21 +223,58 @@ class Solar_View_Helper_Form extends Solar_View_Helper
     
     /**
      * 
-     * Constructor.
+     * Add this suffix to all labels.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @var string
      * 
      */
-    public function __construct($config = null)
+    protected $_label_suffix = null;
+    
+    /**
+     * 
+     * Which form part the element description goes in: 'label' or 'value'.
+     * 
+     * @var string
+     * 
+     */
+    protected $_descr_part = 'value';
+    
+    /**
+     * 
+     * When building XHTML for each of these parts of the form, decorate it
+     * with the noted tag.
+     * 
+     * @var array
+     * 
+     */
+    protected $_decorator = array(
+        'list'  => 'dl',
+        'elem'  => null,
+        'label' => 'dt',
+        'value' => 'dd',
+        'descr' => 'div',
+    );
+    
+    /**
+     * 
+     * Post-construction tasks to complete object construction.
+     * 
+     * @return void
+     * 
+     */
+    public function _postConstruct()
     {
-        // "real" construction
-        parent::__construct($config);
+        parent::_postConstruct();
         
         // get the current request environment
-        $this->_request = Solar_Registry::get('request');
+        $this->_request = Solar::dependency(
+            'Solar_Request',
+            $this->_config['request']
+        );
         
         // make sure we have a default action
-        $this->_default_attribs['action'] = $this->_request->server('REQUEST_URI');
+        $action = $this->_request->server('REQUEST_URI');
+        $this->_default_attribs['action'] = $action;
         
         // reset the form propertes
         $this->reset();
@@ -682,15 +706,7 @@ class Solar_View_Helper_Form extends Solar_View_Helper
             $this->_buildBegin($html);
         }
         
-        // form-level feedback
-        $this->_buildFeedback($html);
-        
-        // the hidden elements
-        if ($this->_hidden) {
-            $this->_buildHidden($html);
-        }
-        
-        // the stack of non-hidden elements
+        // all feedback, hidden, element, etc
         $this->_buildStack($html);
         
         // the closing form tag?
@@ -715,21 +731,25 @@ class Solar_View_Helper_Form extends Solar_View_Helper
     public function reset()
     {
         // attributes for the <form> tag
-        $this->_attribs = array_merge(
+        $this->setAttribs(array_merge(
             $this->_default_attribs,
             $this->_config['attribs']
-        );
+        ));
         
-        // form-element descriptions
-        $this->_descr_elem = $this->_config['descr_elem'];
-        $this->_descr_tag = $this->_config['descr_tag'];
-        $this->_descr_class = $this->_config['descr_class'];
+        // where does the descr go?
+        $this->setDescrPart($this->_config['descr_part']);
         
-        // make sure we force the description to be in either the <dt>
-        // element or the <dd> portion
-        if ($this->_descr_elem != 'dt') {
-            $this->_descr_elem = 'dd';
-        }
+        // custom CSS classes
+        $this->setCssClasses($this->_config['css_classes']);
+        
+        // default decorators ...
+        $this->decorateAsDlList();
+        
+        // ... then custom decorators
+        $this->setDecorators($this->_config['decorators']);
+        
+        // label suffix
+        $this->setLabelSuffix($this->_config['label_suffix']);
         
         // build-tracking properties
         $this->_in_elemlist = false;
@@ -954,6 +974,7 @@ class Solar_View_Helper_Form extends Solar_View_Helper
         
         $html[] = $this->_indent(1, "</ul>");
     }
+    
     /**
      * 
      * Builds the stack of hidden elements for output.
@@ -984,6 +1005,14 @@ class Solar_View_Helper_Form extends Solar_View_Helper
      */
     protected function _buildStack(&$html)
     {
+        // form-level feedback
+        $this->_buildFeedback($html);
+        
+        // the hidden elements
+        if ($this->_hidden) {
+            $this->_buildHidden($html);
+        }
+        
         $this->_in_fieldset = false;
         $this->_in_group    = false;
         $this->_in_elemlist  = false;
@@ -1020,8 +1049,50 @@ class Solar_View_Helper_Form extends Solar_View_Helper
     protected function _buildElement(&$html, $info)
     {
         $this->_buildElementListBegin($html);
+        $this->_buildElementBegin($html);
         $this->_buildElementLabel($html, $info);
         $this->_buildElementValue($html, $info);
+        $this->_buildElementEnd($html);
+    }
+    
+    /**
+     * 
+     * Builds the beginning decorator of an element.
+     * 
+     * @param array &$html A reference to the array of HTML lines for output.
+     * 
+     * @return void
+     * 
+     */
+    protected function _buildElementBegin(&$html)
+    {
+        if ($this->_in_group) {
+            return;
+        }
+        
+        if ($this->_decorator['elem']) {
+            $html[] = $this->_indent(1, "<{$this->_decorator['elem']}>");
+        }
+    }
+    
+    /**
+     * 
+     * Builds the ending decorator of an element.
+     * 
+     * @param array &$html A reference to the array of HTML lines for output.
+     * 
+     * @return void
+     * 
+     */
+    protected function _buildElementEnd(&$html)
+    {
+        if ($this->_in_group) {
+            return;
+        }
+        
+        if ($this->_decorator['elem']) {
+            $html[] = $this->_indent(1, "</{$this->_decorator['elem']}>");
+        }
     }
     
     /**
@@ -1035,11 +1106,37 @@ class Solar_View_Helper_Form extends Solar_View_Helper
      */
     protected function _buildElementLabelInfo(&$info)
     {
+        $attribs = array(
+            'for'   => null,
+            'class' => array(),
+        );
+        
+        // does the element have an ID?
+        if (! empty($info['attribs']['id'])) {
+            $attribs['for'] = $info['attribs']['id'];
+        }
+        
+        // is the element required?
+        if ($info['require']) {
+            $attribs['class'][] = $this->_css_class['require'];
+        }
+        
+        // is the element invalid?
+        if ($info['invalid']) {
+            $attribs['class'][] = $this->_css_class['invalid'];
+        }
+        
         // checkboxes that are not in groups should not be ID'd to their label
         if (strtolower($info['type']) == 'checkbox' && ! $this->_in_group) {
             // don't unset or we get notices; null is good enough
-            $info['attribs']['id'] = null;
+            $attribs['for'] = null;
         }
+        
+        // reset attribs
+        $info['attribs'] = $attribs;
+        
+        // add the label suffix
+        $info['label'] .= $this->_label_suffix;
     }
     
     /**
@@ -1060,38 +1157,37 @@ class Solar_View_Helper_Form extends Solar_View_Helper
             return;
         }
         
+        // open the label decorator
+        if ($this->_decorator['label']) {
+            $attribs = array('class' => array());
+            if ($info['require']) {
+                $attribs['class'][] = 'require';
+            }
+            if ($info['invalid']) {
+                $attribs['class'][] = 'invalid';
+            }
+            $decorator = '<'
+                       . $this->_decorator['label']
+                       . $this->_view->attribs($attribs)
+                       . '>';
+            $html[] = $this->_indent(2, $decorator);
+        }
+        
         // modify information **just for the label portion**
         $this->_buildElementLabelInfo($info);
         
-        // the label text
-        $label = $this->_view->getText($info['label']);
+        $label = $this->_view->formLabel($info);
+        $html[] = $this->_indent(3, $label);
         
-        // does the element have an ID?
-        $id = $this->_view->escape($info['attribs']['id']);
-        if ($id) {
-            $for = " for=\"$id\"";
-        } else {
-            $for = '';
-        }
-        
-        // is the element required?
-        if ($info['require']) {
-            $require = ' class="' . $this->_css_class['require'] . '"';
-        } else {
-            $require = '';
-        }
-            
-        // open the label
-        $html[] = $this->_indent(2, "<dt$require>");
-        $html[] = $this->_indent(3, "<label$require$for>$label</label>");
-        
-        // do descriptions go in the label?
-        if ($this->_descr_elem == 'dt') {
+        // do descriptions go in the label part?
+        if ($this->_descr_part == 'label') {
             $this->_buildElementDescr($html, $info);
         }
         
-        // close the label
-        $html[] = $this->_indent(2, "</dt>");
+        // close the label decorator
+        if ($this->_decorator['label']) {
+            $html[] = $this->_indent(2, "</{$this->_decorator['label']}>");
+        }
     }
     
     /**
@@ -1147,27 +1243,37 @@ class Solar_View_Helper_Form extends Solar_View_Helper
             return;
         }
         
-        // is the element required?
-        if ($info['require']) {
-            $require = ' class="' . $this->_css_class['require'] . '"';
-        } else {
-            $require = '';
+        // open the value decorator
+        if ($this->_decorator['value']) {
+            $attribs = array('class' => array());
+            if ($info['require']) {
+                $attribs['class'][] = 'require';
+            }
+            if ($info['invalid']) {
+                $attribs['class'][] = 'invalid';
+            }
+            $decorator = '<'
+                       . $this->_decorator['value']
+                       . $this->_view->attribs($attribs)
+                       . '>';
+            $html[] = $this->_indent(2, $decorator);
         }
         
-        // open the element value
-        $html[] = $this->_indent(2, "<dd$require>");
+        // add the element
         $html[] = $this->_indent(3, $element);
         
         // add invalid messages
         $this->_buildElementInvalid($html, $info);
         
         // add description
-        if ($this->_descr_elem == 'dd') {
+        if ($this->_descr_part == 'value') {
             $this->_buildElementDescr($html, $info);
         }
         
-        // close the value
-        $html[] = $this->_indent(2, "</dd>");
+        // close the decorator
+        if ($this->_decorator['value']) {
+            $html[] = $this->_indent(2, "</{$this->_decorator['value']}>");
+        }
     }
     
     /**
@@ -1186,15 +1292,8 @@ class Solar_View_Helper_Form extends Solar_View_Helper
         if (empty($info['invalid'])) {
             return;
         }
-        
-        $html[] = $this->_indent(3, '<ul>');
-        
-        foreach ((array) $info['invalid'] as $item) {
-            $item = '<li>' . $this->_view->escape($item) . '</li>';
-            $html[] = $this->_indent(4, $item);
-        }
-        
-        $html[] = $this->_indent(3, "</ul>");
+        $this->_view->getHelper('formInvalid')->setIndent(3);
+        $html[] = $this->_view->formInvalid($info);
     }
     
     /**
@@ -1217,18 +1316,18 @@ class Solar_View_Helper_Form extends Solar_View_Helper
         }
         
         // open the tag ...
-        $descr = "<" . $this->_view->escape($this->_descr_tag);
+        $descr = "<" . $this->_view->escape($this->_decorator['descr']);
         
         // ... add a CSS class ...
-        if ($this->_descr_class) {
+        if ($this->_css_class['descr']) {
             $descr .= ' class="'
-                   . $this->_view->escape($this->_descr_class)
+                   . $this->_view->escape($this->_css_class['descr'])
                    . '"';
         }
         
         // ... add the raw descr XHTML, and close the tag.
         $descr .= '>' . $info['descr']
-               . '</' . $this->_view->escape($this->_descr_tag) . '>';
+               . "</{$this->_decorator['descr']}>";
         
         $html[] = $this->_indent(3, $descr);
     }
@@ -1249,7 +1348,9 @@ class Solar_View_Helper_Form extends Solar_View_Helper
             return;
         }
         
-        $html[] = $this->_indent(1, '<dl>');
+        if ($this->_decorator['list']) {
+            $html[] = $this->_indent(1, "<{$this->_decorator['list']}>");
+        }
         $this->_in_elemlist = true;
     }
     
@@ -1269,7 +1370,9 @@ class Solar_View_Helper_Form extends Solar_View_Helper
             return;
         }
         
-        $html[] = $this->_indent(1, '</dl>');
+        if ($this->_decorator['list']) {
+            $html[] = $this->_indent(1, "</{$this->_decorator['list']}>");
+        }
         $this->_in_elemlist = false;
     }
     
@@ -1315,10 +1418,24 @@ class Solar_View_Helper_Form extends Solar_View_Helper
         }
         
         $this->_buildElementListBegin($html);
-        $html[] = $this->_indent(2, "<dt>");
-        $html[] = $this->_indent(3, "<label>$label</label>");
-        $html[] = $this->_indent(2, "</dt>");
-        $html[] = $this->_indent(2, "<dd>");
+        $this->_buildElementBegin($html);
+        
+        if ($this->_decorator['label']) {
+            $html[] = $this->_indent(2, "<{$this->_decorator['label']}>");
+        }
+        
+        
+        $label = $this->_view->formLabel(array('label' => $label));
+        $html[] = $this->_indent(3, $label);
+        
+        if ($this->_decorator['label']) {
+            $html[] = $this->_indent(2, "</{$this->_decorator['label']}>");
+        }
+        
+        if ($this->_decorator['value']) {
+            $html[] = $this->_indent(2, "<{$this->_decorator['value']}>");
+        }
+        
         $this->_group_invalid = null;
         $this->_in_group = true;
     }
@@ -1343,9 +1460,13 @@ class Solar_View_Helper_Form extends Solar_View_Helper
             $html[] = $this->_indent(3, $this->_group_invalid);
             $this->_group_invalid = null;
         }
+
+        if ($this->_decorator['value']) {
+            $html[] = $this->_indent(2, "</{$this->_decorator['value']}>");
+        }
         
-        $html[] = $this->_indent(2, "</dd>");
         $this->_in_group = false;
+        $this->_buildElementEnd($html);
     }
     
     /**
@@ -1440,5 +1561,170 @@ class Solar_View_Helper_Form extends Solar_View_Helper
         
         $this->_in_fieldset = false;
         $html[] = $this->_indent(1, "</fieldset>");
+    }
+    
+    /**
+     * 
+     * Use this suffix string on all labels; for example, ": ".
+     * 
+     * @param string $suffix The suffix string to use.
+     * 
+     * @return Solar_View_Helper_Form
+     * 
+     */
+    public function setLabelSuffix($suffix)
+    {
+        $this->_label_suffix = $suffix;
+        return $this;
+    }
+    
+    /**
+     * 
+     * When fetching output, render elements as part of an HTML table.
+     * 
+     * @return void
+     * 
+     */
+    public function decorateAsTable()
+    {
+        $this->setDecorators(array(
+            'list'  => 'table',
+            'elem'  => 'tr',
+            'label' => 'th',
+            'value' => 'td',
+        ));
+        
+        return $this;
+    }
+    
+    /**
+     * 
+     * When fetching output, render elements as part of an HTML definition list.
+     * 
+     * @return void
+     * 
+     */
+    public function decorateAsDlList()
+    {
+        $this->setDecorators(array(
+            'list'  => 'dl',
+            'elem'  => null,
+            'label' => 'dt',
+            'value' => 'dd',
+        ));
+        
+        return $this;
+    }
+    
+    /**
+     * 
+     * When fetching output, render elements without any surrounding decoration.
+     * 
+     * @return void
+     * 
+     */
+    public function decorateAsPlain()
+    {
+        $this->setDecorators(array(
+            'list'  => null,
+            'elem'  => null,
+            'label' => null,
+            'value' => null,
+        ));
+        
+        return $this;
+    }
+    
+    /**
+     * 
+     * Set the CSS class to use for particular element type.
+     * 
+     * @param string $type The tag type ('text', 'checkbox', 'button', etc).
+     * 
+     * @param string $class The CSS class to use for that element type.
+     * 
+     * @return Solar_View_Helper_Form
+     * 
+     */
+    public function setCssClass($type, $class)
+    {
+        $this->_css_class[$type] = $class;
+        return $this;
+    }
+    
+    /**
+     * 
+     * Set the CSS classes to use for various element types.
+     * 
+     * @param array $list An array of key-value pairs where the key is the
+     * element type and the value is the CSS class to use for it.
+     * 
+     * @return Solar_View_Helper_Form
+     * 
+     */
+    public function setCssClasses($list)
+    {
+        foreach ((array) $list as $type => $class) {
+            $this->setCssClass($type, $class);
+        }
+        return $this;
+    }
+    
+    /**
+     * 
+     * Set decoration tag to use for a particular form part.
+     * 
+     * @param string $part The form part to decorate (list, elem, label, or
+     * value).
+     *
+     * @param string $tag The tag to use for decoration; this will be used as
+     * both the opening and closing tag around the part.
+     * 
+     * @return Solar_View_Helper_Form
+     * 
+     */
+    public function setDecorator($part, $tag)
+    {
+        $this->_decorator[$part] = $tag;
+        return $this;
+    }
+    
+    /**
+     * 
+     * Sets the decoration tags to use for various form parts.
+     * 
+     * @param array $list An array of key-value pairs where the key is the
+     * form part, and the value is the tag to decorate that part with.
+     * 
+     * @return Solar_View_Helper_Form
+     * 
+     */
+    public function setDecorators($list)
+    {
+        foreach ((array) $list as $part => $tag) {
+            $this->setDecorator($part, $tag);
+        }
+        return $this;
+    }
+    
+    /**
+     * 
+     * Sets where the element description goes, 'label' or 'value'.
+     * 
+     * @param string $part Where to put element descriptions, in the 'label'
+     * part or the 'value' part.
+     * 
+     * @return Solar_View_Helper_Form
+     * 
+     */
+    public function setDescrPart($part)
+    {
+        // make sure we force the description to be in either the 'label'
+        // element or the 'value' portion
+        if ($part != 'label') {
+            $part = 'value';
+        }
+        $this->_descr_part = (string) $part;
+        return $this;
     }
 }

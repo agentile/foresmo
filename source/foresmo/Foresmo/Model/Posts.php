@@ -71,7 +71,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
      */
     public function getPageBySlug($slug_name)
     {
-        $results = $this->fetchArray(
+        $results = $this->fetchAllAsArray(
             array(
                 'where'  => array(
                     'status = ? AND slug = ? AND content_type = ?' => array(1, $slug_name, 2),
@@ -108,7 +108,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
      */
     public function getPostBySlug($slug_name)
     {
-        $results = $this->fetchArray(
+        $results = $this->fetchAllAsArray(
             array(
                 'where'  => array(
                     'status = ? AND slug = ? AND content_type = ?' => array(1, $slug_name, 1),
@@ -143,7 +143,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
      */
     public function getPublishedPosts()
     {
-        $results = $this->fetchArray(
+        $results = $this->fetchAllAsArray(
             array(
                 'where'  => array(
                     'status = ? AND content_type = ?' => array(1, 1)
@@ -178,7 +178,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
      */
     public function getPublishedPages()
     {
-        $results = $this->fetchArray(
+        $results = $this->fetchAllAsArray(
             array(
                 'where'  => array(
                     'status = ? AND content_type = ?' => array(1, 2)
@@ -273,7 +273,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
             $end = gmmktime(23, 59, 59, (int) $month, (int) $day, (int) $year);
 
         }
-        $results = $this->fetchArray(
+        $results = $this->fetchAllAsArray(
             array(
                 'where'  => array(
                     'status = ? AND content_type = ? AND pubdate BETWEEN \''.$start.'\' AND \''.$end.'\'' => array(1, 1)
@@ -309,7 +309,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     public function getPublishedPostsByPage($page_num)
     {
         $page_num = (int) $page_num;
-        $results = $this->fetchArray(
+        $results = $this->fetchAllAsArray(
             array(
                 'where'  => array(
                     'status = ? AND content_type = ?' => array(1, 1)
@@ -358,7 +358,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
             $where_stmt => $tags
         );
 
-        $results = $this->fetchArray(
+        $results = $this->fetchAllAsArray(
             array(
                 'where'  => array(
                     'status = ? AND content_type = ?' => array(1, 1)
@@ -445,7 +445,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
      */
     public function getTotalCount($type, $status)
     {
-        $result = $this->fetchArray(
+        $result = $this->fetchAllAsArray(
             array(
                 'cols' => array(
                     'COUNT(*) as count'

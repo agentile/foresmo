@@ -58,7 +58,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Select.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Select.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_Sql_Select extends Solar_Base
@@ -194,15 +194,14 @@ class Solar_Sql_Select extends Solar_Base
     
     /**
      * 
-     * Constructor.
+     * Post-construction tasks to complete object construction.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _postConstruct()
     {
-        // basic construction
-        parent::__construct($config);
+        parent::_postConstruct();
         
         // connect to the database with dependency injection
         $this->_sql = Solar::dependency('Solar_Sql', $this->_config['sql']);
@@ -359,11 +358,7 @@ class Solar_Sql_Select extends Solar_Base
      */
     public function fromSelect($spec, $name, $cols = '*')
     {
-        // the $spec may be a select object, or a string
-        if ($spec instanceof self) {
-            // get the select object as a string.
-            $spec = $spec->__toString();
-        }
+        $spec = $this->_prepareSubSelect($spec);
         
         // save in the sources list, overwriting previous values
         $this->_addSource(
@@ -401,6 +396,39 @@ class Solar_Sql_Select extends Solar_Base
     
     /**
      * 
+     * Adds multiple JOINs to the query.
+     * 
+     * @param array $list An array of joins, each with keys 'type' (inner, 
+     * left, etc), 'name' (the table name), 'cond' (ON conditions), and
+     * 'cols' (the columns to retrieve, if any).
+     * 
+     * @return Solar_Sql_Select
+     * 
+     */
+    public function multiJoin($list)
+    {
+        $base = array(
+            'type' => null,
+            'name' => null,
+            'cond' => null,
+            'cols' => null,
+        );
+        
+        foreach ($list as $join) {
+            $join = array_merge($base, (array) $join);
+            $this->_join(
+                $join['type'],
+                $join['name'],
+                $join['cond'],
+                $join['cols']
+            );
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * 
      * Adds a LEFT JOIN table and columns to the query.
      * 
      * @param string|object $spec If a Solar_Sql_Model object, the table
@@ -416,6 +444,30 @@ class Solar_Sql_Select extends Solar_Base
     public function leftJoin($spec, $cond, $cols = null)
     {
         $this->_join('LEFT', $spec, $cond, $cols);
+        return $this;
+    }
+    
+    /**
+     * 
+     * Adds a LEFT JOIN sub-select and columns to the query.
+     * 
+     * @param string|Solar_Sql_Select $spec If a Solar_Sql_Select
+     * object, use as the sub-select; if a string, the sub-select
+     * command string.
+     * 
+     * @param string $name The alias name for the sub-select.
+     * 
+     * @param string $cond Join on this condition.
+     * 
+     * @param array|string $cols The columns to select from the joined table.
+     * 
+     * @return Solar_Sql_Select
+     * 
+     */
+    public function leftJoinSelect($spec, $name, $cond, $cols = null)
+    {
+        $spec = $this->_prepareSubSelect($spec);
+        $this->_join('LEFT', "($spec) AS $name", $cond, $cols);
         return $this;
     }
     
@@ -437,6 +489,59 @@ class Solar_Sql_Select extends Solar_Base
     {
         $this->_join('INNER', $spec, $cond, $cols);
         return $this;
+    }
+    
+    /**
+     * 
+     * Adds an INNER JOIN sub-select and columns to the query.
+     * 
+     * @param string|Solar_Sql_Select $spec If a Solar_Sql_Select
+     * object, use as the sub-select; if a string, the sub-select
+     * command string.
+     * 
+     * @param string $name The alias name for the sub-select.
+     * 
+     * @param string $cond Join on this condition.
+     * 
+     * @param array|string $cols The columns to select from the joined table.
+     * 
+     * @return Solar_Sql_Select
+     * 
+     */
+    public function innerJoinSelect($spec, $name, $cond, $cols = null)
+    {
+        $spec = $this->_prepareSubSelect($spec);
+        $this->_join('INNER', "($spec) AS $name", $cond, $cols);
+        return $this;
+    }
+    
+    /**
+     * 
+     * Prepares a select statement for use as a sub-select; returns strings
+     * as they are, but converts Solar_Sql_Select objects to strings after
+     * merging bind values.
+     * 
+     * @param string|Solar_Sql_Select $spec The select to prepare as a 
+     * sub-select.
+     * 
+     * @return string
+     * 
+     */
+    protected function _prepareSubSelect($spec)
+    {
+        if ($spec instanceof self) {
+            // merge bound values, otherwise they won't follow through to
+            // the sub-select
+            if ($spec->_bind) {
+                $this->_bind = array_merge($this->_bind, $spec->_bind);
+            }
+        
+            // get the select object as a string.
+            return $spec->__toString();
+            
+        } else {
+            return $spec;
+        }
     }
     
     /**
@@ -463,7 +568,7 @@ class Solar_Sql_Select extends Solar_Base
      * 
      * @param string $cond The WHERE condition.
      * 
-     * @param string $val A single value to quote into the condition.
+     * @param string $val A value to quote into the condition.
      * 
      * @return Solar_Sql_Select
      * 
@@ -650,7 +755,7 @@ class Solar_Sql_Select extends Solar_Base
      * 
      * @param string $cond The HAVING condition.
      * 
-     * @param string $val A single value to quote into the condition.
+     * @param string $val A value to quote into the condition.
      * 
      * @return Solar_Sql_Select
      * 
@@ -685,7 +790,7 @@ class Solar_Sql_Select extends Solar_Base
      * 
      * @param string $cond The HAVING condition.
      * 
-     * @param string $val A single value to quote into the condition.
+     * @param string $val A value to quote into the condition.
      * 
      * @return Solar_Sql_Select
      * 
@@ -1017,7 +1122,7 @@ class Solar_Sql_Select extends Solar_Base
             $this->_bind = array_merge($this->_bind, $key);
         } elseif (is_object($key)) {
             $this->_bind = array_merge((array) $this->_bind, $key);
-        } else {
+        } elseif (! empty($key)) {
             $this->_bind[$key] = $val;
         }
         
@@ -1711,7 +1816,7 @@ class Solar_Sql_Select extends Solar_Base
      * object, the table to join to; if a string, the table name to
      * join to.
      * 
-     * @param string $cond Join on this condition.
+     * @param string|array $cond Condiiton(s) for the ON clause.
      * 
      * @param array|string $cols The columns to select from the
      * joined table.
@@ -1721,6 +1826,23 @@ class Solar_Sql_Select extends Solar_Base
      */
     protected function _join($type, $spec, $cond, $cols)
     {
+        // Add support for an array based $cond parameter
+        if (is_array($cond)) {
+            $on = array();
+            foreach ((array) $cond as $key => $val) {
+                if (is_int($key)) {
+                    // integer key means a literal condition
+                    // and no value to be quoted into it
+                    $on[] = $val;
+                } else {
+                    // string $key means the key is a condition,
+                    // and the $val should be quoted into it.
+                    $on[] = $this->quoteInto($key, $val);
+                }
+            }
+            $cond = implode($on, ' AND ');
+        }
+        
         // get the table name and columns from the specifcation
         list($name, $cols) = $this->_nameCols($spec, $cols);
         
@@ -1732,7 +1854,7 @@ class Solar_Sql_Select extends Solar_Base
             'join',
             $name['alias'],
             $name['orig'],
-            $type,
+            strtoupper($type),
             $cond,
             $cols
         );
@@ -1803,9 +1925,13 @@ class Solar_Sql_Select extends Solar_Base
             $cols = explode(',', $cols);
         }
         
-        settype($cols, 'array');
-        foreach ($cols as $key => $val) {
-            $cols[$key] = trim($val);
+        if ($cols) {
+            settype($cols, 'array');
+            foreach ($cols as $key => $val) {
+                $cols[$key] = trim($val);
+            }
+        } else {
+            $cols = array();
         }
         
         if ($type == 'cols') {
@@ -1848,8 +1974,8 @@ class Solar_Sql_Select extends Solar_Base
             $parts['from'][] = $this->_sql->quoteName($name);
         } else {
             $parts['from'][] = $this->_sql->quoteName($orig)
-                                    . ' '
-                                    . $this->_sql->quoteName($name);
+                             . ' '
+                             . $this->_sql->quoteName($name);
         }
     }
     

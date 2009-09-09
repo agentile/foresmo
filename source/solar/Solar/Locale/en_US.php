@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: en_US.php 3036 2008-03-22 15:11:46Z pmjones $
+ * @version $Id: en_US.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 return array(
@@ -20,6 +20,8 @@ return array(
     'FORMAT_LANGUAGE'            => 'English',
     'FORMAT_COUNTRY'             => 'United States',
     'FORMAT_CURRENCY'            => '$%s', // printf()
+    'FORMAT_DEC_POINT'           => '.', // number_format
+    'FORMAT_THOUSANDS_SEP'       => ',', // number_format
     'FORMAT_DATE'                => '%b %d, %Y', // strftime(): Mar 19, 2005
     'FORMAT_TIME'                => '%r', // strftime: 12-hour am/pm
     
@@ -46,6 +48,7 @@ return array(
     'ACTION_EDIT'                => 'Edit',
     'ACTION_ADD'                 => 'Add',
     'ACTION_DELETE'              => 'Delete',
+    'ACTION_SEARCH'              => 'Search',
     'ACTION_NOT_FOUND'           => 'Not Found',
     
     // exception error messages  

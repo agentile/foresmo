@@ -11,21 +11,19 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Anchor.php 3282 2008-07-30 14:57:27Z pmjones $
+ * @version $Id: Anchor.php 3898 2009-07-22 15:33:45Z pmjones $
  * 
  */
 class Solar_View_Helper_Anchor extends Solar_View_Helper
 {
     /**
      * 
-     * Returns an anchor tag or anchor href.
-     * 
-     * If the $text link text is empty, will return only the href
-     * value (no attributes) instead of an <a href="">...</a> tag.
+     * Returns an anchor tag.
      * 
      * @param Solar_Uri|string $spec The anchor href specification.
      * 
-     * @param string $text A locale translation key.
+     * @param string $text A locale translation key.  If empty, the
+     * href will be used as the anchor text
      * 
      * @param array $attribs Attributes for the anchor.
      * 
@@ -37,14 +35,21 @@ class Solar_View_Helper_Anchor extends Solar_View_Helper
         // get an escaped href value
         $href = $this->_view->href($spec);
         
-        if (empty($text)) {
-            return $href;
+        // using the string cast and strict equality to make sure that
+        // a string zero is not counted as an empty value.
+        if ((string) $text === '') {
+            // make sure text is something visible,
+            $text = $href;
         } else {
-            settype($attribs, 'array');
-            unset($attribs['href']);
             $text = $this->_view->getText($text);
-            $attr = $this->_view->attribs($attribs);
-            return "<a href=\"$href\"$attr>$text</a>";
-        }
+        }        
+
+        // build attribs, after dropping any 'href' attrib
+        settype($attribs, 'array');
+        unset($attribs['href']);
+        $attr = $this->_view->attribs($attribs);
+        
+        // build text and return
+        return "<a href=\"$href\"$attr>$text</a>";
     }
 }

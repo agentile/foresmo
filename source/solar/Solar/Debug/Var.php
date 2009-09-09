@@ -44,7 +44,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Var.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Var.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_Debug_Var extends Solar_Base
@@ -63,17 +63,16 @@ class Solar_Debug_Var extends Solar_Base
         'output' => null,
     );
     
-    
     /**
      * 
-     * Constructor.
+     * Modifies $this->_config after it has been built.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _postConfig()
     {
-        parent::__construct($config);
+        parent::_postConfig();
         if (empty($this->_config['output'])) {
             $mode = (PHP_SAPI == 'cli') ? 'text' 
                                         : 'html';

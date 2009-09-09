@@ -11,8 +11,8 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id$
+ * @version $Id: Collection.php 3995 2009-09-08 18:49:24Z pmjones $
  * 
  */
-class Solar_Model_Taggings_Collection extends Solar_Model_Collection {
+class Solar_Model_Taggings_Collection extends Solar_Sql_Model_Collection {
 }

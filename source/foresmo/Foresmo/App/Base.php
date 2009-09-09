@@ -78,7 +78,7 @@ class Foresmo_App_Base extends Solar_App_Base {
                 $this->_cache = Solar::factory('Solar_Cache', $cache_settings);
             }
 
-            $results = $this->_model->options->fetchArray(
+            $results = $this->_model->options->fetchAllAsArray(
                 array(
                     'where' => array(
                         'name LIKE ?' => 'blog_%'

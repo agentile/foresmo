@@ -15,11 +15,24 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Filter.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Filter.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_Filter extends Solar_Base
 {
+    /**
+     * 
+     * User-defined configuration values.
+     * 
+     * @config array classes Base class names for filters.
+     * 
+     * @var array
+     * 
+     */
+    protected $_Solar_Filter = array(
+        'classes' => array(),
+    );
+    
     /**
      * 
      * The chain of filters to be applied to the data array.
@@ -161,14 +174,14 @@ class Solar_Filter extends Solar_Base
     
     /**
      * 
-     * Constructor.
+     * Post-construction tasks to complete object construction.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _postConstruct()
     {
-        parent::__construct($config);
+        parent::_postConstruct();
         
         // build the filter class stack
         $this->_stack = Solar::factory('Solar_Class_Stack');
@@ -240,9 +253,8 @@ class Solar_Filter extends Solar_Base
      */
     public function setFilterClass($list = null)
     {
-        $parents = Solar_Class::parents($this, true);
-        array_shift($parents); // drops Solar_Base
-        $this->_stack->set($parents);
+        $this->_stack->setByParents($this);
+        $this->_stack->add($this->_config['classes']);
         $this->_stack->add($list);
     }
     

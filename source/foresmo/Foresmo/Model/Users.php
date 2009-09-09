@@ -57,7 +57,7 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
             $password = md5($salt . $values['password']);
             $where = array('username = ?' => $username, 'password = ?' => $password);
 
-            $result = $this->fetchArray(array('where' => $where));
+            $result = $this->fetchAllAsArray(array('where' => $where));
 
             if (is_array($result) && count($result) === 0) {
                 return false;
@@ -78,7 +78,7 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
         $where = array(
             'username LIKE ?' => $username
         );
-        $results = $this->fetchArray(array('where' => $where));
+        $results = $this->fetchAllAsArray(array('where' => $where));
         if (!empty($results)) {
             return $results[0];
         }
@@ -95,7 +95,7 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
         $where = array(
             'email = ?' => strtolower($email)
         );
-        $results = $this->fetchArray(array('where' => $where));
+        $results = $this->fetchAllAsArray(array('where' => $where));
         if (!empty($results)) {
             return $results[0];
         }
@@ -114,7 +114,7 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
             'id = ?' => (int) $id
         );
 
-        $results = $this->fetchArray(array('where' => $where));
+        $results = $this->fetchAllAsArray(array('where' => $where));
         if (!empty($results)) {
             return $results[0]['email'];
         }
@@ -128,6 +128,6 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
      */
     public function getUsers()
     {
-        return $this->fetchArray(array('eager' => array('permissions','groups')));
+        return $this->fetchAllAsArray(array('eager' => array('permissions','groups')));
     }
 }

@@ -33,6 +33,19 @@ $config['Solar']['registry_set'] = array(
     'sql'           => 'Solar_Sql',
     'user'          => 'Solar_User',
     'model_catalog' => 'Solar_Sql_Model_Catalog',
+    'model_cache'   => 'Solar_Cache_Adapter_File',
+);
+
+$config['Solar_Cache_Adapter_File'] = array(
+    'path' => '/tmp/Solar_Cache',
+    'life' => 1800,
+);
+
+$config['Solar_Sql_Model'] = array(
+    'cache' => array(
+        'adapter' => 'Solar_Cache_Adapter_File',
+    ),
+    'auto_cache' => true,
 );
 
 $config['Solar_Sql_Model_Catalog']['classes'] = array('Foresmo_Model');
@@ -52,17 +65,6 @@ $config['Solar_Sql_Adapter_Mysql'] = array(
 
 // Foresmo settings
 $config['Foresmo']['installed'] = true;
-
-// Foresmo cache
-$config['Foresmo']['cache'] = array(
-    // which adapter class to use
-    'adapter' => 'Solar_Cache_Adapter_File',
-    // where the cache files will be stored
-    'path' => '/tmp/Solar_Cache/',
-    // the cache entry lifetime in seconds
-    'life' => 1800,
-);
-
 
 // Authentication source
 $config['Solar_Auth'] = array(

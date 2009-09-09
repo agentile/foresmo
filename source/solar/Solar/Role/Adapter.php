@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Adapter.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Adapter.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 abstract class Solar_Role_Adapter extends Solar_Base {
@@ -45,15 +45,14 @@ abstract class Solar_Role_Adapter extends Solar_Base {
     
     /**
      * 
-     * Constructor to set up the storage adapter.
+     * Post-construction tasks to complete object construction.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _postConstruct()
     {
-        // basic config option settings
-        parent::__construct($config);
+        parent::_postConstruct();
         
         // cache dependency injection
         $this->_cache = Solar::dependency(

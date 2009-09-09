@@ -20,7 +20,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Oracle.php 3732 2009-04-29 17:27:56Z pmjones $
+ * @version $Id: Oracle.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_Sql_Adapter_Oracle extends Solar_Sql_Adapter
@@ -279,6 +279,20 @@ class Solar_Sql_Adapter_Oracle extends Solar_Sql_Adapter
         
         // done!
         return $descr;
+    }
+    
+    /**
+     * 
+     * Returns an array of index information for a table.
+     * 
+     * @param string $table The table name to fetch indexes for.
+     * 
+     * @return array An array of table indexes.
+     * 
+     */
+    protected function _fetchIndexInfo($table)
+    {
+        throw $this->_exception('ERR_METHOD_NOT_IMPLEMENTED');
     }
     
     /**

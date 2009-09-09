@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Page.php 3566 2008-11-06 23:38:19Z pmjones $
+ * @version $Id: Page.php 3997 2009-09-08 22:12:03Z pmjones $
  * 
  */
 class Solar_Example_Controller_Page extends Solar_Controller_Page
@@ -50,6 +50,10 @@ class Solar_Example_Controller_Page extends Solar_Controller_Page
         '_preRender'  => 0,
         '_postRender' => 0,
     );
+    
+    protected $_layout_default = null;
+    
+    protected $_layout = null;
     
     /**
      * 

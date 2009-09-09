@@ -38,7 +38,7 @@ class Foresmo_Model_PostInfo extends Solar_Sql_Model {
             'post_id = ?' => (int) $post_id,
             'name = ?' => 'comments_disabled'
         );
-        $result = $this->fetchArray(array('where' => $where));
+        $result = $this->fetchAllAsArray(array('where' => $where));
         if (empty($result)) {
             return false;
         }

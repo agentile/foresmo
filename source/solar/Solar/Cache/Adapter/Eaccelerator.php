@@ -20,7 +20,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Eaccelerator.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Eaccelerator.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  * @todo Does not work with objects.  Need to add custom support for them.
  * <http://bart.eaccelerator.net/doc/phpdoc/eAccelerator/_shared_memory_php.html#functioneaccelerator_put>
@@ -30,23 +30,20 @@ class Solar_Cache_Adapter_Eaccelerator extends Solar_Cache_Adapter
 {
     /**
      * 
-     * Constructor.
+     * Checks to make sure the EAccelerator extension is available.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _preConfig()
     {
-        // make sure we have apc available
+        parent::_preConfig();
         if (! (extension_loaded('eaccelerator') && ini_get('eaccelerator.enable'))) {
             throw $this->_exception(
                 'ERR_EXTENSION_NOT_LOADED',
                 array('extension' => 'eaccelerator')
             );
         }
-        
-        // we're ok
-        parent::__construct($config);
     }
     
     /**

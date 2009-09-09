@@ -171,7 +171,7 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
         }
         $limit = (int) $limit;
 
-        $results = $this->fetchArray(
+        $results = $this->fetchAllAsArray(
             array(
                 'where' => array(
                     'type = ?' => 0
@@ -200,7 +200,7 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
      */
     public function getTotalCount($type, $status)
     {
-        $result = $this->fetchArray(
+        $result = $this->fetchAllAsArray(
             array(
                 'cols' => array(
                     'COUNT(*) as count'

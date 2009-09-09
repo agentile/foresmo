@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Echo.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Echo.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_Log_Adapter_Echo extends Solar_Log_Adapter
@@ -43,14 +43,14 @@ class Solar_Log_Adapter_Echo extends Solar_Log_Adapter
     
     /**
      * 
-     * Constructor.  Detect output mode by SAPI if none is specified.
+     * Modifies $this->_config after it has been built.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _postConfig()
     {
-        parent::__construct($config);
+        parent::_postConfig();
         if (empty($this->_config['output'])) {
             $mode = (PHP_SAPI == 'cli') ? 'text' 
                                         : 'html';

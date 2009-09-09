@@ -13,7 +13,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Message.php 3858 2009-06-25 22:57:34Z pmjones $
+ * @version $Id: Message.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_Mail_Message extends Solar_Base
@@ -181,15 +181,14 @@ class Solar_Mail_Message extends Solar_Base
     
     /**
      * 
-     * Constructor.
+     * Post-construction tasks to complete object construction.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _postConstruct()
     {
-        // main construction
-        parent::__construct($config);
+        parent::_postConstruct();
         
         // custom boundary string
         if ($this->_config['boundary']) {

@@ -28,18 +28,19 @@
  * Examples
  * ========
  * 
- * Run the whole suite of Solar tests:
+ * `./script/solar run-tests Test_Class`
+ * : runs all methods for the test class and its subclasses
  * 
- *     $ cd /path/to/tests/
- *     $ solar run-tests
+ * `./script/solar run-tests --only Test_Class`
+ * : runs all methods for the one test class (no subclasses)
  * 
- * Run "remotely":
+ * `./script/solar run-tests Test_Class::testMethod`
+ * : runs all methods starting with "testMethod" for the test class and its 
+ *   subclasses
  * 
- *     $ solar run-tests --dir /path/to/tests
+ * `./script/solar run-tests --only Test_Class::testMethod`
+ * : runs exactly the one Test_Class::testMethod()
  * 
- * Run the Vendor_Example test and all its subdirectories:
- * 
- *     $ solar run-tests Vendor_Example
  * 
  * @category Solar
  * 
@@ -49,7 +50,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: RunTests.php 3833 2009-06-12 02:18:00Z pmjones $
+ * @version $Id: RunTests.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_Cli_RunTests extends Solar_Cli_Base
@@ -101,6 +102,7 @@ class Solar_Cli_RunTests extends Solar_Cli_Base
         $suite = Solar::factory('Solar_Test_Suite', array(
             'verbose'       => $this->_options['verbose'],
             'test_config'   => $test_config,
+            'stop_on_fail'  => $this->_options['stop_on_fail'],
         ));
         
         // run the suite

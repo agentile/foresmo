@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Class.php 3723 2009-04-28 01:04:26Z pmjones $
+ * @version $Id: Class.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_Class
@@ -191,5 +191,37 @@ class Solar_Class
             // no underscores, must be an arch-class
             return $class;
         }
+    }
+    
+    /**
+     * 
+     * Find the vendors of a given class or object and its parents.
+     * 
+     * @param mixed $spec An object, or a class name.
+     * 
+     * @return array The vendor names of the class or object hierarchy.
+     * 
+     */
+    public static function vendors($spec)
+    {
+        // vendor listing
+        $stack = array();
+        
+        // get the list of parents
+        $parents = Solar_Class::parents($spec, true);
+        
+        // look through vendor names
+        $old = null;
+        foreach ($parents as $class) {
+            $new = Solar_Class::vendor($class);
+            if ($new != $old) {
+                // not the same, add the current vendor name and suffix
+                $stack[] = $new;
+            }
+            // retain old vendor for next loop
+            $old = $new;
+        }
+        
+        return $stack;
     }
 }

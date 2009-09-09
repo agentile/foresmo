@@ -35,7 +35,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: File.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: File.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  * @todo Add CRC32 to check for cache corruption?
  * 
@@ -103,18 +103,28 @@ class Solar_Cache_Adapter_File extends Solar_Cache_Adapter
     
     /**
      * 
-     * Constructor.
+     * Sets the default cache directory location.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _preConfig()
     {
-        // set the default cache directory location
-        $this->_Solar_Cache_Adapter_File['path'] = Solar_Dir::tmp('/Solar_Cache_File/');
-        
-        // basic construction
-        parent::__construct($config);
+        parent::_preConfig();
+        $tmp = Solar_Dir::tmp('/Solar_Cache_File/');
+        $this->_Solar_Cache_Adapter_File['path'] = $tmp;
+    }
+    
+    /**
+     * 
+     * Post-construction tasks to complete object construction.
+     * 
+     * @return void
+     * 
+     */
+    protected function _postConstruct()
+    {
+        parent::_postConstruct();
         
         // path to storage; include the prefix as part of the path
         $this->_path = Solar_Dir::fix($this->_config['path'] . '/' . $this->_prefix);

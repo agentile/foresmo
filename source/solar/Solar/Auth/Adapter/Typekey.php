@@ -28,7 +28,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Typekey.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Typekey.php 3989 2009-09-07 19:51:04Z pmjones $
  * 
  */
 class Solar_Auth_Adapter_Typekey extends Solar_Auth_Adapter
@@ -117,13 +117,14 @@ class Solar_Auth_Adapter_Typekey extends Solar_Auth_Adapter
     
     /**
      * 
-     * Constructor.
+     * Checks to make sure a GMP or BCMath extension is available.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _preConfig()
     {
+        parent::_preConfig();
         if (extension_loaded('gmp')) {
             $this->_ext = 'gmp';
         } elseif (extension_loaded('bcmath')) {
@@ -134,9 +135,18 @@ class Solar_Auth_Adapter_Typekey extends Solar_Auth_Adapter
                 array('extension' => '(bcmath || gmp)')
             );
         }
-        
-        parent::__construct($config);
-        
+    }
+    
+    /**
+     * 
+     * Post-construction tasks to complete object construction.
+     * 
+     * @return void
+     * 
+     */
+    protected function _postConstruct()
+    {
+        parent::_postConstruct();
         if ($this->_config['cache']) {
             $this->_cache = Solar::dependency(
                 'Solar_Cache',
@@ -183,7 +193,7 @@ class Solar_Auth_Adapter_Typekey extends Solar_Auth_Adapter
      * as extracted from the fetched key string.
      * 
      */
-    protected protected function _fetchKeyData()
+    protected function _fetchKeyData()
     {
         $cache_key = $this->_config['cache_key'];
         if ($this->_cache) {

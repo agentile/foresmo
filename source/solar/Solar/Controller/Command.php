@@ -14,7 +14,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Command.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Command.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_Controller_Command extends Solar_Base
@@ -125,14 +125,14 @@ class Solar_Controller_Command extends Solar_Base
     
     /**
      * 
-     * Constructor.
+     * Post-construction tasks to complete object construction.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _postConstruct()
     {
-        parent::__construct($config);
+        parent::_postConstruct();
         
         // stdout and stderr
         $this->_stdout = fopen('php://stdout', 'w');

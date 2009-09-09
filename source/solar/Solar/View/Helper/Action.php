@@ -1,7 +1,7 @@
 <?php
 /**
  * 
- * Helper for action anchors and hrefs, with built-in text translation.
+ * Helper for action anchors, with built-in text translation.
  * 
  * @category Solar
  * 
@@ -11,17 +11,14 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Action.php 3281 2008-07-30 14:57:00Z pmjones $
+ * @version $Id: Action.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_View_Helper_Action extends Solar_View_Helper
 {
     /**
      * 
-     * Returns an action anchor, or just an action href.
-     * 
-     * If the $text link text is empty, will just return the
-     * href value, not an <a href="">...</a> anchor tag.
+     * Returns an action anchor tag.
      * 
      * @param string|Solar_Uri_Action $spec The action specification.
      * 
@@ -37,18 +34,21 @@ class Solar_View_Helper_Action extends Solar_View_Helper
         // get an escaped href action value
         $href = $this->_view->actionHref($spec);
         
-        // return the href, or an anchor?
-        if (empty($text)) {
-            return $href;
+        // using the string cast and strict equality to make sure that
+        // a string zero is not counted as an empty value.
+        if ((string) $text === '') {
+            // make sure text is something visible
+            $text = $href;
         } else {
-            // build attribs, after dropping any 'href' attrib
-            settype($attribs, 'array');
-            unset($attribs['href']);
-            $attribs = $this->_view->attribs($attribs);
-            
-            // escape text and return
             $text = $this->_view->getText($text);
-            return "<a href=\"$href\"$attribs>$text</a>";
         }
+        
+        // build attribs, after dropping any 'href' attrib
+        settype($attribs, 'array');
+        unset($attribs['href']);
+        $attribs = $this->_view->attribs($attribs);
+        
+        // escape text and return
+        return "<a href=\"$href\"$attribs>$text</a>";
     }
 }

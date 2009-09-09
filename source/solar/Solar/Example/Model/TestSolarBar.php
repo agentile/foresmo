@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: TestSolarBar.php 3617 2009-02-16 19:47:30Z pmjones $
+ * @version $Id: TestSolarBar.php 3897 2009-07-22 13:47:56Z pmjones $
  * 
  */
 class Solar_Example_Model_TestSolarBar extends Solar_Example_Model_TestSolarFoo

@@ -11,10 +11,10 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Record.php 3838 2009-06-18 23:50:36Z pmjones $
+ * @version $Id: Record.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
-class Solar_Model_Nodes_Record extends Solar_Model_Record {
+class Solar_Model_Nodes_Record extends Solar_Sql_Model_Record {
     
     /**
      * 

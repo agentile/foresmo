@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Config.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Config.php 3898 2009-07-22 15:33:45Z pmjones $
  * 
  */
 class Solar_Config
@@ -140,6 +140,8 @@ class Solar_Config
         } else {
             Solar_Config::$_store[$class][$key] = $val;
         }
+        
+        // Invalidate the build cache; this can make set a rather expensive method to call
         Solar_Config::$_build = array();
     }
     

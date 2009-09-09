@@ -38,7 +38,7 @@ class Foresmo_Model_PostsTags extends Solar_Sql_Model {
         $post_id = (int) $post_id;
         $tag_map = array();
         $tags_table = Solar::factory('Foresmo_Model_Tags');
-        $existing_tags = $tags_table->fetchArray();
+        $existing_tags = $tags_table->fetchAllAsArray();
         foreach ($existing_tags as $existing_tag) {
             foreach ($tags as $tag) {
                 if (strtolower($tag) == strtolower($existing_tag['tag'])) {

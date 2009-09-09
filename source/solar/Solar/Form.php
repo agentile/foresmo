@@ -13,11 +13,23 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Form.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Form.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 class Solar_Form extends Solar_Base
 {
+    // we use "success/failure" terminology rather than "valid/invalid"
+    // terminology for a couple reasons.
+    // 
+    // (1) the form may be in a midway state, where validation has not been
+    // applied yet; the form is neither valid nor invalid in that case.  
+    // 
+    // (2) form feedback usually indicates something more than whether or not 
+    // the data are valid; the feedback is intended to show that (on success) 
+    // some other process has been completed, e.g. saving to a database.
+    const STATUS_SUCCESS = true;
+    const STATUS_FAILURE = false;
+    
     /**
      * 
      * Default configuration values.
@@ -41,6 +53,7 @@ class Solar_Form extends Solar_Base
      * 
      */
     protected $_Solar_Form = array(
+        'request' => 'request',
         'filter'  => null,
         'success' => null,
         'failure' => null,
@@ -227,22 +240,34 @@ class Solar_Form extends Solar_Base
     
     /**
      * 
-     * Constructor.
+     * Sets the default success and failure messages.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _preConfig()
     {
-        // programmatic defaults
+        parent::_preConfig();
         $this->_Solar_Form['success'] = $this->locale('SUCCESS_FORM');
         $this->_Solar_Form['failure'] = $this->locale('FAILURE_FORM');
-        
-        // "real" contruction
-        parent::__construct($config);
+    }
+    
+    /**
+     * 
+     * Post-construction tasks to complete object construction.
+     * 
+     * @return void
+     * 
+     */
+    protected function _postConstruct()
+    {
+        parent::_postConstruct();
         
         // request environment
-        $this->_request = Solar_Registry::get('request');
+        $this->_request = Solar::dependency(
+            'Solar_Request',
+            $this->_config['request']
+        );
         
         // filter object
         $this->_filter = Solar::dependency(
@@ -254,13 +279,13 @@ class Solar_Form extends Solar_Base
         $action = $this->_request->server('REQUEST_URI');
         $this->_default_attribs['action'] = $action;
         
-        // now merge attribute configs
-        $this->_config['attribs'] = array_merge(
-            $this->_default_attribs,
-            $this->_config['attribs']
+        // now merge attribute configs to defaults
+        $this->_default_attribs = array_merge(
+            $this->_config['attribs'],
+            $this->_default_attribs
         );
         
-        // reset all the properties based on config now
+        // reset everything
         $this->reset();
     }
     
@@ -328,6 +353,49 @@ class Solar_Form extends Solar_Base
         foreach ($list as $name => $info) {
             $this->setElement($name, $info, $array);
         }
+    }
+    
+    /**
+     * 
+     * Gets multiple elements from this form.
+     * 
+     * @param string|array $spec If a string, return all elements with that
+     * prefix (i.e., all elements in an array).  If an array, return that
+     * specific list of elements.  If empty, return all elements.
+     * 
+     * @return array
+     * 
+     */
+    public function getElements($spec = null)
+    {
+        // pre-emptively return all elements when there's no spec
+        if (! $spec) {
+            return $this->elements;
+        }
+        
+        // the elements to return
+        $list = array();
+        
+        // return only specific element names?
+        if (is_array($spec)) {
+            foreach ($spec as $name) {
+                if (! empty($this->elements[$name])) {
+                    $list[$name] = $this->elements[$name];
+                }
+            }
+        }
+        
+        // return all elements of a specific array-name?
+        if (is_string($spec)) {
+            foreach($this->elements as $name => $info) {
+                if (strpos($name, $spec . '[') === 0) {
+                    $list[$name] = $info;
+                }
+            }
+        }
+        
+        // done!
+        return $list;
     }
     
     /**
@@ -483,7 +551,8 @@ class Solar_Form extends Solar_Base
     /**
      * 
      * Adds one or more invalid message to an element, sets the element status
-     * to false (invalid), and sets the form status to false (invalid).
+     * to false (invalid), and sets the form status to false (invalid); if the
+     * element does not exist, adds the message as form-level feedback.
      * 
      * @param string $name The element name.
      * 
@@ -496,19 +565,30 @@ class Solar_Form extends Solar_Base
      */
     public function addInvalid($name, $spec, $array = null)
     {
-        // make sure the element exists
+        // prepare the name as an array key
         $name = $this->_prepareName($name, $array);
+        
+        // does the element exist?
         if (empty($this->elements[$name])) {
-            return;
+            
+            // no; add as messages as feedback on the form as a whole
+            foreach ((array) $spec as $text) {
+                $this->feedback[] = "$name: $text";
+            }
+            
+        } else {
+            
+            // yes, add messages to the element itself
+            foreach ((array) $spec as $text) {
+                $this->elements[$name]['invalid'][] = $text;
+            }
+            
+            // mark the status of the element
+            $this->elements[$name]['status'] = false;
+            
         }
         
-        // add the messages
-        foreach ((array) $spec as $text) {
-            $this->elements[$name]['invalid'][] = $text;
-        }
-    
-        // mark the status of the element, and of the form
-        $this->elements[$name]['status'] = false;
+        // mark the status of the form as a whole
         $this->setStatus(false);
     }
     
@@ -694,19 +774,12 @@ class Solar_Form extends Solar_Base
             // set the filters and require-flag, reference not needed
             $this->_filter->addChainFilters($name, $info['filters']);
             $this->_filter->setChainRequire($name, $info['require']);
-            
         }
         
         // apply the filter chain to the data, which will modify the 
         // element data in place because of the references
-        $this->_status = $this->_filter->applyChain($data);
-        
-        // set the main feedback message
-        if ($this->_status) {
-            $this->feedback = array($this->_config['success']);
-        } else {
-            $this->feedback = array($this->_config['failure']);
-        }
+        $status = $this->_filter->applyChain($data);
+        $this->setStatus($status);
         
         // retain any invalidation messages
         $invalid = $this->_filter->getChainInvalid();
@@ -780,9 +853,9 @@ class Solar_Form extends Solar_Base
      */
     public function reset()
     {
-        $this->attribs    = $this->_config['attribs'];
+        $this->attribs    = $this->_default_attribs;
         $this->elements   = array();
-        $this->feedback   = null;
+        $this->feedback   = array();
         $this->_filters   = array();
         $this->_submitted = null;
     }
@@ -793,24 +866,44 @@ class Solar_Form extends Solar_Base
      * 
      * Does not set individual element status values.
      * 
-     * @param bool $flag True if you want to say the form is valid,
-     * false if you want to say it is not valid.
+     * @param bool $status Solar_Form::STATUS_SUCCESS if you want to say the 
+     * form as a whole is valid, Solar_Form::STATUS_FAILURE if you want to say
+     * the form as a whole is is invalid.
      * 
      * @return void
      * 
      */
-    public function setStatus($flag)
+    public function setStatus($status)
     {
-        $this->feedback = array();
-        if ($flag === null) {
-            $this->_status = null;
-        } elseif ((bool) $flag) {
-            $this->_status = true;
+        // only allow certain statuses
+        $allowed = array(
+            Solar_Form::STATUS_SUCCESS,
+            Solar_Form::STATUS_FAILURE,
+            null,
+        );
+        
+        if (! in_array($status, $allowed)) {
+            throw $this->_exception('ERR_STATUS_NOT_ALLOWED', array(
+                'status' => $status,
+            ));
+        }
+        
+        // no operation if status does not change
+        if ($this->_status === $status) {
+            return;
+        }
+        
+        // reset feedback when we change from one status to another
+        if ($status === null) {
+            $this->feedback = array();
+        } elseif ($status) {
             $this->feedback = array($this->_config['success']);
         } else {
-            $this->_status = false;
             $this->feedback = array($this->_config['failure']);
         }
+        
+        // set the status to the new value
+        $this->_status = $status;
     }
     
     /**
@@ -824,6 +917,34 @@ class Solar_Form extends Solar_Base
     public function getStatus()
     {
         return $this->_status;
+    }
+    
+    /**
+     * 
+     * Has the current form been successfully validated?
+     * 
+     * Note that if validation has not been attempted, this will return false.
+     * 
+     * @return bool
+     * 
+     */
+    public function isSuccess()
+    {
+        return $this->_status === Solar_Form::STATUS_SUCCESS;
+    }
+    
+    /**
+     * 
+     * Has the current form failed validation?
+     * 
+     * Note that if validation has not been attempted, this will return false.
+     * 
+     * @return bool
+     * 
+     */
+    public function isFailure()
+    {
+        return $this->_status === Solar_Form::STATUS_FAILURE;
     }
     
     /**
@@ -885,17 +1006,31 @@ class Solar_Form extends Solar_Base
         // we don't call reset() because there are
         // sure to be cases when you need to load()
         // more than once to get a full form.
-        // 
+        $this->_load($info);
+    }
+    
+    /**
+     * 
+     * Adds attribs and elements from the loader results into this form.
+     * 
+     * @param array $info Attribs and elements info.
+     * 
+     * @return void
+     * 
+     */
+    protected function _load($info)
+    {
         // merge the loaded attribs onto the current ones.
         $this->attribs = array_merge(
             $this->attribs,
             $info['attribs']
         );
         
-        // add elements, overwriting existing ones (no way
-        // around this, I'm afraid).
+        // add elements, overwriting existing ones with the same names
+        // (no way around this, I'm afraid).
         $this->setElements($info['elements']);
     }
+    
     
     // -----------------------------------------------------------------
     //

@@ -13,7 +13,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Getopt.php 3858 2009-06-25 22:57:34Z pmjones $
+ * @version $Id: Getopt.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  * @todo Add load() method similar to Solar_Form::load(), for loading from 
  * external XML, PHP array, etc. files.
@@ -140,15 +140,14 @@ class Solar_Getopt extends Solar_Base
     
     /**
      * 
-     * Constructor.
+     * Post-construction tasks to complete object construction.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _postConstruct()
     {
-        // "real" contruction
-        parent::__construct($config);
+        parent::_postConstruct();
         
         // get the current request environment
         $this->_request = Solar_Registry::get('request');

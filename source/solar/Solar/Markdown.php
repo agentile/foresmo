@@ -36,7 +36,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Markdown.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Markdown.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  * @todo How to configure plugins at the start?
  * 
@@ -255,17 +255,17 @@ class Solar_Markdown extends Solar_Base
         
     /**
      * 
-     * Constructor.
+     * Post-construction tasks to complete object construction.
      * 
      * Loads the plugins, builds a list of characters to encode, and
      * builds the list of block-type and span-type plugin classes.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _postConstruct()
     {
-        parent::__construct($config);
+        parent::_postConstruct();
         
         // use tidy?
         if ($this->_config['tidy'] && ! extension_loaded('tidy')) {

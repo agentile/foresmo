@@ -37,7 +37,7 @@ class Foresmo_Model_GroupsPermissions extends Solar_Sql_Model {
      */
     public function getGroupPermissionsByID($group_id, $short_list = false)
     {
-        $permissions = $this->fetchArray(
+        $permissions = $this->fetchAllAsArray(
             array(
                 'where' => array(
                     'group_id = ?' => $group_id

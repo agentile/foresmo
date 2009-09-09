@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Var.php 3617 2009-02-16 19:47:30Z pmjones $
+ * @version $Id: Session.php 3995 2009-09-08 18:49:24Z pmjones $
  * 
  */
 class Solar_Cache_Adapter_Session extends Solar_Cache_Adapter
@@ -36,14 +36,14 @@ class Solar_Cache_Adapter_Session extends Solar_Cache_Adapter
     
     /**
      * 
-     * Constructor.
+     * Post-construction tasks to complete object construction.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _postConstruct()
     {
-        parent::__construct($config);
+        parent::_postConstruct();
         
         // prefix the session class store, not the individual keys.
         $prefix = $this->_prefix;

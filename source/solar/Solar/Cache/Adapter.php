@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Adapter.php 3858 2009-06-25 22:57:34Z pmjones $
+ * @version $Id: Adapter.php 3988 2009-09-04 13:51:51Z pmjones $
  * 
  */
 abstract class Solar_Cache_Adapter extends Solar_Base {
@@ -57,15 +57,14 @@ abstract class Solar_Cache_Adapter extends Solar_Base {
     
     /**
      * 
-     * Constructor.
+     * Post-construction tasks to complete object construction.
      * 
-     * @param array $config Configuration value overrides, if any.
+     * @return void
      * 
      */
-    public function __construct($config = null)
+    protected function _postConstruct()
     {
-        // basic construction
-        parent::__construct($config);
+        parent::_postConstruct();
         
         // keep the cache active flag
         $this->_active = (bool) $this->_config['active'];

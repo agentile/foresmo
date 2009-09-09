@@ -34,7 +34,7 @@ class Foresmo_Model_UserInfo extends Solar_Sql_Model {
      */
     public function getUserInfoByID($user_id)
     {
-        return $this->fetchArray(
+        return $this->fetchAllAsArray(
             array(
                 'where' => array(
                     'user_id = ?' => $user_id
