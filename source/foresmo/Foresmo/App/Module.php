@@ -30,12 +30,6 @@ class Foresmo_App_Module extends Foresmo_App_Base {
         $f_args = func_get_args();
         // Check if module exists and is enabled
         if (isset($f_args[0]) && $this->_model->modules->isEnabled($f_args[0])) {
-            $redirect_info = $this->session->getFlash('redirect');
-            try {
-                $redirect_obj = Solar::factory('Foresmo_App_'.ucfirst($redirect_info['controller']));
-            } catch (Exception $e) {
-                $redirect_obj = Solar::factory('Foresmo_App_Index');
-            }
             $module_name = ucfirst(strtolower($f_args[0]));
             array_shift($f_args);
             $data = array(
@@ -52,6 +46,13 @@ class Foresmo_App_Module extends Foresmo_App_Base {
                     }
                 }
             }
+        }
+
+        $redirect_info = $this->session->getFlash('redirect');
+        try {
+            $redirect_obj = Solar::factory('Foresmo_App_'.ucfirst($redirect_info['controller']));
+        } catch (Exception $e) {
+            $redirect_obj = Solar::factory('Foresmo_App_Index');
         }
 
         if (isset($redirect_info['action'])) {

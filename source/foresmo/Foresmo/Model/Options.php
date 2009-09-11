@@ -24,4 +24,27 @@ class Foresmo_Model_Options extends Solar_Sql_Model {
         $this->_table_name = Solar_Config::get($adapter, 'prefix') . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
     }
+
+    /**
+     * getOption
+     * Get value from option key
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function getOptionValue($key)
+    {
+        $results = $this->fetchAllAsArray(
+            array(
+                'where' => array(
+                    'name = ?' => $key
+                )
+            )
+        );
+
+        if (isset($results[0])) {
+            return $results[0]['value'];
+        }
+        return null;
+    }
 }

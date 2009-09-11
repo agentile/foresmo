@@ -54,6 +54,44 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
     }
 
     /**
+     * actionModule
+     * Ajax for Modules dispatcher
+     *
+     * @param $param
+     *
+     * @return void
+     */
+    public function actionModule()
+    {
+        $this->_layout = null;
+        $this->_view = null;
+        $f_args = func_get_args();
+        $ret = array(
+            'success' => false,
+            'message' => '',
+        );
+        // Check if module exists and is enabled
+        if (isset($f_args[0]) && $this->_model->modules->isEnabled($f_args[0])) {
+            $module_name = ucfirst(strtolower($f_args[0]));
+            array_shift($f_args);
+            $data = array(
+                'POST' => $this->_request->post(),
+                'GET' => $this->_request->get(),
+                'PARAMS' => $f_args,
+            );
+
+            $module_output = $this->_modules->processAjaxRequest($module_name, $data);
+            if ($module_output && $module_output != '') {
+                $ret = array(
+                    'success' => true,
+                    'message' => $module_output,
+                );
+            }
+        }
+        $this->_response->content = json_encode($ret);
+    }
+
+    /**
      * ajax_admin_pages_new
      * New page post
      *
@@ -135,6 +173,9 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
      */
     public function ajax_blog_install($post_data)
     {
+        if ($this->installed) {
+            return 'Blog is already installed!';
+        }
         if (!empty($post_data['db_type'])) {
             $db_type = ucfirst($post_data['db_type']);
             $adapter = 'Solar_Sql_Adapter_' . $db_type;

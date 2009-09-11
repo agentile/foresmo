@@ -49,7 +49,11 @@
                 $m = $date[0];
                 $d = $date[1];
                 $y = $date[2];
-                $calendar_posts[$m][$d][$y] = true;
+                if (isset($calendar_posts[$m][$d][$y])) {
+                    $calendar_posts[$m][$d][$y] += 1;
+                } else {
+                    $calendar_posts[$m][$d][$y] = 1;
+                }
             }
         }
 
@@ -64,7 +68,7 @@
                 $str = '';
             }
             if (isset($calendar_posts[$this->calendar['month']][$i][$this->calendar['year']])) {
-                $day = '<a href="/sort/'.$this->calendar['month'].'/'.$i.'/'.$this->calendar['year'].'">' . $i . '</a>';
+                $day = '<a href="/sort/'.$this->calendar['month'].'/'.$i.'/'.$this->calendar['year'].'" alt="'.$calendar_posts[$this->calendar['month']][$i][$this->calendar['year']].' Posts">' . $i . '</a>';
             } else {
                 $day = $i;
             }

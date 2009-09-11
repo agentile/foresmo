@@ -169,7 +169,7 @@ class Foresmo_App_Base extends Solar_App_Base {
      */
     public function validate($validator, $str)
     {
-        $obj = Solar::factory('Solar_Filter_' . ucfirst($validator));
+        $obj = Solar::factory('Solar_Filter_' . ucfirst(strtolower($validator)));
         if (is_object($obj)) {
             return $obj->$validator($str);
         }
@@ -208,14 +208,4 @@ class Foresmo_App_Base extends Solar_App_Base {
         return false;
     }
 
-    /**
-     * _loadModules
-     * Load enabled modules
-     *
-     * @return void
-     */
-    protected function _loadModules()
-    {
-
-    }
 }

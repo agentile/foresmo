@@ -361,7 +361,7 @@ table tr td
 {
   background:#fff;
   border-right:1px solid #ccc;
-  padding:4px;
+  padding:1px;
   text-align:center;
   vertical-align:top;
 }
@@ -702,10 +702,14 @@ ol.code li code
 
 /* Module ---------*/
 
-#module{
+#module {
     border: 1px dashed #222;
     padding:2px 3px;
     text-align:right;
     margin-top: 10px;
+    color: #222;
 }
 
+#module_calendar {
+    font-size: 70%;
+}
