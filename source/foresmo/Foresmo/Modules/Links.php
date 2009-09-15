@@ -35,6 +35,9 @@ class Foresmo_Modules_Links extends Solar_Base {
      */
     public function start()
     {
+        $links = $this->_model->links->getLinks();
+        $this->_view->assign('links', $links);
+
         $this->output = $this->_view->fetch($this->_view_file);
     }
 

@@ -56,7 +56,9 @@ class Foresmo_App_Base extends Solar_App_Base {
      */
     protected function _setup()
     {
-        $this->session = Solar::factory('Solar_Session', array('class' => 'Foresmo_App'));
+        if (!isset($this->session)) {
+            $this->session = Solar::factory('Solar_Session', array('class' => 'Foresmo_App'));
+        }
         $adapter = Solar_Config::get('Solar_Sql', 'adapter');
         $adapter = Solar::factory($adapter);
         try {

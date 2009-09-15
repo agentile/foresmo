@@ -132,7 +132,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             $errors[] = 'Content cannot be blank.';
         }
         $post_data['post_slug'] = Foresmo::makeSlug($post_data['post_title']);
-        if (in_array(strtolower($post_data['post_slug'])), $this->_restricted_names) {
+        if (in_array(strtolower($post_data['post_slug']), $this->_restricted_names)) {
             $errors[] = 'The slug for this post/page "'.$post_data['post_slug'].'" is restricted. Please choose a different slug/title';
         }
         if (count($errors) > 0) {
@@ -435,7 +435,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             'enabled' => 0,
         );
         $adapter->insert($table, $data);
-        $table = $post_data['db_prefix'] . 'modules_info';
+        $table = $post_data['db_prefix'] . 'module_info';
         $data = array(
             'module_id' => 3,
             'name' => 'start_of_week',

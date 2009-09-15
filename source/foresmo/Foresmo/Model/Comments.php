@@ -174,7 +174,7 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
         $results = $this->fetchAllAsArray(
             array(
                 'where' => array(
-                    'type = ?' => 0
+                    'type = ?' => array(0)
                 ),
                 'eager' => array(
                     'commentinfo', 'posts'
@@ -182,7 +182,7 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
                 'order'  => array (
                     'id DESC'
                 ),
-                'limit'  => $limit,
+                'limit'  => array($limit),
             )
         );
         Foresmo::dateFilter($results);
@@ -206,8 +206,8 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
                     'COUNT(*) as count'
                 ),
                 'where' => array(
-                    'type = ?' => $type,
-                    'status = ?' => $status,
+                    'type = ?' => array($type),
+                    'status = ?' => array($status),
                 ),
             )
         );
