@@ -206,8 +206,8 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
                     'COUNT(*) as count'
                 ),
                 'where' => array(
-                    'type = ?' => array($type),
-                    'status = ?' => array($status),
+                    'type = ?' => $type,
+                    'status = ?' => $status,
                 ),
             )
         );

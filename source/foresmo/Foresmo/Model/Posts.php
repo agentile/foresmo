@@ -18,6 +18,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     public $posts_per_page = 10;
     public $page_count;
     public $published_posts_count = 1;
+    protected $_prefix;
 
     /**
      *
@@ -34,7 +35,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
              . DIRECTORY_SEPARATOR;
 
         $adapter = Solar_Config::get('Solar_Sql', 'adapter');
-        $this->_table_name = Solar_Config::get($adapter, 'prefix') . Solar_File::load($dir . 'table_name.php');
+        $this->_prefix = Solar_Config::get($adapter, 'prefix');
+        $this->_table_name = $this->_prefix . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
 
         $this->_hasMany('postinfo', array(
@@ -337,46 +339,88 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
 
     /**
      * getPostsByTag
-     * get all posts with status of 1 (published) and a specific tag
+     * get all posts with status of 1 (published) with specific tag(s)
      * with all it's pertitent associated data (tags, comments,
      * postinfo) as an array
      *
+     * @param array $tags list of tags
+     *
+     * @param string $oper AND / OR
+     *
      * @return array
      */
-    public function getPostsByTag($tags)
+    public function getPostsByTag($tags, $oper = 'AND')
     {
-        if (!$tags || empty($tags)) {
+        if (!$tags || empty($tags) || ($oper != 'AND' && $oper != 'OR')) {
             return array();
         }
 
-        $where_stmt = 'tags.tag_slug = ?';
-        for ($i = 1; $i < count($tags); $i++) {
-            $where_stmt .= ' OR tags.tag_slug = ?';
+        $where_stmt = 'status = ? AND content_type = ?';
+        $where_values = array(1, 1);
+        $join = array();
+
+        for ($i = 0; $i < count($tags); $i++) {
+            $where_values[] = $tags[$i];
+            if ($oper == 'AND') {
+                $tc = $i + 1;
+                $where_stmt .= " AND tags{$tc}.tag_slug = ?";
+                if ($tc == 1) {
+                    $join[] = array(
+                        'type' => "inner",
+                        'name' => "{$this->_prefix}posts_tags AS posts_tags{$tc}",
+                        'cond' => "posts_tags{$tc}.post_id = {$this->_prefix}posts.id"
+                    );
+                } else {
+                    $join[] = array(
+                        'type' => "inner",
+                        'name' => "{$this->_prefix}posts_tags AS posts_tags{$tc}",
+                        'cond' => "posts_tags{$tc}.post_id = posts_tags{$i}.post_id"
+                    );
+                }
+                $join[] = array(
+                    'type' => "inner",
+                    'name' => "{$this->_prefix}tags AS tags{$tc}",
+                    'cond' => "posts_tags{$tc}.tag_id = tags{$tc}.id"
+                );
+            }
+        }
+
+        if ($oper == 'OR') {
+            $join[] = array(
+                'type' => "inner",
+                'name' => "{$this->_prefix}posts_tags AS posts_tags1",
+                'cond' => "posts_tags1.post_id = {$this->_prefix}posts.id"
+            );
+            $join[] = array(
+                'type' => "inner",
+                'name' => "{$this->_prefix}tags AS tags1",
+                'cond' => "posts_tags1.tag_id = tags1.id"
+            );
+            $where_stmt .= ' AND tags1.tag_slug IN (' . rtrim(str_repeat('?,', count($tags)), ',') . ')';
         }
 
         $where = array(
-            $where_stmt => $tags
+            $where_stmt => $where_values
         );
 
         $results = $this->fetchAllAsArray(
             array(
-                'where'  => array(
-                    'status = ? AND content_type = ?' => array(1, 1)
-                ),
+                'distinct' => true,
+                'where'  => $where,
                 'order'  => array ('id DESC'),
+                'join'   => $join,
                 'eager'  => array(
                     'comments' => array(
                         'eager' => array(
                             'commentinfo'
                         )
                     ),
-                    'tags' => array(
-                        'where' => $where
-                    ),
-                    'postinfo'
+                    'tags',
+                    'postinfo',
                 ),
             )
         );
+
         Foresmo::dateFilter($results);
         Foresmo::sanitize($results);
         return $results;
