@@ -54,11 +54,13 @@ class Solar_File
             return false;
         }
 
-        if ($file[0] !== '/') {
-            $first = strtolower(substr($file, 0, strpos($file, '/')));
-            $file = 'source' . DIRECTORY_SEPARATOR . $first . DIRECTORY_SEPARATOR .  $file;
-        } else {
-            $file = str_ireplace(Solar_Config::get('Solar', 'system') . '/source/', 'source/', $file);
+        if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+            if ($file[0] !== '/') {
+                $first = strtolower(substr($file, 0, strpos($file, '/')));
+                $file = 'source' . DIRECTORY_SEPARATOR . $first . DIRECTORY_SEPARATOR .  $file;
+            } else {
+                $file = str_ireplace(Solar_Config::get('Solar', 'system') . '/source/', 'source/', $file);
+            }
         }
 
         // using an absolute path for the file?

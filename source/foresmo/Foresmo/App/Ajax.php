@@ -443,6 +443,29 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             'value' => 0,
         );
         $adapter->insert($table, $data);
+        if ($db_type == 'Mysql') {
+            $data = array(
+                'module_id' => 2,
+                'name' => 'search_adapter',
+                'type' => 0,
+                'value' => 'mysql',
+            );
+        } else {
+            $data = array(
+                'module_id' => 2,
+                'name' => 'search_adapter',
+                'type' => 0,
+                'value' => 'default',
+            );
+        }
+        $adapter->insert($table, $data);
+        $data = array(
+            'module_id' => 2,
+            'name' => 'search_adapter_settings',
+            'type' => 0,
+            'value' => 'a:5:{s:7:"Default";a:0:{}s:6:"Google";a:0:{}s:5:"Mysql";a:0:{}s:6:"Lucene";a:0:{}s:5:"Sphinx";a:0:{}}',
+        );
+        $adapter->insert($table, $data);
         return 'Foresmo installed! Click <a href="/">here</a> to check it out! Also, don\'t forget to change the permissions of the config back to read only.';
     }
 

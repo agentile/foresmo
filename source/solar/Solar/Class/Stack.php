@@ -351,7 +351,11 @@ class Solar_Class_Stack extends Solar_Base
      */
     protected function _run()
     {
-        $file = Solar_File::exists(func_get_arg(0));
-        include $file;
+        if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+            $file = Solar_File::exists(func_get_arg(0));
+            include $file;
+        } else {
+            include func_get_arg(0);
+        }
     }
 }

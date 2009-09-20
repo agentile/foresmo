@@ -196,7 +196,7 @@ hr
 
 #content-right a:hover
 {
-  color:#eee;
+  color:#006699;
   text-decoration:none;
 }
 
@@ -704,12 +704,49 @@ ol.code li code
 
 #module {
     border: 1px dashed #222;
-    padding:2px 3px;
-    text-align:right;
+    padding: 2px 3px;
+    text-align: right;
     margin-top: 10px;
     color: #222;
 }
 
 #module_calendar {
     font-size: 70%;
+}
+
+#module input[type="radio"] {
+    display: inline;
+    margin-top: 8px;
+    float: right;
+    margin-right: 30px;
+
+}
+
+#module input[type="checkbox"] {
+    margin-top: 8px;
+    float: right;
+    clear: right;
+}
+
+#module input[type="textbox"] {
+    width: 90%;
+}
+
+#module input[type="text"] {
+    width: 90%;
+}
+
+#module input[type="submit"] {
+    margin: 10px auto;
+    display: block;
+    clear: both;
+}
+
+#module form {
+    margin-right: 0px;
+    width: 100%;
+}
+#module label {
+    float: right;
+    padding-right: 10px;
 }

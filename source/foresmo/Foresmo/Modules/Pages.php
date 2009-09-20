@@ -23,8 +23,7 @@ class Foresmo_Modules_Pages extends Solar_Base {
     public function __construct($model = null)
     {
         $this->_model = $model;
-        $this->_view_path = Solar_Config::get('Solar', 'system') .
-            '/source/foresmo/Foresmo/Modules/' . $this->_name . '/View/';
+        $this->_view_path = Solar::$system . '/source/foresmo/Foresmo/Modules/' . $this->_name . '/View/';
         $this->_view_file = 'index.php';
         $this->_view = Solar::factory('Solar_View', array('template_path' => $this->_view_path));
     }

@@ -64,7 +64,14 @@ $config['Solar_Sql_Adapter_Mysql'] = array(
 );
 
 // Foresmo settings
-$config['Foresmo']['installed'] = true;
+$config['Foresmo'] = array(
+    'installed' => true,
+    'dev' => false,
+);
+
+// Test Notes
+//./script/solar run-tests Test_Foresmo_Modules
+// Need to have symlink to source/foresmo/tests/Test/Foresmo in includes/Test/Foresmo
 
 // Authentication source
 $config['Solar_Auth'] = array(

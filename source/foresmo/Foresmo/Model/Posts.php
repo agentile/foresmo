@@ -278,7 +278,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
         $results = $this->fetchAllAsArray(
             array(
                 'where'  => array(
-                    'status = ? AND content_type = ? AND pubdate BETWEEN \''.$start.'\' AND \''.$end.'\'' => array(1, 1)
+                     'status = ? AND content_type = ? AND pubdate BETWEEN \''.$start.'\' AND \''.$end.'\'' => array(1, 1)
                 ),
                 'order'  => array (
                     'id DESC'
@@ -358,8 +358,9 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
         $where_stmt = 'status = ? AND content_type = ?';
         $where_values = array(1, 1);
         $join = array();
+        $count = count($tags);
 
-        for ($i = 0; $i < count($tags); $i++) {
+        for ($i = 0; $i < $count; $i++) {
             $where_values[] = $tags[$i];
             if ($oper == 'AND') {
                 $tc = $i + 1;
@@ -396,7 +397,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 'name' => "{$this->_prefix}tags AS tags1",
                 'cond' => "posts_tags1.tag_id = tags1.id"
             );
-            $where_stmt .= ' AND tags1.tag_slug IN (' . rtrim(str_repeat('?,', count($tags)), ',') . ')';
+            $where_stmt .= ' AND tags1.tag_slug IN (' . rtrim(str_repeat('?,', $count), ',') . ')';
         }
 
         $where = array(

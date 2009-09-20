@@ -24,11 +24,10 @@ class Foresmo_Modules_Calendar extends Solar_Base {
     public function __construct($model = null)
     {
         $this->_model = $model;
-        $this->_view_path = Solar_Config::get('Solar', 'system') .
-            '/source/foresmo/Foresmo/Modules/' . $this->_name . '/View/';
+        $this->_view_path = Solar::$system . '/source/foresmo/Foresmo/Modules/' . $this->_name . '/View/';
         $this->_view_file = 'index.php';
         $this->_view = Solar::factory('Solar_View', array('template_path' => $this->_view_path));
-        $this->_module_info = $this->_model->modules->getModuleInfoByName('Calendar');
+        $this->_module_info = $this->_model->modules->getModuleInfoByName($this->_name);
     }
 
     /**

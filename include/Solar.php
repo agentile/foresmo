@@ -10,7 +10,7 @@
  * 
  * @author Paul M. Jones <pmjones@solarphp.net>
  * 
- * @version $Id: Solar.php 3727 2009-04-28 01:30:10Z pmjones $
+ * @version $Id: Solar.php 3991 2009-09-08 01:01:43Z pmjones $
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
@@ -52,24 +52,20 @@ class Solar
      * 
      * Default config values for the Solar arch-class.
      * 
-     * Keys are:
-     * 
-     * `ini_set`
-     * : (array) An array of key-value pairs where the key is an
+     * @config array ini_set An array of key-value pairs where the key is an
      *   [[php::ini_set | ]] key, and the value is the value for that setting.
      * 
-     * `registry_set`
-     * : (array) An array of key-value pairs to use in pre-setting registry
+     * @config array registry_set An array of key-value pairs to use in pre-setting registry
      *   objects.  The key is a registry name to use.  The value is either
      *   a string class name, or is a sequential array where element 0 is
      *   a string class name and element 1 is a configuration array for that
      *   class.  Cf. [[Solar_Registry::set()]].
      * 
-     * `start`
-     * : (array) Run these scripts at the end of Solar::start().
+     * @config array start Run these scripts at the end of Solar::start().
      * 
-     * `stop`
-     * : (array) Run these scripts in Solar::stop().
+     * @config array stop Run these scripts in Solar::stop().
+     * 
+     * @config string system The system directory path.
      * 
      * @var array
      * 
@@ -354,7 +350,7 @@ class Solar
      * 
      * @param string $class The class name.
      * 
-     * @param array $config Additional configuration array for the class.
+     * @param array $config Configuration value overrides, if any.
      * 
      * @return object A new instance of the requested class.
      * 
@@ -368,12 +364,6 @@ class Solar
         if ($obj instanceof Solar_Factory) {
             // return an instance from the object factory
             return $obj->factory();
-        }
-        
-        // "the old way" so we can ease transition to "the new way"
-        if (method_exists($obj, 'solarFactory')) {
-            // return an instance from the object factory
-            return $obj->solarFactory();
         }
         
         // return the object itself

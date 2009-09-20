@@ -56,6 +56,9 @@ class Foresmo_App_Base extends Solar_App_Base {
      */
     protected function _setup()
     {
+        if (Solar_Config::get('Foresmo', 'dev')) {
+            xdebug_start_trace('/var/www/foresmo/tmp/trace');
+        }
         if (!isset($this->session)) {
             $this->session = Solar::factory('Solar_Session', array('class' => 'Foresmo_App'));
         }
@@ -72,7 +75,7 @@ class Foresmo_App_Base extends Solar_App_Base {
             if (!$this->installed) {
                 return;
             }
-            $this->web_root = Solar_Config::get('Solar', 'system') . '/content/';
+            $this->web_root = Solar::$system . '/content/';
             $this->_model = Solar_Registry::get('model_catalog');
             $cache_settings = Solar_Config::get('Foresmo', 'cache');
             if (isset($cache_settings['adapter'])) {
@@ -209,5 +212,4 @@ class Foresmo_App_Base extends Solar_App_Base {
         }
         return false;
     }
-
 }
