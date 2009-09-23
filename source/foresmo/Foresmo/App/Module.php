@@ -58,7 +58,7 @@ class Foresmo_App_Module extends Foresmo_App_Base {
         if (isset($redirect_info['action'])) {
             $action = $redirect_info['action'];
         } else {
-            $action = 'index';
+            $action = 'main';
         }
 
         $redirect_obj->enabled_modules_data = $this->enabled_modules_data;

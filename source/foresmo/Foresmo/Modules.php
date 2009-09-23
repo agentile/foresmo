@@ -7,16 +7,18 @@
  */
 class Foresmo_Modules extends Solar_Base {
 
+    protected $_Foresmo_Modules = array('model' => null);
     protected $_model;
 
     /**
-     * __construct
+     * _postConstruct
      *
      * @param $model
      */
-    public function __construct($model)
+    protected function _postConstruct()
     {
-        $this->_model = $model;
+        parent::_postConstruct();
+        $this->_model = $this->_config['model'];
     }
 
     /**
@@ -42,7 +44,7 @@ class Foresmo_Modules extends Solar_Base {
      */
     public function getModuleData($name)
     {
-        $module = Solar::factory("Foresmo_Modules_{$name}", $this->_model);
+        $module = Solar::factory("Foresmo_Modules_{$name}", array('model' => $this->_model));
         $module->start();
         return $module->output;
     }
@@ -59,7 +61,7 @@ class Foresmo_Modules extends Solar_Base {
      */
     public function processRequest($name, $data)
     {
-        $module = Solar::factory("Foresmo_Modules_{$name}", $this->_model);
+        $module = Solar::factory("Foresmo_Modules_{$name}", array('model' => $this->_model));
         if (method_exists($module, 'request')) {
             try {
                 $module->request($data);
@@ -87,7 +89,7 @@ class Foresmo_Modules extends Solar_Base {
      */
     public function processAjaxRequest($name, $data)
     {
-        $module = Solar::factory("Foresmo_Modules_{$name}", $this->_model);
+        $module = Solar::factory("Foresmo_Modules_{$name}", array('model' => $this->_model));
         if (method_exists($module, 'ajaxRequest')) {
             try {
                 $module->ajaxRequest($data);
@@ -101,5 +103,27 @@ class Foresmo_Modules extends Solar_Base {
             }
         }
         return null;
+    }
+
+    /**
+     * getRegisteredHooks
+     * Get registered hooks from enabled modules
+     *
+     * @return array
+     */
+    public function getRegisteredHooks()
+    {
+        $hooks = array();
+        $enabled_modules = $this->_model->modules->getEnabledModules();
+        foreach ($enabled_modules as $module) {
+            $name = ucfirst(strtolower($module['name']));
+            $module_obj = Solar::factory("Foresmo_Modules_{$name}", array('model' => $this->_model));
+            if (isset($module_obj->register) && is_array($module_obj->register)) {
+                $hooks[$name] = $module_obj->register;
+            }
+            $module_obj = null;
+        }
+
+        return $hooks;
     }
 }

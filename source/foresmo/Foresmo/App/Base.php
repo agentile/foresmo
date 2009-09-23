@@ -17,6 +17,49 @@ class Foresmo_App_Base extends Solar_App_Base {
     protected $_modules;
     protected $_cache = null;
 
+    protected $_registered_hooks = array(
+        '_preRender' => array(
+            'index' => array(
+                'main' => array(),
+                'tag'   => array(),
+                'page'  => array(),
+                'sort'  => array(),
+            ),
+        ),
+        '_postRender' => array(
+            'index' => array(
+                'main' => array(),
+                'tag'   => array(),
+                'page'  => array(),
+                'sort'  => array(),
+            ),
+        ),
+        '_preRun' => array(
+            'index' => array(
+                'main' => array(),
+                'tag'   => array(),
+                'page'  => array(),
+                'sort'  => array(),
+            ),
+        ),
+        '_postRun' => array(
+            'index' => array(
+                'main' => array(),
+                'tag'   => array(),
+                'page'  => array(),
+                'sort'  => array(),
+            ),
+        ),
+        '_postAction' => array(
+            'index' => array(
+                'main' => array(),
+                'tag'   => array(),
+                'page'  => array(),
+                'sort'  => array(),
+            ),
+        ),
+    );
+
     /**
      * _restricted_names
      *
@@ -72,8 +115,8 @@ class Foresmo_App_Base extends Solar_App_Base {
         if ($this->connect) {
             $this->_adapter = $adapter;
             $this->installed = (bool) Solar_Config::get('Foresmo', 'installed');
-            if (!$this->installed) {
-                return;
+            if (!$this->installed && $this->_controller != 'install') {
+                $this->_redirect('/install');
             }
             $this->web_root = Solar::$system . '/content/';
             $this->_model = Solar_Registry::get('model_catalog');
@@ -114,8 +157,9 @@ class Foresmo_App_Base extends Solar_App_Base {
             $this->_setPagesCount();
             $this->_layout_default = $this->blog_theme;
             $this->_setToken();
-            $this->_modules = Solar::factory('Foresmo_Modules', $this->_model);
+            $this->_modules = Solar::factory('Foresmo_Modules', array('model' => $this->_model));
             $this->enabled_modules_data = $this->_modules->getEnabledModulesData();
+            $this->_registerModuleHooks();
         }
     }
 
@@ -211,5 +255,43 @@ class Foresmo_App_Base extends Solar_App_Base {
                 return true;
         }
         return false;
+    }
+
+    /**
+     * _getModuleHooks
+     * Get registered hooks from enabled modules
+     *
+     * @return void
+     */
+    protected function _registerModuleHooks()
+    {
+        $allowed_processes = array('_preRun', '_postRun', '_postAction', '_preRender', '_postRender');
+        $allowed_actions = array(
+            'index' => array('index', 'tag', 'page', 'sort'),
+        );
+
+        $hooks = $this->_modules->getRegisteredHooks();
+        foreach ($hooks as $module => $rh) {
+            foreach ($rh as $process => $cont) {
+                // allowable hook process?
+                if (!in_array($process, $allowed_processes)) {
+                    continue;
+                }
+                foreach ($cont as $controller => $act) {
+                    // allowable controller?
+                    if (!in_array($controller, array_keys($allowed_actions))) {
+                        continue;
+                    }
+                    foreach ($act as $action => $module_call) {
+                        // allowable action?
+                        if (!isset($allowed_actions[$controller])
+                            || !in_array($action, array_values($allowed_actions[$controller]))) {
+                            continue;
+                        }
+                        $this->_registered_hooks[$process][$controller][$action][$module] = $module_call;
+                    }
+                }
+            }
+        }
     }
 }

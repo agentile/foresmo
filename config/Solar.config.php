@@ -33,19 +33,21 @@ $config['Solar']['registry_set'] = array(
     'sql'           => 'Solar_Sql',
     'user'          => 'Solar_User',
     'model_catalog' => 'Solar_Sql_Model_Catalog',
-    'model_cache'   => 'Solar_Cache_Adapter_File',
-);
-
-$config['Solar_Cache_Adapter_File'] = array(
-    'path' => '/tmp/Solar_Cache',
-    'life' => 1800,
+    'model_cache'   => array(
+        'Solar_Cache',
+        array(
+            'adapter' => 'Solar_Cache_Adapter_File',
+            'path' => "$system/tmp/cache",
+            'hash' => false,
+            'mode' => 0777,
+        )
+    ),
 );
 
 $config['Solar_Sql_Model'] = array(
-    'cache' => array(
-        'adapter' => 'Solar_Cache_Adapter_File',
-    ),
+    'cache' => 'model_cache',
     'auto_cache' => true,
+    'prefix' => 'foresmo_'
 );
 
 $config['Solar_Sql_Model_Catalog']['classes'] = array('Foresmo_Model');
@@ -60,7 +62,6 @@ $config['Solar_Sql_Adapter_Mysql'] = array(
     'user' => 'taint',
     'pass' => 'taintpass',
     'name' => 'foresmo',
-    'prefix' => 'foresmo_'
 );
 
 // Foresmo settings

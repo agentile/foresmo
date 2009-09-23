@@ -2,17 +2,12 @@
 // Solar system directory
 $system = dirname(dirname(__FILE__));
 
-// set the include-path
+// set the include-path, load Solar based on sym-link capable
 if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
     set_include_path($system);
-} else {
-    set_include_path("$system/include");
-}
-
-// load Solar
-if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
     require_once "$system/source/solar/Solar.php";
 } else {
+    set_include_path("$system/include");
     require_once "Solar.php";
 }
 

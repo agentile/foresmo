@@ -11,7 +11,7 @@
  */
 class Foresmo_App_Index extends Foresmo_App_Base {
 
-    protected $_action_default = 'index';
+    protected $_action_default = 'main';
 
     public $form;
     public $form_success = false;
@@ -60,9 +60,34 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             die();
         }
     }
+
+    protected function _postRender()
+    {
+        parent::_postRender();
+    }
+
+    protected function _postAction()
+    {
+        parent::_postAction();
+    }
+
+    protected function _preRun()
+    {
+        parent::_preRun();
+    }
+
     protected function _postRun()
     {
         parent::_postRun();
+
+        $hooks = $this->_registered_hooks['_postRun'][$this->_controller][$this->_action];
+        foreach ($hooks as $module => $module_call) {
+            $module_obj = Solar::factory("Foresmo_Modules_{$module}", $this->_model);
+            if (method_exists($module_obj, $module_call)) {
+                $module_obj->$module_call();
+            }
+        }
+
         $this->session->setFlash('redirect', array(
             'controller' => $this->_controller,
             'action' => $this->_action,
@@ -79,12 +104,8 @@ class Foresmo_App_Index extends Foresmo_App_Base {
      * @access public
      * @since  0.05
      */
-    public function actionIndex()
+    public function actionMain()
     {
-        if (!$this->installed) {
-            $this->_redirect('/install');
-        }
-
         $posts = array();
         $is_post = false;
 
@@ -146,7 +167,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         if (empty($this->posts)) {
             $this->_view = 'notfound';
         } else {
-            $this->_view = 'index';
+            $this->_view = 'main';
         }
     }
 
@@ -170,7 +191,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         if (empty($this->posts)) {
             $this->_view = 'notfound';
         } else {
-            $this->_view = 'index';
+            $this->_view = 'main';
         }
     }
 
@@ -205,7 +226,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         if (empty($this->posts)) {
             $this->_view = 'notfound';
         } else {
-            $this->_view = 'index';
+            $this->_view = 'main';
         }
     }
 
@@ -282,7 +303,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
     public function actionLogout()
     {
         $this->session->resetAll();
-        $this->_redirect('/index');
+        $this->_redirect('/');
     }
 
     /**

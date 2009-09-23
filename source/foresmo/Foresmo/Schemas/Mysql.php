@@ -17,7 +17,7 @@ CREATE TABLE  [prefix]user_info (
   name VARCHAR(255) NOT NULL,
   type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   value TEXT,
-  PRIMARY KEY  (id),
+  PRIMARY KEY (id),
   KEY user_id (user_id)
 ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 

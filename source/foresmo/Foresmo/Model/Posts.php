@@ -18,7 +18,6 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     public $posts_per_page = 10;
     public $page_count;
     public $published_posts_count = 1;
-    protected $_prefix;
 
     /**
      *
@@ -34,9 +33,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
              . 'Setup'
              . DIRECTORY_SEPARATOR;
 
-        $adapter = Solar_Config::get('Solar_Sql', 'adapter');
-        $this->_prefix = Solar_Config::get($adapter, 'prefix');
-        $this->_table_name = $this->_prefix . Solar_File::load($dir . 'table_name.php');
+        $this->_table_name = $this->_config['prefix'] . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
 
         $this->_hasMany('postinfo', array(
@@ -368,19 +365,19 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                 if ($tc == 1) {
                     $join[] = array(
                         'type' => "inner",
-                        'name' => "{$this->_prefix}posts_tags AS posts_tags{$tc}",
-                        'cond' => "posts_tags{$tc}.post_id = {$this->_prefix}posts.id"
+                        'name' => "{$this->_config['prefix']}posts_tags AS posts_tags{$tc}",
+                        'cond' => "posts_tags{$tc}.post_id = {$this->_config['prefix']}posts.id"
                     );
                 } else {
                     $join[] = array(
                         'type' => "inner",
-                        'name' => "{$this->_prefix}posts_tags AS posts_tags{$tc}",
+                        'name' => "{$this->_config['prefix']}posts_tags AS posts_tags{$tc}",
                         'cond' => "posts_tags{$tc}.post_id = posts_tags{$i}.post_id"
                     );
                 }
                 $join[] = array(
                     'type' => "inner",
-                    'name' => "{$this->_prefix}tags AS tags{$tc}",
+                    'name' => "{$this->_config['prefix']}tags AS tags{$tc}",
                     'cond' => "posts_tags{$tc}.tag_id = tags{$tc}.id"
                 );
             }
@@ -389,12 +386,12 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
         if ($oper == 'OR') {
             $join[] = array(
                 'type' => "inner",
-                'name' => "{$this->_prefix}posts_tags AS posts_tags1",
-                'cond' => "posts_tags1.post_id = {$this->_prefix}posts.id"
+                'name' => "{$this->_config['prefix']}posts_tags AS posts_tags1",
+                'cond' => "posts_tags1.post_id = {$this->_config['prefix']}posts.id"
             );
             $join[] = array(
                 'type' => "inner",
-                'name' => "{$this->_prefix}tags AS tags1",
+                'name' => "{$this->_config['prefix']}tags AS tags1",
                 'cond' => "posts_tags1.tag_id = tags1.id"
             );
             $where_stmt .= ' AND tags1.tag_slug IN (' . rtrim(str_repeat('?,', $count), ',') . ')';
