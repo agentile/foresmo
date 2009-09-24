@@ -17,6 +17,8 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
     public $users = array();
     public $recent_comments = array();
     public $quick_stats = array();
+    public $message;
+    public $data;
 
     public function _setup()
     {
@@ -56,13 +58,37 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
      * @access public
      * @since .09
      */
-    public function actionPages($sub = null)
+    public function actionPages($act = null, $slug = null)
     {
-        if ($sub !== null) {
-            $sub = strtolower($sub);
-            switch ($sub) {
+        $this->_view = 'pages_manage';
+
+        if ($act !== null) {
+            $act = strtolower($act);
+            switch ($act) {
                 case 'new':
                     $this->_view = 'pages_new';
+                break;
+                case 'manage':
+                    $this->_view = 'pages_manage';
+                    $this->data = $this->_model->posts->getAllPages();
+                break;
+                case 'edit':
+                    $this->_view = 'pages_edit';
+                    if ($slug === null) {
+                        $this->message = 'Please select a page to edit.';
+                        $this->_view = 'pages_manage';
+                        $this->data = $this->_model->posts->getAllPages();
+                        return;
+                    }
+
+                    $this->data = $this->_model->posts->getPageBySlug($slug);
+
+                    if (empty($this->data)) {
+                        $this->message = "$slug is not a valid page. Please select a page to edit.";
+                        $this->_view = 'pages_manage';
+                        $this->data = $this->_model->posts->getAllPages();
+                        return;
+                    }
                 break;
             }
         }
@@ -77,13 +103,35 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
      * @access public
      * @since .09
      */
-    public function actionPosts($sub = null)
+    public function actionPosts($act = null, $slug = null)
     {
-        if ($sub !== null) {
-            $sub = strtolower($sub);
-            switch ($sub) {
+        if ($act !== null) {
+            $act = strtolower($act);
+            switch ($act) {
                 case 'new':
                     $this->_view = 'posts_new';
+                break;
+                case 'manage':
+                    $this->_view = 'posts_manage';
+                    $this->data = $this->_model->posts->getAllPosts();
+                break;
+                case 'edit':
+                    $this->_view = 'posts_edit';
+                    if ($slug === null) {
+                        $this->message = 'Please select a post to edit.';
+                        $this->_view = 'posts_manage';
+                        $this->data = $this->_model->posts->getAllPosts();
+                        return;
+                    }
+
+                    $this->data = $this->_model->posts->getPostBySlug($slug);
+
+                    if (empty($this->data)) {
+                        $this->message = "$slug is not a valid post. Please select a post to edit.";
+                        $this->_view = 'posts_manage';
+                        $this->data = $this->_model->posts->getAllPosts();
+                        return;
+                    }
                 break;
             }
         }

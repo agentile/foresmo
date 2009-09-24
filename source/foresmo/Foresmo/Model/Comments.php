@@ -4,9 +4,10 @@
  * Comments model
  *
  * status codes
- * 0 = hidden, disapproved
+ * 0 = hidden, disapproved,
  * 1 = visible, approved
  * 2 = spam
+ * 3 = under moderation
  *
  * type codes
  * 0 = regular comment

@@ -80,11 +80,14 @@ class Foresmo_App_Index extends Foresmo_App_Base {
     {
         parent::_postRun();
 
-        $hooks = $this->_registered_hooks['_postRun'][$this->_controller][$this->_action];
-        foreach ($hooks as $module => $module_call) {
-            $module_obj = Solar::factory("Foresmo_Modules_{$module}", $this->_model);
-            if (method_exists($module_obj, $module_call)) {
-                $module_obj->$module_call();
+        if (isset($this->_registered_hooks['_postRun'][$this->_controller][$this->_action])) {
+            $hooks = $this->_registered_hooks['_postRun'][$this->_controller][$this->_action];
+
+            foreach ($hooks as $module => $module_call) {
+                $module_obj = Solar::factory("Foresmo_Modules_{$module}", $this->_model);
+                if (method_exists($module_obj, $module_call)) {
+                    $module_obj->$module_call();
+                }
             }
         }
 
@@ -111,22 +114,23 @@ class Foresmo_App_Index extends Foresmo_App_Base {
 
         // Is this a post?
         if (!empty($this->_info)) {
-            $posts = $this->_model->posts->getPostBySlug($this->_info[0]);
+            $posts = $this->_model->posts->getPublishedPostBySlug($this->_info[0]);
         }
         if (!empty($posts)) {
             $this->_view = 'post';
             $posts = $posts[0];
             $this->_setPostCommentForm($posts['id']);
             if ($this->form_success) {
-                $posts = $this->_model->posts->getPostBySlug($this->_info[0]);
+                $posts = $this->_model->posts->getPublishedPostBySlug($this->_info[0]);
                 $posts = $posts[0];
             }
+            $this->page_title .= ' | ' . $posts['title'];
             $is_post = true;
         }
 
         // Is it a page?
         if (empty($posts) && !$is_post && !empty($this->_info)) {
-            $posts = $this->_model->posts->getPageBySlug($this->_info[0]);
+            $posts = $this->_model->posts->getPublishedPageBySlug($this->_info[0]);
         }
 
         if (!empty($posts) && !$is_post) {
@@ -134,9 +138,10 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             $posts = $posts[0];
             $this->_setPostCommentForm($posts['id']);
             if ($this->form_success) {
-                $posts = $this->_model->posts->getPageBySlug($this->_info[0]);
+                $posts = $this->_model->posts->getPublishedPageBySlug($this->_info[0]);
                 $posts = $posts[0];
             }
+            $this->page_title .= ' | ' . $posts['title'];
         }
 
         if (empty($posts) && !empty($this->_info)) {

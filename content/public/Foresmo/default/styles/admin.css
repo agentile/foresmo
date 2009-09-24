@@ -862,57 +862,110 @@ ul.section li.current > a.active:hover {
 
 /* table
 ----------------------------------------------- */
+
 table {
-    width:100%;
-    border:1px solid #bbb;
-    margin-bottom:10px;
+width: 100%;
+border-collapse:separate;
+border-spacing:1px;
+font-family:Verdana, Arial, Helvetica, sans-serif;
+font-size:10px;
+background-color:#E7E7E7;
+color:#646054;
+text-align:center;
+border:1px solid #646054;
 }
-col.colC {
-    width:8em;
+
+caption,th,td {
+text-align:left;
+font-weight:400;
 }
-th, td {
-    padding:.2em 1em;
-    text-align:left;
+
+caption {
+font-weight:700;
+background:#682222;
+border-bottom:2px solid #646054;
+color:#FFF;
+text-align:center;
+text-transform:uppercase;
+padding:10px;
 }
+
+td,th {
+padding:4px;
+}
+
 thead th {
-    border-bottom:2px solid #888;
-    background:#bbb;
-    padding:.4em 1em .2em;
+text-align:center;
+background:#F5F5F5;
+color:#646054;
+border:1px solid #FFF;
+text-transform:uppercase;
 }
-thead th.table-head {
-    font-size:1em;
-    font-weight:normal;
-    text-transform:uppercase;
-    color:#fff;
-    background:#555;
-    border:1px solid #555;
+
+tbody th {
+font-weight:700;
+text-align:left;
+padding-left:16px;
+background-image:url(../images/arrow_state_grey_right.png);
+background-repeat:no-repeat;
+background-position:0 4px;
 }
-tbody th,
-tbody td {
-    border-top:1px solid #bbb;
-    border-bottom:1px solid #bbb;
-    background:#eee;
+
+tbody tr {
+background-color:#FFF;
+text-align:center;
 }
-tbody tr.odd th,
-tbody tr.odd td {
-    background:#fff;
+
+tbody tr.alt {
+background:#f9f9f9;
+border-top:1px solid #FFF;
+text-align:center;
 }
-tfoot th,
-tfoot td {
-    border-top:2px solid #666;
-    background:#eee;
+
+tbody th a:link,tbody th a:visited {
+color:#96D030;
+padding:3px 0 0 18px;
 }
-tfoot tr.total th,
-tfoot tr.total td {
-    border-top:6px double #666;
+
+tbody th a:hover {
+color:#FF8601;
 }
-tfoot tr.total th {
-    text-transform:uppercase;
+
+tbody tr td {
+height:30px;
+background:#FFF;
+border:1px solid #FFF;
+text-align:center;
 }
-th.currency,
-td.currency {
-    text-align:right;
+
+tbody tr.alt td {
+background:#f9f9f9;
+border-top:1px solid #FFF;
 }
+
+table td a:link,table td a:visited {
+color:#682222;
+text-decoration:none;
+}
+
+table td a:hover {
+color:#682222;
+border-bottom:1px solid #646054;
+text-decoration:none;
+}
+
+tfoot th,tfoot td {
+background-color:#E7E7E7;
+text-align:center;
+font-family:Georgia, "Times New Roman", Times, serif;
+font-size:16px;
+font-weight:700;
+font-style:italic;
+border-bottom:3px solid #CCC;
+border-top:1px solid #DFDFDF;
+padding:5px;
+}
+
 
 
 /* forms
@@ -1544,6 +1597,23 @@ option {
 
 .message {
     color:#990000;
+}
+
+.admin_message {
+    margin-top:10px;
+    border-top:1px solid #904860;
+    border-bottom:1px solid #904860;
+    text-align:center;
+    color: #904860;
+    font-weight: bold;
+    padding-top:5px;
+    padding-bottom: 5px;
+    background-color: #F0D8D8;
+    width:98%;
+    display: inline;
+    float: left;
+    margin-left: 1%;
+    margin-right: 1%;
 }
 
 /* login

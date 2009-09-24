@@ -21,32 +21,35 @@ echo $this->script('Foresmo/default/scripts/admin.js')."\n";
                 <a href="/admin/pages">Pages</a>
                 <ul>
                     <li><a href="/admin/pages/new">Create New Page</a></li>
-                    <li><a href="#">Manage Pages</a></li>
+                    <li><a href="/admin/pages/manage">Manage Pages</a></li>
                 </ul>
             </li>
             <li>
                 <a href="/admin/posts">Posts</a>
                 <ul>
                     <li><a href="/admin/posts/new">Create New Post</a></li>
-                    <li><a href="#">Manage Posts</a></li>
+                    <li><a href="/admin/posts/manage">Manage Posts</a></li>
                 </ul>
             </li>
             <li>
                 <a href="/admin/comments">Comments</a>
                 <ul>
-                    <li><a href="#">Spam</a></li>
+                    <li><a href="/admin/comments/spam">Spam</a></li>
                 </ul>
             </li>
             <li>
                 <a href="/admin/modules">Modules</a>
+                <ul>
+                    <li><a href="/admin/modules/manage">Manage Modules</a></a></li>
+                </ul>
             </li>
             <li>
                 <a href="/admin/users">Users</a>
                 <ul>
-                    <li><a href="#">Add user</a></li>
-                    <li><a href="#">Manage users</a></li>
-                    <li><a href="#">Add role</a></li>
-                    <li><a href="#">Manage roles</a></li>
+                    <li><a href="/admin/users/add">Add user</a></li>
+                    <li><a href="/admin/users/manage">Manage users</a></li>
+                    <li><a href="/admin/roles/add">Add role</a></li>
+                    <li><a href="/admin/roles/manage">Manage roles</a></li>
                 </ul>
             </li>
             <li>
@@ -60,12 +63,19 @@ echo $this->script('Foresmo/default/scripts/admin.js')."\n";
             <li>
                 <a href="#"><?php echo $this->session->get('Foresmo_username'); ?></a>
                 <ul>
-                    <li><a href="#">Preferences</a></li>
+                    <li><a href="/admin/preferences">Preferences</a></li>
                 </ul>
             </li>
         </ul>
     </div>
     <div id="main_content" class="container_16">
+        <?php
+            if (isset($this->message)) {
+                echo '<div class="admin_message">';
+                echo $this->message;
+                echo '</div>';
+            }
+        ?>
         <?php echo $this->layout_content; ?>
     </div>
     <div id="footer">

@@ -155,10 +155,17 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             } else {
                 $this->_model->post_info->setCommentsDisabled($last_insert_id, false);
             }
+
+            if ((int) $post_data['post_type'] == 1) {
+                $message = "Successly created new post! <a href=\"/{$post_data['post_slug']}\">View post</a>.";
+            } elseif ((int) $post_data['post_type'] == 2) {
+                $message = "Successly created new page! <a href=\"/{$post_data['post_slug']}\">View page</a>.";
+            }
+
             $ret = array(
                 'success' => true,
                 'id' => $last_insert_id,
-                'message' => "Success! <a href=\"/{$post_data['post_slug']}\">View post</a>.",
+                'message' => $message,
             );
         }
         return json_encode($ret);

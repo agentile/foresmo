@@ -88,6 +88,7 @@ class Foresmo_App_Base extends Solar_App_Base {
     public $installed = false;
     public $blog_theme = 'default';
     public $blog_title = 'Foresmo Blog';
+    public $page_title;
     public $pages_count;
     public $web_root;
     public $enabled_modules_data = array();
@@ -150,6 +151,7 @@ class Foresmo_App_Base extends Solar_App_Base {
                     break;
                 }
             }
+            $this->page_title = $this->blog_title;
             $time_info = Foresmo::getTimeInfo();
             Foresmo::$date_format = $time_info['blog_date_format'];
             Foresmo::$timezone = $time_info['blog_timezone'];
@@ -218,7 +220,7 @@ class Foresmo_App_Base extends Solar_App_Base {
      */
     public function validate($validator, $str)
     {
-        $obj = Solar::factory('Solar_Filter_' . ucfirst(strtolower($validator)));
+        $obj = Solar::factory('Solar_Filter_' . ucfirst($validator));
         if (is_object($obj)) {
             return $obj->$validator($str);
         }
@@ -267,7 +269,7 @@ class Foresmo_App_Base extends Solar_App_Base {
     {
         $allowed_processes = array('_preRun', '_postRun', '_postAction', '_preRender', '_postRender');
         $allowed_actions = array(
-            'index' => array('index', 'tag', 'page', 'sort'),
+            'index' => array('main', 'tag', 'page', 'sort'),
         );
 
         $hooks = $this->_modules->getRegisteredHooks();

@@ -40,7 +40,7 @@
                     var response = JSON.decode(response);
                     $('message').set('html', response.message);
                     if (response.success) {
-                        window.location = '/admin/pages/edit/1';
+                        window.location = '/admin/pages/manage';
                     }
                 }});
                 $('post_new').send();
@@ -63,6 +63,7 @@
                     <select name="post_status">
                         <option value="1">Publish</option>
                         <option value="2">Save as draft</option>
+                        <option value="0">Hidden</option>
                     </select><br/><br/>
                     <label for="post_tags">Tags</label><br/>
                     <input type="text" name="post_tags" class="input" style="width: 90%;"/><br/>

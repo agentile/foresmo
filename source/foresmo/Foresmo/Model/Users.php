@@ -22,16 +22,20 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
 
         $this->_table_name = $this->_config['prefix'] . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
+
         $this->_hasMany('userinfo');
+
         $this->_hasOne('groups_permissions', array(
             'foreign_class' => 'Foresmo_Model_GroupsPermissions',
             'foreign_key' => 'group_id',
         ));
+
         $this->_hasMany('permissions', array(
              'foreign_class' => 'Foresmo_Model_Permissions',
              'through'       => 'groups_permissions',
              'through_key'   => 'permission_id',
         ));
+
         $this->_hasOne('groups', array(
             'foreign_class' => 'Foresmo_Model_Groups',
             'foreign_key' => 'id',

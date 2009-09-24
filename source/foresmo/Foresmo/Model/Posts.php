@@ -57,11 +57,18 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
              'through'       => 'posts_tags',
              'through_key'   => 'tag_id',
         ));
+
+        $this->_hasOne('users', array(
+            'foreign_class' => 'Foresmo_Model_Users',
+            'cols' => array('id', 'username', 'email'),
+            'native_col' => 'user_id',
+            'foreign_col' => 'id',
+        ));
     }
 
     /**
      * getPageBySlug
-     * get a specific page by slug and status of 1 (published),
+     * get a specific page by slug,
      * with all it's pertitent associated data (tags, comments,
      * postinfo) as an array
      *
@@ -69,6 +76,82 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
      * @return array
      */
     public function getPageBySlug($slug_name)
+    {
+        $results = $this->fetchAllAsArray(
+            array(
+                'where'  => array(
+                    'slug = ? AND content_type = ?' => array($slug_name, 2),
+                ),
+                'order'  => array (
+                    'id DESC'
+                ),
+                'paging' => $this->posts_per_page,
+                'page'   => 1,
+                'eager'  => array(
+                    'comments' => array(
+                        'eager' => array(
+                            'commentinfo'
+                        )
+                    ),
+                    'tags',
+                    'postinfo',
+                    'users',
+                ),
+            )
+        );
+        Foresmo::dateFilter($results);
+        Foresmo::sanitize($results);
+        return $results;
+    }
+
+    /**
+     * getPostBySlug
+     * get a specific blog post by slug,
+     * with all it's pertitent associated data (tags, comments,
+     * postinfo) as an array
+     *
+     * @param $slug_name
+     * @return array
+     */
+    public function getPostBySlug($slug_name)
+    {
+        $results = $this->fetchAllAsArray(
+            array(
+                'where'  => array(
+                    'slug = ? AND content_type = ?' => array($slug_name, 1),
+                ),
+                'order'  => array (
+                    'id DESC'
+                ),
+                'paging' => $this->posts_per_page,
+                'page'   => 1,
+                'eager'  => array(
+                    'comments' => array(
+                        'eager' => array(
+                            'commentinfo'
+                        )
+                    ),
+                    'tags',
+                    'postinfo',
+                    'users',
+                ),
+            )
+        );
+        Foresmo::dateFilter($results);
+        Foresmo::sanitize($results);
+        return $results;
+    }
+
+    /**
+     * getPublishedPageBySlug
+     * get a specific page by slug and status of 1 (published),
+     * with all it's pertitent associated data (tags, comments,
+     * postinfo) as an array
+     *
+     * @param $slug_name
+     * @return array
+     */
+    public function getPublishedPageBySlug($slug_name)
     {
         $results = $this->fetchAllAsArray(
             array(
@@ -87,7 +170,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                         )
                     ),
                     'tags',
-                    'postinfo'
+                    'postinfo',
+                    'users',
                 ),
             )
         );
@@ -97,7 +181,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getPostBySlug
+     * getPublishedPostBySlug
      * get a specific blog post by slug and status of 1 (published),
      * with all it's pertitent associated data (tags, comments,
      * postinfo) as an array
@@ -105,7 +189,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
      * @param $slug_name
      * @return array
      */
-    public function getPostBySlug($slug_name)
+    public function getPublishedPostBySlug($slug_name)
     {
         $results = $this->fetchAllAsArray(
             array(
@@ -124,7 +208,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                         )
                     ),
                     'tags',
-                    'postinfo'
+                    'postinfo',
+                    'users',
                 ),
             )
         );
@@ -159,7 +244,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                         )
                     ),
                     'tags',
-                    'postinfo'
+                    'postinfo',
+                    'users',
                 ),
             )
         );
@@ -194,7 +280,76 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                         )
                     ),
                     'tags',
-                    'postinfo'
+                    'postinfo',
+                    'users',
+                ),
+            )
+        );
+        Foresmo::dateFilter($results);
+        Foresmo::sanitize($results);
+        return $results;
+    }
+
+    /**
+     * getAllPages
+     * get all pages, with all it's pertitent associated data
+     * (tags, comments, postinfo, author) as an array
+     *
+     * @return array
+     */
+    public function getAllPages()
+    {
+        $results = $this->fetchAllAsArray(
+            array(
+                'where'  => array(
+                    'content_type = ?' => array(2)
+                ),
+                'order'  => array (
+                    'id DESC'
+                ),
+                'eager'  => array(
+                    'comments' => array(
+                        'eager' => array(
+                            'commentinfo'
+                        )
+                    ),
+                    'tags',
+                    'postinfo',
+                    'users',
+                ),
+            )
+        );
+        Foresmo::dateFilter($results);
+        Foresmo::sanitize($results);
+        return $results;
+    }
+
+    /**
+     * getAllPosts
+     * get all posts, with all it's pertitent associated data
+     * (tags, comments, postinfo, author) as an array
+     *
+     * @return array
+     */
+    public function getAllPosts()
+    {
+        $results = $this->fetchAllAsArray(
+            array(
+                'where'  => array(
+                    'content_type = ?' => array(1)
+                ),
+                'order'  => array (
+                    'id DESC'
+                ),
+                'eager'  => array(
+                    'comments' => array(
+                        'eager' => array(
+                            'commentinfo'
+                        )
+                    ),
+                    'tags',
+                    'postinfo',
+                    'users',
                 ),
             )
         );
@@ -289,7 +444,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                         )
                     ),
                     'tags',
-                    'postinfo'
+                    'postinfo',
+                    'users',
                 ),
             )
         );
@@ -325,7 +481,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                         )
                     ),
                     'tags',
-                    'postinfo'
+                    'postinfo',
+                    'users',
                 ),
             )
         );
@@ -415,6 +572,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
                     ),
                     'tags',
                     'postinfo',
+                    'users',
                 ),
             )
         );
@@ -456,7 +614,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     public function newPost($post_data)
     {
         $post_status = (int) $post_data['post_status'];
-        if ($post_data['post_status'] <= 0 || $post_data['post_status'] > 2) {
+        if ($post_data['post_status'] < 0 || $post_data['post_status'] > 2) {
             // if unexpected int, default to 1 (published)
             $post_data['post_status'] = 1;
         }
