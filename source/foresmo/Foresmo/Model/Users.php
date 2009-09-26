@@ -23,7 +23,10 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
         $this->_table_name = $this->_config['prefix'] . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
 
-        $this->_hasMany('userinfo');
+        $this->_hasMany('userinfo', array(
+            'foreign_class' => 'Foresmo_Model_UserInfo',
+            'foreign_key' => 'user_id',
+        ));
 
         $this->_hasOne('groups_permissions', array(
             'foreign_class' => 'Foresmo_Model_GroupsPermissions',
@@ -43,37 +46,39 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
     }
 
     /**
-     * validUser
+     * isValidUser
      * Given credentionals, is this a valid user. (Login)
      *
      * @param $values
-     * @return mixed false on invalid, fetched row if valid.
+     * @return bool
      */
-    public function validUser($values = array())
+    public function isValidUser($values = array())
     {
-        if (array_key_exists('username', $values)
-            && array_key_exists('password', $values)) {
+        if (!array_key_exists('username', $values) || !array_key_exists('password', $values)) {
+            return false;
+        }
 
-            $salt = Solar_Config::get('Solar_Auth_Adapter_Sql', 'salt');
+        $salt = Solar_Config::get('Solar_Auth_Adapter_Sql', 'salt');
 
-            $username = $values['username'];
-            $password = md5($salt . $values['password']);
-            $where = array('username = ?' => $username, 'password = ?' => $password);
+        $username = $values['username'];
+        $password = md5($salt . $values['password']);
+        $where = array('username = ?' => $username, 'password = ?' => $password);
 
-            $result = $this->fetchAllAsArray(array('where' => $where));
+        $result = $this->fetchAllAsArray(array(
+            'cache' => false,
+            'where' => $where,
+            )
+        );
 
-            if (is_array($result) && count($result) === 0) {
-                return false;
-            } elseif (is_array($result) && count($result) > 0) {
-                return $result[0];
-            }
+        if (is_array($result) && count($result) > 0) {
+            return true;
         }
         return false;
     }
 
     /**
      * checkUsernameExists
-     * Checks to see if e-mail address supplied is an e-mail address of
+     * Checks to see if username supplied is a username of
      * one of the blogs registered users.
      */
     public function checkUsernameExists($username)
@@ -106,31 +111,84 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
     }
 
     /**
-     * getEmailFromID
+     * fetchEmailByID
      *
      * @param $id
      * @return string
      */
-    public function getEmailFromID($id)
+    public function fetchEmailByID($id)
     {
         $where = array(
             'id = ?' => (int) $id
         );
 
-        $results = $this->fetchAllAsArray(array('where' => $where));
-        if (!empty($results)) {
-            return $results[0]['email'];
+        $result = $this->fetchOneAsArray(array('where' => $where));
+        if (!empty($result) && isset($result['email'])) {
+            return $result['email'];
         }
         return false;
     }
 
     /**
-     * getUsers
+     * fetchUsers
      *
      * @return array
      */
-    public function getUsers()
+    public function fetchUsers()
     {
-        return $this->fetchAllAsArray(array('eager' => array('permissions','groups')));
+        return $this->fetchAllAsArray(array(
+            'eager' => array(
+                'userinfo',
+                'permissions',
+                'groups',
+                )
+            )
+        );
+    }
+
+    /**
+     * fetchUserByID
+     *
+     * @param $user_id
+     * @return array
+     */
+    public function fetchUserByID($user_id)
+    {
+        if ((int) $user_id != $user_id) {
+            return array();
+        }
+
+        return $this->fetchOneAsArray(array(
+            'where' => array(
+                'id = ?' => (int) $user_id
+            ),
+            'eager' => array(
+                'userinfo',
+                'permissions',
+                'groups',
+                )
+            )
+        );
+    }
+
+    /**
+     * fetchUserByUsername
+     *
+     * @param $username
+     * @return array
+     */
+    public function fetchUserByUsername($username)
+    {
+        return $this->fetchOneAsArray(array(
+            'where' => array(
+                'username = ?' => (string) $username
+            ),
+            'eager' => array(
+                'userinfo',
+                'permissions',
+                'groups',
+                )
+            )
+        );
     }
 }

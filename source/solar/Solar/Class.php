@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Class.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Class.php 4071 2009-09-20 21:47:30Z pmjones $
  * 
  */
 class Solar_Class
@@ -155,10 +155,12 @@ class Solar_Class
         // does the directory exist?
         $dir = Solar_Dir::exists($base);
         if (! $dir) {
-            throw $this->_exception('ERR_NO_DIR_FOR_CLASS', array(
-                'class' => $class,
-                'base'  => $base,
-            ));
+            throw Solar::exception(
+                'Solar_Class',
+                'ERR_NO_DIR_FOR_CLASS',
+                'Directory does not exist',
+                array('class' => $class, 'base' => $base)
+            );
         } else {
             return Solar_Dir::fix($dir . DIRECTORY_SEPARATOR. $sub);
         }

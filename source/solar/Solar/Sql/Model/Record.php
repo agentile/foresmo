@@ -13,7 +13,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Record.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Record.php 4087 2009-09-23 16:48:23Z pmjones $
  * 
  */
 class Solar_Sql_Model_Record extends Solar_Struct
@@ -1238,8 +1238,18 @@ class Solar_Sql_Model_Record extends Solar_Struct
         // create a filter object based on the model's filter class
         $filter = Solar::factory($this->_model->filter_class);
         
+        // note which table cols are not part of the fetch cols
+        $skip = array_diff(
+            array_keys($this->_model->table_cols),
+            $this->_model->fetch_cols
+        );
+        
         // set filters as specified by the model
         foreach ($this->_model->filters as $key => $list) {
+            // skip table cols that are not part of the fetch cols
+            if (in_array($key, $skip)) {
+                continue;
+            }
             $filter->addChainFilters($key, $list);
         }
         
@@ -1249,10 +1259,6 @@ class Solar_Sql_Model_Record extends Solar_Struct
         }
         
         // set which elements are required by the table itself
-        // 
-        // @todo Turn off created/updated, as they will get populated?  Also
-        // turn off "inherit" values?  Or auto-set them in _preInsert() and
-        // _preUpdate() ?
         foreach ($this->_model->table_cols as $key => $info) {
             if ($info['autoinc']) {
                 // autoinc are not required

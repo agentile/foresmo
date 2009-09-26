@@ -13,7 +13,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Form.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Form.php 4069 2009-09-20 21:25:53Z pmjones $
  * 
  */
 class Solar_Form extends Solar_Base
@@ -79,7 +79,10 @@ class Solar_Form extends Solar_Base
      */
     protected $_default_attribs = array(
         'action'  => null,
+        'class'   => null,
+        'id'      => null,
         'method'  => 'post',
+        'name'    => null,
         'enctype' => 'multipart/form-data',
     );
     
@@ -350,7 +353,7 @@ class Solar_Form extends Solar_Base
      */
     public function setElements($list, $array = null)
     {
-        foreach ($list as $name => $info) {
+        foreach ((array) $list as $name => $info) {
             $this->setElement($name, $info, $array);
         }
     }

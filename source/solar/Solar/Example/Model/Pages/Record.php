@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Areas.php 3617 2009-02-16 19:47:30Z pmjones $
+ * @version $Id: Record.php 4041 2009-09-18 03:00:39Z pmjones $
  * 
  */
 class Solar_Example_Model_Pages_Record extends Solar_Example_Model_Nodes_Record {

@@ -158,13 +158,13 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
     }
 
     /**
-     * getRecentComments
-     * Get recent comments
+     * fetchRecentComments
+     * Fetch recent comments
      *
      * @param int $limit limit (default 10)
      * @return array result set
      */
-    public function getRecentComments($limit = null)
+    public function fetchRecentComments($limit = null)
     {
         if (is_null($limit)) {
             $limit = 10;
@@ -191,14 +191,14 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
     }
 
     /**
-     * getTotalCount
-     * Get count of certain type and status
+     * fetchTotalCount
+     * Fetch count of certain type and status
      *
      * $param int $type
      * $param int $status
      * @return int count
      */
-    public function getTotalCount($type, $status)
+    public function fetchTotalCount($type, $status)
     {
         $result = $this->fetchAllAsArray(
             array(

@@ -29,13 +29,13 @@ class Foresmo_Model_Modules extends Solar_Sql_Model {
     }
 
     /**
-     * getEnablesModules
+     * fetchEnablesModules
      *
-     * get modules that are enabled
+     * fetch modules that are enabled
      *
      * @return array
      */
-    public function getEnabledModules()
+    public function fetchEnabledModules()
     {
         $where = array('enabled = ?' => 1);
         $results = $this->fetchAllAsArray(
@@ -57,7 +57,7 @@ class Foresmo_Model_Modules extends Solar_Sql_Model {
      */
     public function isEnabled($name)
     {
-        $enabled_modules = $this->getEnabledModules();
+        $enabled_modules = $this->fetchEnabledModules();
         foreach ($enabled_modules as $enabled_module) {
             if (strtolower($enabled_module['name']) == strtolower($name)) {
                 return true;
@@ -67,14 +67,14 @@ class Foresmo_Model_Modules extends Solar_Sql_Model {
     }
 
     /**
-     * getModuleInfoByName
+     * fetchModuleInfoByName
      *
-     * get Module Info Rows by Module Name
+     * fetch Module Info Rows by Module Name
      *
      * @param string $name module name
      * @return array
      */
-    public function getModuleInfoByName($name)
+    public function fetchModuleInfoByName($name)
     {
         $results = $this->fetchAllAsArray(
             array(

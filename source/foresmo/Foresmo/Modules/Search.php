@@ -31,7 +31,7 @@ class Foresmo_Modules_Search extends Solar_Base {
         $this->_view_path = Solar_Class::dir($this, 'View');
         $this->_view_file = 'index.php';
         $this->_view = Solar::factory('Solar_View', array('template_path' => $this->_view_path));
-        $this->_module_info = $this->_model->modules->getModuleInfoByName($this->_name);
+        $this->_module_info = $this->_model->modules->fetchModuleInfoByName($this->_name);
     }
 
     /**

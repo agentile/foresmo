@@ -36,7 +36,7 @@
             $('post_edit_submit').addEvent('click', function(e) {
                 e.stop();
                 fixTiny({instance:'post_content'});
-                $('post_new').set('send', {url: '/ajax', onComplete: function(response) {
+                $('post_edit').set('send', {url: '/ajax', onComplete: function(response) {
                     var response = JSON.decode(response);
                     $('message').set('html', response.message);
                     if (response.success) {

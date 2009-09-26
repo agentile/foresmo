@@ -22,6 +22,7 @@ class Foresmo_Model_Tags extends Solar_Sql_Model {
 
         $this->_table_name = $this->_config['prefix'] . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
+
         $this->_hasMany('posts_tags', array(
             'foreign_class' => 'Foresmo_Model_PostsTags',
             'foreign_key' => 'tag_id',
@@ -34,13 +35,42 @@ class Foresmo_Model_Tags extends Solar_Sql_Model {
     }
 
     /**
-     * getTags
+     * fetchTagsForPublishedPosts
+     *
+     * Fetch all available tags with pertinant info
+     *
+     * @return array
+     */
+    public function fetchTagsForPublishedPosts()
+    {
+        $results = $this->fetchAllAsArray(
+            array(
+                'cols' => array('id', 'tag', 'tag_slug', "COUNT({$this->_config['prefix']}tags.id) AS count"),
+                'order'  => array (
+                    'tag ASC'
+                ),
+                'group' => array('foresmo_tags.id'),
+                'eager'  => array(
+                    'posts' => array(
+                        'join_only' => true,
+                        'join_cond' => array(
+                            'posts.status = ?' => 1,
+                        ),
+                    ),
+                ),
+            )
+        );
+        return $results;
+    }
+
+    /**
+     * fetchTags
      *
      * Get all available tags with pertinant info
      *
      * @return array
      */
-    public function getTags()
+    public function fetchTags()
     {
         $results = $this->fetchAllAsArray(
             array(

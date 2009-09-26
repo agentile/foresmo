@@ -142,18 +142,18 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
                 'message' => $message,
             );
         } else {
-            $last_insert_id = $this->_model->posts->newPost($post_data);
+            $last_insert_id = $this->_model->posts->insertNewPost($post_data);
             if (!$this->validate('validateBlank', $post_data['post_tags'])) {
                 $tags = explode(',', rtrim(trim($post_data['post_tags']), ','));
                 foreach ($tags as $key => $tag) {
                     $tags[$key] = trim($tag);
                 }
-                $this->_model->posts_tags->setPostTags($last_insert_id, $tags);
+                $this->_model->posts_tags->insertPostTags($last_insert_id, $tags);
             }
             if (isset($post_data['post_comments_disabled']) && $post_data['post_comments_disabled'] == 'true') {
-                $this->_model->post_info->setCommentsDisabled($last_insert_id, true);
+                $this->_model->post_info->insertCommentsDisabled($last_insert_id, true);
             } else {
-                $this->_model->post_info->setCommentsDisabled($last_insert_id, false);
+                $this->_model->post_info->insertCommentsDisabled($last_insert_id, false);
             }
 
             if ((int) $post_data['post_type'] == 1) {
@@ -202,7 +202,8 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             return 'Cannot connect to database! Please ensure valid DB info.';
         }
 
-        $config_file = Solar_Config::get('Solar', 'system') . '/config/Solar.config.php';
+        $this->random_str = Foresmo::randomString(18);
+        $config_file = Solar::$system . '/config/Solar.config.php';
         $config_content = $this->_getConfigContent($post_data);
         if(($handle = @fopen($config_file, 'w')) !== false) {
             if (@fwrite($handle, $config_content) === false) {
@@ -215,7 +216,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
             return "Could not open {$config_file}, please ensure that this file exists and is writable.";
         }
 
-        $schema = Solar_Config::get('Solar', 'system') . '/source/foresmo/Foresmo/Schemas/' . $db_type . '.php';
+        $schema = Solar::$system . '/source/foresmo/Foresmo/Schemas/' . $db_type . '.php';
         $schema_sql = Solar_File::load($schema);
         $schema_sql = str_replace('[prefix]', $post_data['db_prefix'], $schema_sql);
         try {
@@ -260,8 +261,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
 
         $username = $post_data['blog_user'];
         $password = $post_data['blog_password'];
-        $salt = $this->random_str;
-        $password = md5($salt . $password);
+        $password = md5($this->random_str . $password);
         $email = trim($post_data['blog_email']);
 
         $table = $post_data['db_prefix'] . 'groups';
@@ -571,7 +571,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
 );
 
 // Salt for password - change to something unique and strong.
-\$config['Solar_Auth_Adapter_Sql']['salt'] = '".$this->str_rand(18)."';
+\$config['Solar_Auth_Adapter_Sql']['salt'] = '".$this->random_str."';
 
 
 /**
@@ -588,52 +588,4 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
 return \$config;
         ";
     }
-
-
-    /**
-     * Generate and return a random string
-     *
-     * The default string returned is 8 alphanumeric characters.
-     *
-     * The type of string returned can be changed with the output parameter.
-     * Four types are available: alpha, numeric, alphanum and hexadec.
-     *
-     * If the output parameter does not match one of the above, then the string
-     * supplied is used.
-     *
-     * @author      Aidan Lister <aidan@php.net>
-     * @version     2.1.0
-     * @link        http://aidanlister.com/repos/v/function.str_rand.php
-     * @param       int     $length  Length of string to be generated
-     * @param       string  $seeds   Seeds string should be generated from
-     */
-    public function str_rand($length = 8, $output = 'alphanum')
-    {
-        // Possible seeds
-        $outputs['alpha']    = 'abcdefghijklmnopqrstuvwxyz';
-        $outputs['numeric']  = '0123456789';
-        $outputs['alphanum'] = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        $outputs['alphanumi'] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        $outputs['hexadec']  = '0123456789abcdef';
-
-        // Choose seed
-        if (isset($outputs[$output])) {
-            $output = $outputs[$output];
-        }
-
-        // Seed generator
-        list($usec, $sec) = explode(' ', microtime());
-        $seed = (float) $sec + ((float) $usec * 100000);
-        mt_srand($seed);
-
-        // Generate
-        $str = '';
-        $output_count = strlen($output);
-        for ($i = 0; $length > $i; $i++) {
-            $str .= $output{mt_rand(0, $output_count - 1)};
-        }
-        $this->random_str = $str;
-        return $str;
-    }
-
 }

@@ -41,11 +41,11 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
      */
     public function actionIndex()
     {
-        $this->recent_comments = $this->_model->comments->getRecentComments(20);
+        $this->recent_comments = $this->_model->comments->fetchRecentComments(20);
         $this->quick_stats = array(
-            'total_posts' => $this->_model->posts->getTotalCount(1, 1),
-            'total_pages' => $this->_model->posts->getTotalCount(2, 1),
-            'total_comments' => $this->_model->comments->getTotalCount(0, 1),
+            'total_posts' => $this->_model->posts->fetchTotalCount(1, 1),
+            'total_pages' => $this->_model->posts->fetchTotalCount(2, 1),
+            'total_comments' => $this->_model->comments->fetchTotalCount(0, 1),
         );
     }
 
@@ -70,23 +70,23 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
                 break;
                 case 'manage':
                     $this->_view = 'pages_manage';
-                    $this->data = $this->_model->posts->getAllPages();
+                    $this->data = $this->_model->posts->fetchAllPages();
                 break;
                 case 'edit':
                     $this->_view = 'pages_edit';
                     if ($slug === null) {
                         $this->message = 'Please select a page to edit.';
                         $this->_view = 'pages_manage';
-                        $this->data = $this->_model->posts->getAllPages();
+                        $this->data = $this->_model->posts->fetchAllPages();
                         return;
                     }
 
-                    $this->data = $this->_model->posts->getPageBySlug($slug);
+                    $this->data = $this->_model->posts->fetchPageBySlug($slug);
 
                     if (empty($this->data)) {
                         $this->message = "$slug is not a valid page. Please select a page to edit.";
                         $this->_view = 'pages_manage';
-                        $this->data = $this->_model->posts->getAllPages();
+                        $this->data = $this->_model->posts->fetchAllPages();
                         return;
                     }
                 break;
@@ -113,23 +113,23 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
                 break;
                 case 'manage':
                     $this->_view = 'posts_manage';
-                    $this->data = $this->_model->posts->getAllPosts();
+                    $this->data = $this->_model->posts->fetchAllPosts();
                 break;
                 case 'edit':
                     $this->_view = 'posts_edit';
                     if ($slug === null) {
                         $this->message = 'Please select a post to edit.';
                         $this->_view = 'posts_manage';
-                        $this->data = $this->_model->posts->getAllPosts();
+                        $this->data = $this->_model->posts->fetchAllPosts();
                         return;
                     }
 
-                    $this->data = $this->_model->posts->getPostBySlug($slug);
+                    $this->data = $this->_model->posts->fetchPostBySlug($slug);
 
                     if (empty($this->data)) {
                         $this->message = "$slug is not a valid post. Please select a post to edit.";
                         $this->_view = 'posts_manage';
-                        $this->data = $this->_model->posts->getAllPosts();
+                        $this->data = $this->_model->posts->fetchAllPosts();
                         return;
                     }
                 break;
@@ -190,7 +190,7 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
      */
     public function actionUsers()
     {
-        $this->users = $this->_model->users->getUsers();
+        $this->users = $this->_model->users->fetchUsers();
         $this->quick_stats = array(
             'total_users' => count($this->users),
         );

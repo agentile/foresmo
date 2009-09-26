@@ -28,7 +28,7 @@ body
 {
   background:#fff;
   color:#222;
-  font-family:verdana,helvetica,sans-serif;
+  font-family:Georgia,Verdana,Tahoma,Arial,sans-serif;
   line-height:1.5em;
   letter-spacing:.05em;
   font-size:.9em;
@@ -145,7 +145,7 @@ ul,li
 
 #header span
 {
-  font-family:Constantia, Georgia;
+  font-family:Georgia,Verdana,Tahoma,Arial,sans-serif;
   font-size:1.8em;
   float:right;
   color:#000;
@@ -202,7 +202,7 @@ hr
 
 #content-right span
 {
-  font-family:verdana;
+  font-family:Georgia,Verdana,Tahoma,Arial,sans-serif;
   font-size:.9em;
   font-weight:700;
 }

@@ -44,7 +44,6 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
         $this->_hasMany('comments', array(
             'foreign_class' => 'Foresmo_Model_Comments',
             'foreign_key' => 'post_id',
-            'where' => array('status = ?' => 1)
         ));
 
         $this->_hasMany('posts_tags', array(
@@ -67,20 +66,20 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getPageBySlug
-     * get a specific page by slug,
+     * fetchPageBySlug
+     * Fetch a specific page by its slug,
      * with all it's pertitent associated data (tags, comments,
      * postinfo) as an array
      *
      * @param $slug_name
      * @return array
      */
-    public function getPageBySlug($slug_name)
+    public function fetchPageBySlug($slug_name)
     {
         $results = $this->fetchAllAsArray(
             array(
                 'where'  => array(
-                    'slug = ? AND content_type = ?' => array($slug_name, 2),
+                    'slug = ? AND content_type = ? AND comments.status = ?' => array($slug_name, 2, 1),
                 ),
                 'order'  => array (
                     'id DESC'
@@ -105,15 +104,15 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getPostBySlug
-     * get a specific blog post by slug,
+     * fetchPostBySlug
+     * Fetch a specific blog post by slug,
      * with all it's pertitent associated data (tags, comments,
      * postinfo) as an array
      *
      * @param $slug_name
      * @return array
      */
-    public function getPostBySlug($slug_name)
+    public function fetchPostBySlug($slug_name)
     {
         $results = $this->fetchAllAsArray(
             array(
@@ -143,15 +142,15 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getPublishedPageBySlug
-     * get a specific page by slug and status of 1 (published),
+     * fetchPublishedPageBySlug
+     * Fetch a specific page by slug and status of 1 (published),
      * with all it's pertitent associated data (tags, comments,
      * postinfo) as an array
      *
      * @param $slug_name
      * @return array
      */
-    public function getPublishedPageBySlug($slug_name)
+    public function fetchPublishedPageBySlug($slug_name)
     {
         $results = $this->fetchAllAsArray(
             array(
@@ -181,15 +180,15 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getPublishedPostBySlug
-     * get a specific blog post by slug and status of 1 (published),
+     * fetchPublishedPostBySlug
+     * Fetch a specific blog post by slug and status of 1 (published),
      * with all it's pertitent associated data (tags, comments,
      * postinfo) as an array
      *
      * @param $slug_name
      * @return array
      */
-    public function getPublishedPostBySlug($slug_name)
+    public function fetchPublishedPostBySlug($slug_name)
     {
         $results = $this->fetchAllAsArray(
             array(
@@ -219,13 +218,13 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getPublishedPosts
-     * get all posts with status of 1 (published), with all it's
+     * fetchPublishedPosts
+     * Fetch all posts with status of 1 (published), with all it's
      * pertitent associated data (tags, comments, postinfo) as an array
      *
      * @return array
      */
-    public function getPublishedPosts()
+    public function fetchPublishedPosts()
     {
         $results = $this->fetchAllAsArray(
             array(
@@ -255,13 +254,13 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getPublishedPages
-     * get all pages with status of 1 (published), with all it's
+     * fetchPublishedPages
+     * Fetch all pages with status of 1 (published), with all it's
      * pertitent associated data (tags, comments, postinfo) as an array
      *
      * @return array
      */
-    public function getPublishedPages()
+    public function fetchPublishedPages()
     {
         $results = $this->fetchAllAsArray(
             array(
@@ -291,13 +290,13 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getAllPages
-     * get all pages, with all it's pertitent associated data
+     * fetchAllPages
+     * Fetch all pages, with all it's pertitent associated data
      * (tags, comments, postinfo, author) as an array
      *
      * @return array
      */
-    public function getAllPages()
+    public function fetchAllPages()
     {
         $results = $this->fetchAllAsArray(
             array(
@@ -325,13 +324,13 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getAllPosts
-     * get all posts, with all it's pertitent associated data
+     * fetchAllPosts
+     * Fetch all posts, with all it's pertitent associated data
      * (tags, comments, postinfo, author) as an array
      *
      * @return array
      */
-    public function getAllPosts()
+    public function fetchAllPosts()
     {
         $results = $this->fetchAllAsArray(
             array(
@@ -359,13 +358,13 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getPublishedPostsByDate
-     * get all posts with status of 1 (published) and corresponding year, month, date
+     * fetchPublishedPostsByDate
+     * Fetch all posts with status of 1 (published) and corresponding year, month, date
      * with all pertitent associated data (tags, comments, postinfo) as an array
      *
      * @return array
      */
-    public function getPublishedPostsByDate($year = null, $month = null, $day = null)
+    public function fetchPublishedPostsByDate($year = null, $month = null, $day = null)
     {
         if (is_null($year) && is_null($month) && is_null($day)) {
             // If all is null then get posts made today.
@@ -455,13 +454,13 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getPublishedPostsByPage
-     * get all posts with status of 1 (published) and page, with all
+     * fetchPublishedPostsByPage
+     * Fetch all posts with status of 1 (published) and page, with all
      * pertitent associated data (tags, comments, postinfo) as an array
      *
      * @return array
      */
-    public function getPublishedPostsByPage($page_num)
+    public function fetchPublishedPostsByPage($page_num)
     {
         $page_num = (int) $page_num;
         $results = $this->fetchAllAsArray(
@@ -492,8 +491,8 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getPostsByTag
-     * get all posts with status of 1 (published) with specific tag(s)
+     * fetchPostsByTag
+     * Fetch all posts with status of 1 (published) with specific tag(s)
      * with all it's pertitent associated data (tags, comments,
      * postinfo) as an array
      *
@@ -503,7 +502,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
      *
      * @return array
      */
-    public function getPostsByTag($tags, $oper = 'AND')
+    public function fetchPostsByTag($tags, $oper = 'AND')
     {
         if (!$tags || empty($tags) || ($oper != 'AND' && $oper != 'OR')) {
             return array();
@@ -583,12 +582,12 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getPublishedPostsCount
+     * fetchPublishedPostsCount
      * Get the number of published posts
      *
      * @return int
      */
-    public function getPublishedPostsCount()
+    public function fetchPublishedPostsCount()
     {
         $result = $this->fetchOne(
             array(
@@ -601,17 +600,17 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
             )
         );
 
-        $this->published_posts_count = (int) $result->count;
+        return (int) $result->count;
     }
 
     /**
-     * newPost
+     * insertNewPost
      * Insert a new post from post data
      *
      * @param $post_data
      * @return mixed last insert id
      */
-    public function newPost($post_data)
+    public function insertNewPost($post_data)
     {
         $post_status = (int) $post_data['post_status'];
         if ($post_data['post_status'] < 0 || $post_data['post_status'] > 2) {
@@ -636,14 +635,14 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * getTotalCount
-     * Get count of certain type and status
+     * fetchTotalCount
+     * Fetch count of certain type and status
      *
      * $param int $type
      * $param int $status
      * @return int count
      */
-    public function getTotalCount($type, $status)
+    public function fetchTotalCount($type, $status)
     {
         $result = $this->fetchAllAsArray(
             array(

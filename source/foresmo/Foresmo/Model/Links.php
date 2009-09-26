@@ -25,12 +25,12 @@ class Foresmo_Model_Links extends Solar_Sql_Model {
     }
 
     /**
-     * getLinks
+     * fetchLinks
      * fetch all links
      *
      * @return array
      */
-    public function getLinks()
+    public function fetchLinks()
     {
         return $this->fetchAllAsArray();
     }

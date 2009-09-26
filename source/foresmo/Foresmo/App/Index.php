@@ -114,14 +114,14 @@ class Foresmo_App_Index extends Foresmo_App_Base {
 
         // Is this a post?
         if (!empty($this->_info)) {
-            $posts = $this->_model->posts->getPublishedPostBySlug($this->_info[0]);
+            $posts = $this->_model->posts->fetchPublishedPostBySlug($this->_info[0]);
         }
         if (!empty($posts)) {
             $this->_view = 'post';
             $posts = $posts[0];
             $this->_setPostCommentForm($posts['id']);
             if ($this->form_success) {
-                $posts = $this->_model->posts->getPublishedPostBySlug($this->_info[0]);
+                $posts = $this->_model->posts->fetchPublishedPostBySlug($this->_info[0]);
                 $posts = $posts[0];
             }
             $this->page_title .= ' | ' . $posts['title'];
@@ -130,7 +130,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
 
         // Is it a page?
         if (empty($posts) && !$is_post && !empty($this->_info)) {
-            $posts = $this->_model->posts->getPublishedPageBySlug($this->_info[0]);
+            $posts = $this->_model->posts->fetchPublishedPageBySlug($this->_info[0]);
         }
 
         if (!empty($posts) && !$is_post) {
@@ -138,7 +138,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             $posts = $posts[0];
             $this->_setPostCommentForm($posts['id']);
             if ($this->form_success) {
-                $posts = $this->_model->posts->getPublishedPageBySlug($this->_info[0]);
+                $posts = $this->_model->posts->fetchPublishedPageBySlug($this->_info[0]);
                 $posts = $posts[0];
             }
             $this->page_title .= ' | ' . $posts['title'];
@@ -147,7 +147,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         if (empty($posts) && !empty($this->_info)) {
             $this->_view = 'notfound';
         } elseif (empty($posts) && empty($this->_info)) {
-            $posts = $this->_model->posts->getPublishedPosts();
+            $posts = $this->_model->posts->fetchPublishedPosts();
         }
 
         $this->posts = $posts;
@@ -168,7 +168,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             $this->_redirect('/');
         }
 
-        $this->posts = $this->_model->posts->getPublishedPostsByPage($page);
+        $this->posts = $this->_model->posts->fetchPublishedPostsByPage($page);
         if (empty($this->posts)) {
             $this->_view = 'notfound';
         } else {
@@ -192,7 +192,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             $this->_redirect('/');
         }
 
-        $this->posts = $this->_model->posts->getPostsByTag($tags);
+        $this->posts = $this->_model->posts->fetchPostsByTag($tags);
         if (empty($this->posts)) {
             $this->_view = 'notfound';
         } else {
@@ -227,7 +227,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             $year = (isset($params[2])) ? $params[2] : null;
         }
 
-        $this->posts = $this->_model->posts->getPublishedPostsByDate($year, $month, $day);
+        $this->posts = $this->_model->posts->fetchPublishedPostsByDate($year, $month, $day);
         if (empty($this->posts)) {
             $this->_view = 'notfound';
         } else {
@@ -272,19 +272,14 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         if ($process == 'Login') {
             $form->populate();
             $values = $form->getValues();
-            $result = $this->_model->users->validUser($values);
-            if ($result !== false) {
-                $this->session->set('Foresmo_user_id', $result['id']);
-                $this->session->set('Foresmo_group_id', $result['group_id']);
-                $this->session->set('Foresmo_username', $result['username']);
-                $this->session->set(
-                    'Foresmo_permissions',
-                    $this->_model->groups_permissions->getGroupPermissionsByID($result['group_id'], true)
-                );
-                $this->session->set(
-                    'Foresmo_user_info',
-                    $this->_model->user_info->getUserInfoByID($result['id'])
-                );
+            $result = $this->_model->users->isValidUser($values);
+            if ($result === true) {
+                $user = $this->_model->users->fetchUserByUsername($values['username']);
+                $this->session->set('Foresmo_user_id', $user['id']);
+                $this->session->set('Foresmo_groups', $user['groups']);
+                $this->session->set('Foresmo_username', $user['username']);
+                $this->session->set('Foresmo_permissions', $user['permissions']);
+                $this->session->set('Foresmo_user_info', $user['userinfo']);
                 $this->_redirect('/admin');
             } else {
                 $this->msg = 'Login Failed';
@@ -318,7 +313,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
      */
     private function _setPostCommentForm($post_id)
     {
-        if ($this->_model->post_info->commentsDisabled($post_id)) {
+        if ($this->_model->post_info->isCommentsDisabled($post_id)) {
             $this->msg = 'This post has commenting disabled.';
             $this->comments_disabled = true;
             return;
@@ -343,7 +338,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             $form->setElement('email', array(
                 'name'  => 'email',
                 'type'  => 'hidden',
-                'value' => $this->_model->users->getEmailFromID($this->session->get('Foresmo_user_id')),
+                'value' => $this->_model->users->fetchEmailByID($this->session->get('Foresmo_user_id')),
                 'filters' => array('validateNotBlank','validateEmail'),
             ));
         }

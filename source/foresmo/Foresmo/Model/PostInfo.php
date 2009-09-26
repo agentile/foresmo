@@ -25,13 +25,13 @@ class Foresmo_Model_PostInfo extends Solar_Sql_Model {
     }
 
     /**
-     * commentsDisabled
+     * isCommentsDisabled
      * Check to see if comments are disabled for a post.
      *
      * @param $post_id
      * @return bool
      */
-    public function commentsDisabled($post_id)
+    public function isCommentsDisabled($post_id)
     {
         $where = array(
             'post_id = ?' => (int) $post_id,
@@ -50,20 +50,20 @@ class Foresmo_Model_PostInfo extends Solar_Sql_Model {
     }
 
     /**
-     * setCommentsDisabled
-     * Set a post with comments disabled or not
+     * insertCommentsDisabled
+     * insert a post with comments disabled or not
      *
      * @param $post_id
-     * @param $value
+     * @param $bool default false
      * @return array
      */
-    public function setCommentsDisabled($post_id, $value)
+    public function insertCommentsDisabled($post_id, $bool = false)
     {
         $data = array(
             'post_id' => $post_id,
             'name' => 'comments_disabled',
             'type' => 0,
-            'value' => $value
+            'value' => $bool,
         );
         $this->insert($data);
     }

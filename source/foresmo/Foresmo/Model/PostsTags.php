@@ -27,12 +27,12 @@ class Foresmo_Model_PostsTags extends Solar_Sql_Model {
     }
 
     /**
-     * setPostTags
+     * insertPostTags
      *
      * @param $post_id
      * @param $post_data
      */
-    public function setPostTags($post_id, $tags)
+    public function insertPostTags($post_id, $tags)
     {
         $post_id = (int) $post_id;
         $tag_map = array();
@@ -55,7 +55,7 @@ class Foresmo_Model_PostsTags extends Solar_Sql_Model {
             } else {
                 $data = array(
                     'tag' => $tag,
-                    'tag_slug' => $this->makeSlug($tag),
+                    'tag_slug' => Foresmo::makeSlug($tag),
                 );
                 $last_insert_id = $tags_table->insert($data);
                 $data = array(
@@ -65,21 +65,5 @@ class Foresmo_Model_PostsTags extends Solar_Sql_Model {
                 $this->insert($data);
             }
         }
-    }
-
-    /**
-     * makeSlug
-     * Change string to url friendly slug
-     *
-     * @param $str
-     * @param $delim  default '-'
-     *
-     * @return string
-     */
-    public function makeSlug($str, $delim = '-')
-    {
-        $str = preg_replace('/[^a-z0-9-]/', $delim, strtolower(trim($str)));
-        $str = preg_replace("/{$delim}+/", $delim, trim($str, $delim));
-        return $str;
     }
 }

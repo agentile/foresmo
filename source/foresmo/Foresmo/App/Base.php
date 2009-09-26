@@ -87,6 +87,9 @@ class Foresmo_App_Base extends Solar_App_Base {
     public $connect = true;
     public $installed = false;
     public $blog_theme = 'default';
+    public $blog_admin_theme = 'default';
+    public $blog_theme_options = array();
+    public $blog_admin_theme_options = array();
     public $blog_title = 'Foresmo Blog';
     public $page_title;
     public $pages_count;
@@ -112,6 +115,7 @@ class Foresmo_App_Base extends Solar_App_Base {
             $adapter->connect();
         } catch (Exception $e) {
             $this->connect = false;
+            // should display an error page and die.
         }
         if ($this->connect) {
             $this->_adapter = $adapter;
@@ -127,18 +131,21 @@ class Foresmo_App_Base extends Solar_App_Base {
                 $this->_cache = Solar::factory('Solar_Cache', $cache_settings);
             }
 
-            $results = $this->_model->options->fetchAllAsArray(
-                array(
-                    'where' => array(
-                        'name LIKE ?' => 'blog_%'
-                    )
-                )
-            );
+            $results = $this->_model->options->fetchBlogOptions();
 
             foreach ($results as $result) {
                 switch ($result['name']) {
                     case 'blog_theme':
                         $this->blog_theme = $result['value'];
+                    break;
+                    case 'blog_admin_theme':
+                        $this->blog_admin_theme = $result['value'];
+                    break;
+                    case 'blog_theme_options':
+                        $this->blog_theme_options = unserialize($result['value']);
+                    break;
+                    case 'blog_admin_theme_options':
+                        $this->blog_admin_theme_options = unserialize($result['value']);
                     break;
                     case 'blog_title':
                         $this->blog_title = $result['value'];
@@ -155,7 +162,7 @@ class Foresmo_App_Base extends Solar_App_Base {
             $time_info = Foresmo::getTimeInfo();
             Foresmo::$date_format = $time_info['blog_date_format'];
             Foresmo::$timezone = $time_info['blog_timezone'];
-            $this->_model->posts->published_posts_count = $this->_model->posts->getPublishedPostsCount();
+            $this->_model->posts->published_posts_count = $this->_model->posts->fetchPublishedPostsCount();
             $this->_setPagesCount();
             $this->_layout_default = $this->blog_theme;
             $this->_setToken();
@@ -186,25 +193,44 @@ class Foresmo_App_Base extends Solar_App_Base {
 
     /**
      * allowAjaxAction
-     * Check user permissions for an action to be performed
+     * Check user permissions for an ajax action to be performed
      *
      * @param $action
      * @return bool
      */
     public function allowAjaxAction($action)
     {
+        switch ($action) {
+            case 'admin_post_new':
+                return $this->isValidPermission('create_post');
+            break;
+            case 'admin_pages_new':
+                return $this->isValidPermission('create_page');
+            break;
+        }
+        return false;
+    }
+
+    /**
+     * isValidPermission
+     * Check permission against logged in user's session permission data
+     *
+     * @param string $permission e.g. 'create_post'
+     * @return bool
+     */
+    public function isValidPermission($permission)
+    {
         $user_permissions = $this->session->get('Foresmo_permissions');
         if (!is_array($user_permissions)) {
             return false;
         }
-        switch ($action) {
-            case 'admin_post_new':
-                return (in_array('create_post', $user_permissions)) ? true : false;
-            break;
-            case 'admin_pages_new':
-                return (in_array('create_page', $user_permissions)) ? true : false;
-            break;
+
+        foreach ($user_permissions as $user_permission) {
+            if ($user_permission['name'] == $permission) {
+                return true;
+            }
         }
+
         return false;
     }
 
@@ -295,5 +321,64 @@ class Foresmo_App_Base extends Solar_App_Base {
                 }
             }
         }
+    }
+
+    /**
+     * _addViewTemplates
+     * Override Solar_Controller_Page _addViewTemplates
+     * to add theme view path to view stack
+     *
+     */
+    protected function _addViewTemplates()
+    {
+        // get the parents of the current class, including self
+        $stack = array_reverse(Solar_Class::parents($this, true));
+
+        // remove Solar_Base
+        array_pop($stack);
+
+        // convert underscores to slashes, and add /View
+        foreach ($stack as $key => $val) {
+            $stack[$key] = str_replace('_', '/', $val) . '/View';
+        }
+
+        // add theme view path
+        $theme_name = ($this->_controller == 'admin') ? $this->blog_admin_theme : $this->blog_theme;
+        $theme_view_path = Solar::$system . '/themes/' . $theme_name;
+        $theme_view_path = str_replace('Foresmo', $theme_view_path, $stack[0]);
+        array_unshift($stack, $theme_view_path);
+
+        // done, add the stack
+        $this->_view_object->addTemplatePath($stack);
+    }
+
+    /**
+     * _setLayoutTemplates
+     * Override Solar_Controller_Page _setLayoutTemplates
+     * to add theme layout path to layout stack
+     *
+     */
+    protected function _setLayoutTemplates()
+    {
+        // get the parents of the current class, including self
+        $stack = array_reverse(Solar_Class::parents($this, true));
+
+        // remove Solar_Base
+        array_pop($stack);
+
+        // convert underscores to slashes, and add /Layout
+        foreach ($stack as $key => $val) {
+            $stack[$key] = str_replace('_', '/', $val) . '/Layout';
+        }
+
+        // add theme layout path
+        $theme_name = ($this->_controller == 'admin') ? $this->blog_admin_theme : $this->blog_theme;
+        $theme_layout_path = Solar::$system . '/themes/' . $theme_name;
+        $theme_layout_path_base = str_replace('Foresmo', $theme_layout_path, $stack[1]);
+        $theme_layout_path = str_replace('Foresmo', $theme_layout_path, $stack[0]);
+        array_unshift($stack, $theme_layout_path, $theme_layout_path_base);
+
+        // done, add the stack
+        $this->_view_object->setTemplatePath($stack);
     }
 }

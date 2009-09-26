@@ -28,7 +28,7 @@ class Foresmo_Modules extends Solar_Base {
      */
     public function getEnabledModulesData()
     {
-        $results = $this->_model->modules->getEnabledModules();
+        $results = $this->_model->modules->fetchEnabledModules();
 
         foreach ($results as $key => $result) {
             $results[$key]['output'] = $this->getModuleData($result['name']);
@@ -114,7 +114,7 @@ class Foresmo_Modules extends Solar_Base {
     public function getRegisteredHooks()
     {
         $hooks = array();
-        $enabled_modules = $this->_model->modules->getEnabledModules();
+        $enabled_modules = $this->_model->modules->fetchEnabledModules();
         foreach ($enabled_modules as $module) {
             $name = ucfirst(strtolower($module['name']));
             $module_obj = Solar::factory("Foresmo_Modules_{$name}", array('model' => $this->_model));

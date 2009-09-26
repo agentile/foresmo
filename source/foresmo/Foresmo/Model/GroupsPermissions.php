@@ -27,14 +27,14 @@ class Foresmo_Model_GroupsPermissions extends Solar_Sql_Model {
     }
 
     /**
-     * getGroupPermissionsByID
-     * Get the group permissions by ID as an array
+     * fetchGroupPermissionsByID
+     * Fetch the group permissions by ID as an array
      *
      * @access public
      * @param  $group_id
      * @return array
      */
-    public function getGroupPermissionsByID($group_id, $short_list = false)
+    public function fetchGroupPermissionsByID($group_id, $short_list = false)
     {
         $permissions = $this->fetchAllAsArray(
             array(

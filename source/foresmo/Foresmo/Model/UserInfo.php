@@ -25,13 +25,13 @@ class Foresmo_Model_UserInfo extends Solar_Sql_Model {
     }
 
     /**
-     * getUserInfoByID
+     * fetchUserInfoByID
      * Get extended user information by user ID.
      *
      * @param $user_id
      * @return array
      */
-    public function getUserInfoByID($user_id)
+    public function fetchUserInfoByID($user_id)
     {
         return $this->fetchAllAsArray(
             array(

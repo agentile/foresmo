@@ -37,14 +37,17 @@ class Foresmo_Modules_Archives extends Solar_Base {
      */
     public function start()
     {
-        $posts = $this->_model->posts->getPublishedPosts();
-        $blog_start = $this->_model->options->getOptionValue('blog_installed');
+        $posts = $this->_model->posts->fetchAllPosts();
+        $blog_start = $this->_model->options->fetchOptionValue('blog_installed');
         $blog_start = explode('/', date('n/j/Y', $blog_start));
         $current = getdate();
 
         $archive = $this->getArchiveArray($blog_start[0], $blog_start[2], $current['mon'], $current['year']);
 
         foreach ($posts as $key => $post) {
+            if ((int) $post['status'] != 1) {
+                continue;
+            }
             $date = explode('/', date('n/j/Y', $post['pubdate_ts']));
             $m = (int) $date[0];
             $y = (int) $date[2];

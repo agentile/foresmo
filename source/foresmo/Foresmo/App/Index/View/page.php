@@ -31,6 +31,10 @@ if (!$this->comments_disabled) {
 
 foreach($this->posts['comments'] as $key => $comment){
 
+    if($comment['status'] != '1') {
+        continue;
+    }
+
     if ($comment['type'] == '1') {
         echo "<div class=\"comment admin\">";
     } else {

@@ -25,13 +25,13 @@ class Foresmo_Model_Options extends Solar_Sql_Model {
     }
 
     /**
-     * getOption
-     * Get value from option key
+     * fetchOptionValue
+     * Fetch value from option key
      *
      * @param string $key
      * @return mixed
      */
-    public function getOptionValue($key)
+    public function fetchOptionValue($key)
     {
         $results = $this->fetchAllAsArray(
             array(
@@ -45,5 +45,21 @@ class Foresmo_Model_Options extends Solar_Sql_Model {
             return $results[0]['value'];
         }
         return null;
+    }
+
+    /**
+     * fetchBlogOptions
+     * Fetch blog options
+     *
+     * @return array
+     */
+    public function fetchBlogOptions()
+    {
+        return $this->fetchAllAsArray(array(
+            'where' => array(
+                'name LIKE ?' => 'blog_%'
+                )
+            )
+        );
     }
 }

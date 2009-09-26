@@ -38,7 +38,7 @@ class Foresmo_Modules_Tags extends Solar_Base {
      */
     public function start()
     {
-        $tags = $this->_model->tags->getTags();
+        $tags = $this->_model->tags->fetchTagsForPublishedPosts();
         $this->_view->assign('tags', $tags);
 
         $this->output = $this->_view->fetch($this->_view_file);
