@@ -22,7 +22,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Response.php 3569 2008-12-12 19:13:28Z pmjones $
+ * @version $Id: Response.php 4143 2009-10-07 21:26:28Z pmjones $
  * 
  * @todo Add charset param so that headers get sent with right encoding?
  * 
@@ -363,7 +363,7 @@ class Solar_Http_Response extends Solar_Base
      * 
      * @param string $value The value of the cookie.
      * 
-     * @param int|string $expire The Unix timestamp after which the cookie
+     * @param int|string $expires The Unix timestamp after which the cookie
      * expires.  If non-numeric, the method uses strtotime() on the value.
      * 
      * @param string $path The path on the server in which the cookie will be
@@ -383,13 +383,13 @@ class Solar_Http_Response extends Solar_Base
      * @see [[php::setcookie() | ]]
      * 
      */
-    public function setCookie($name, $value = '', $expire = 0,
+    public function setCookie($name, $value = '', $expires = 0,
         $path = '', $domain = '', $secure = false, $httponly = null)
     {
         // store the cookie value
         $this->_cookies[$name] = array(
             'value'     => $value,
-            'expire'    => $expire,
+            'expires'   => $expires,
             'path'      => $path,
             'domain'    => $domain,
             'secure'    => $secure,
@@ -613,15 +613,15 @@ class Solar_Http_Response extends Solar_Base
                 : (bool) $val['httponly'];
             
             // try to allow for times not in unix-timestamp format
-            if (! is_numeric($val['expire'])) {
-                $val['expire'] = strtotime($val['expire']);
+            if (! is_numeric($val['expires'])) {
+                $val['expires'] = strtotime($val['expires']);
             }
             
             // actually set the cookie
             setcookie(
                 $key,
                 $val['value'],
-                (int) $val['expire'],
+                (int) $val['expires'],
                 $val['path'],
                 $val['domain'],
                 (bool) $val['secure'],

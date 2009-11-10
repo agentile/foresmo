@@ -28,7 +28,7 @@
                     foreach ($this->data as $key => $page_info) {
                         echo ($key % 2 == 0) ? '<tr>' : '<tr class="alt">';
                         echo '<td></td>';
-                        echo '<td><a href="/'.$page_info['slug'].'" target="_blank">' . $page_info['title'] . '</a></td>';
+                        echo '<td style="text-align:left;"><a href="/'.$page_info['slug'].'" target="_blank">' . $page_info['title'] . '</a></td>';
                         echo '<td>' . $page_info['users']['username'] . '</td>';
                         echo '<td>';
                         if ($page_info['status'] == 0) {

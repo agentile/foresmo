@@ -58,20 +58,21 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
             return false;
         }
 
-        $salt = Solar_Config::get('Solar_Auth_Adapter_Sql', 'salt');
-
         $username = $values['username'];
-        $password = md5($salt . $values['password']);
-        $where = array('username = ?' => $username, 'password = ?' => $password);
+        $password = $values['password'];
+        $where = array('username = ?' => $username);
 
-        $result = $this->fetchAllAsArray(array(
+        $results = $this->fetchAllAsArray(array(
             'cache' => false,
             'where' => $where,
             )
         );
 
-        if (is_array($result) && count($result) > 0) {
-            return true;
+        if (is_array($results) && count($results) > 0) {
+            $hasher = new Foresmo_Hashing(8, false);
+            if ($hasher->checkPassword($password, $results[0]['password'])) {
+                return true;
+            }
         }
         return false;
     }

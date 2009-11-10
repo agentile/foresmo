@@ -98,9 +98,9 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
      * @param $post_data
      * @return string
      */
-    public function ajax_admin_pages_new($post_data)
+    public function ajax_admin_page_new($post_data)
     {
-        return $this->ajax_admin_new_content($post_data);
+        return $this->addContent($post_data);
     }
 
     /**
@@ -112,17 +112,41 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
      */
     public function ajax_admin_post_new($post_data)
     {
-        return $this->ajax_admin_new_content($post_data);
+        return $this->addContent($post_data);
     }
 
     /**
-     * ajax_admin_new_content
-     * New blog post
+     * ajax_admin_post_edit
+     * Edit blog post
      *
      * @param $post_data
      * @return string
      */
-    public function ajax_admin_new_content($post_data)
+    public function ajax_admin_post_edit($post_data)
+    {
+        return $this->editContent($post_data);
+    }
+
+    /**
+     * ajax_admin_page_edit
+     * Edit blog page
+     *
+     * @param $post_data
+     * @return string
+     */
+    public function ajax_admin_page_edit($post_data)
+    {
+        return $this->editContent($post_data);
+    }
+
+    /**
+     * addContent
+     * New blog post/page
+     *
+     * @param $post_data
+     * @return string
+     */
+    public function addContent($post_data)
     {
         $errors = array();
         if (!isset($post_data['post_title']) || $this->validate('validateBlank', $post_data['post_title'])) {
@@ -141,33 +165,94 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
                 'success' => false,
                 'message' => $message,
             );
+            return json_encode($ret);
+        }
+        $last_insert_id = $this->_model->posts->insertContent($post_data);
+        if (!$this->validate('validateBlank', $post_data['post_tags'])) {
+            $tags = explode(',', rtrim(trim($post_data['post_tags']), ','));
+            foreach ($tags as $key => $tag) {
+                $tags[$key] = trim($tag);
+            }
+            $this->_model->posts_tags->insertContentTags($last_insert_id, $tags);
+        }
+        if (isset($post_data['post_comments_disabled']) && $post_data['post_comments_disabled'] == 'true') {
+            $this->_model->post_info->insertCommentsDisabled($last_insert_id, true);
         } else {
-            $last_insert_id = $this->_model->posts->insertNewPost($post_data);
-            if (!$this->validate('validateBlank', $post_data['post_tags'])) {
-                $tags = explode(',', rtrim(trim($post_data['post_tags']), ','));
-                foreach ($tags as $key => $tag) {
-                    $tags[$key] = trim($tag);
-                }
-                $this->_model->posts_tags->insertPostTags($last_insert_id, $tags);
-            }
-            if (isset($post_data['post_comments_disabled']) && $post_data['post_comments_disabled'] == 'true') {
-                $this->_model->post_info->insertCommentsDisabled($last_insert_id, true);
-            } else {
-                $this->_model->post_info->insertCommentsDisabled($last_insert_id, false);
-            }
+            $this->_model->post_info->insertCommentsDisabled($last_insert_id, false);
+        }
 
-            if ((int) $post_data['post_type'] == 1) {
-                $message = "Successly created new post! <a href=\"/{$post_data['post_slug']}\">View post</a>.";
-            } elseif ((int) $post_data['post_type'] == 2) {
-                $message = "Successly created new page! <a href=\"/{$post_data['post_slug']}\">View page</a>.";
-            }
+        if ((int) $post_data['post_type'] == 1) {
+            $message = "Successly created new post! <a href=\"/{$post_data['post_slug']}\">View post</a>.";
+        } elseif ((int) $post_data['post_type'] == 2) {
+            $message = "Successly created new page! <a href=\"/{$post_data['post_slug']}\">View page</a>.";
+        }
 
+        $ret = array(
+            'success' => true,
+            'id' => $last_insert_id,
+            'message' => $message,
+        );
+        return json_encode($ret);
+    }
+
+    /**
+     * editContent
+     * Edit post/page
+     *
+     * @param array $post_data POST data
+     * @return array JSON return array
+     */
+    public function editContent($post_data)
+    {
+        $errors = array();
+        if (!isset($post_data['post_title']) || $this->validate('validateBlank', $post_data['post_title'])) {
+            $errors[] = 'Title cannot be blank.';
+        }
+        if (!isset($post_data['post_content']) || $this->validate('validateBlank', $post_data['post_title'])) {
+            $errors[] = 'Content cannot be blank.';
+        }
+        $post_data['id'] = (int) $post_data['id'];
+        $post_data['post_slug'] = $this->_model->posts->fetchContentValue($post_data['id'], 'slug');
+
+        if (in_array(strtolower($post_data['post_slug']), $this->_restricted_names)) {
+            $errors[] = 'The slug for this post/page "'.$post_data['post_slug'].'" is restricted. Please choose a different slug/title';
+        }
+        if (count($errors) > 0) {
+            $message = implode('<br/>', $errors);
             $ret = array(
-                'success' => true,
-                'id' => $last_insert_id,
+                'success' => false,
                 'message' => $message,
             );
+            return json_encode($ret);
         }
+
+        $this->_model->posts->updateContent($post_data);
+
+        if (!$this->validate('validateBlank', $post_data['post_tags'])) {
+            $tags = explode(',', rtrim(trim($post_data['post_tags']), ','));
+            foreach ($tags as $key => $tag) {
+                $tags[$key] = trim($tag);
+            }
+            $this->_model->posts_tags->updateContentTags($post_data['id'], $tags);
+        }
+        if (isset($post_data['post_comments_disabled']) && $post_data['post_comments_disabled'] == 'true') {
+            $this->_model->post_info->updateCommentsDisabled($post_data['id'], true);
+        } else {
+            $this->_model->post_info->updateCommentsDisabled($post_data['id'], false);
+        }
+
+        if ((int) $post_data['post_type'] == 1) {
+            $message = "Successly edited post! <a href=\"/{$post_data['post_slug']}\">View post</a>.";
+        } elseif ((int) $post_data['post_type'] == 2) {
+            $message = "Successly edited page! <a href=\"/{$post_data['post_slug']}\">View page</a>.";
+        }
+
+        $ret = array(
+            'success' => true,
+            'id' => $post_data['id'],
+            'message' => $message,
+        );
+
         return json_encode($ret);
     }
 
@@ -261,7 +346,8 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
 
         $username = $post_data['blog_user'];
         $password = $post_data['blog_password'];
-        $password = md5($this->random_str . $password);
+        $hasher = new Foresmo_Hashing(8, false);
+        $pwhash = $hasher->hashPassword($password);
         $email = trim($post_data['blog_email']);
 
         $table = $post_data['db_prefix'] . 'groups';
@@ -311,7 +397,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         $data = array(
             'group_id' => $last_insert_id,
             'username'=> $username,
-            'password' => $password,
+            'password' => $pwhash,
             'email' => strtolower($email),
         );
         $adapter->insert($table, $data);

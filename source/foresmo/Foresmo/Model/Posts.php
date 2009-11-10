@@ -79,7 +79,7 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
         $results = $this->fetchAllAsArray(
             array(
                 'where'  => array(
-                    'slug = ? AND content_type = ? AND comments.status = ?' => array($slug_name, 2, 1),
+                    'slug = ? AND content_type = ?' => array($slug_name, 2),
                 ),
                 'order'  => array (
                     'id DESC'
@@ -604,13 +604,13 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
-     * insertNewPost
-     * Insert a new post from post data
+     * insertContent
+     * Insert new content from post data
      *
      * @param $post_data
      * @return mixed last insert id
      */
-    public function insertNewPost($post_data)
+    public function insertContent($post_data)
     {
         $post_status = (int) $post_data['post_status'];
         if ($post_data['post_status'] < 0 || $post_data['post_status'] > 2) {
@@ -635,6 +635,31 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
     }
 
     /**
+     * updateContent
+     * Update content
+     *
+     * @param $post_data
+     */
+    public function updateContent($post_data)
+    {
+        $cur_time = time();
+        $post_status = (int) $post_data['post_status'];
+        if ($post_data['post_status'] < 0 || $post_data['post_status'] > 2) {
+            // if unexpected int, default to 1 (published)
+            $post_data['post_status'] = 1;
+        }
+        $where = array('id = ?' => (int) $post_data['id']);
+        $data = array(
+            'title' => $post_data['post_title'],
+            'content' => $post_data['post_content'],
+            'modified' => $cur_time,
+            'status' => $post_status,
+        );
+
+        return $this->update($data, $where);
+    }
+
+    /**
      * fetchTotalCount
      * Fetch count of certain type and status
      *
@@ -656,5 +681,23 @@ class Foresmo_Model_Posts extends Solar_Sql_Model {
             )
         );
         return (int) $result[0]['count'];
+    }
+
+    /**
+     * fetchContentValue
+     * Fetch Column for post/page
+     *
+     * @param int $content_id
+     * @param string $col
+     * @return mixed
+     */
+    public function fetchContentValue($content_id, $col)
+    {
+        return $this->fetchValue(
+            array(
+                'cols' => array($col),
+                'where' => array('id = ?' => $content_id),
+            )
+        );
     }
 }

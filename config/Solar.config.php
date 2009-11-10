@@ -66,7 +66,7 @@ $config['Solar_Sql_Adapter_Mysql'] = array(
 
 // Foresmo settings
 $config['Foresmo'] = array(
-    'installed' => true,
+    'installed' => false,
     'dev' => false,
 );
 
@@ -78,9 +78,6 @@ $config['Foresmo'] = array(
 $config['Solar_Auth'] = array(
     'adapter' => 'Solar_Auth_Adapter_Sql',
 );
-
-// Salt for password - change to something unique and strong.
-$config['Solar_Auth_Adapter_Sql']['salt'] = '6ookwbgu2i4x2458k5';
 
 
 /**

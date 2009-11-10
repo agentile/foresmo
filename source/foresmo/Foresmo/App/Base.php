@@ -122,6 +122,8 @@ class Foresmo_App_Base extends Solar_App_Base {
             $this->installed = (bool) Solar_Config::get('Foresmo', 'installed');
             if (!$this->installed && $this->_controller != 'install') {
                 $this->_redirect('/install');
+            } elseif (!$this->installed) {
+                return;
             }
             $this->web_root = Solar::$system . '/content/';
             $this->_model = Solar_Registry::get('model_catalog');
@@ -204,8 +206,14 @@ class Foresmo_App_Base extends Solar_App_Base {
             case 'admin_post_new':
                 return $this->isValidPermission('create_post');
             break;
-            case 'admin_pages_new':
+            case 'admin_page_new':
                 return $this->isValidPermission('create_page');
+            break;
+            case 'admin_post_edit':
+                return $this->isValidPermission('edit_post');
+            break;
+            case 'admin_page_edit':
+                return $this->isValidPermission('edit_page');
             break;
         }
         return false;

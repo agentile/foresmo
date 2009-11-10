@@ -26,45 +26,65 @@ class Foresmo_Model_PostInfo extends Solar_Sql_Model {
 
     /**
      * isCommentsDisabled
-     * Check to see if comments are disabled for a post.
+     * Check to see if comments are disabled for a post/page.
      *
-     * @param $post_id
+     * @param $id
      * @return bool
      */
-    public function isCommentsDisabled($post_id)
+    public function isCommentsDisabled($id)
     {
         $where = array(
-            'post_id = ?' => (int) $post_id,
+            'post_id = ?' => (int) $id,
             'name = ?' => 'comments_disabled'
         );
-        $result = $this->fetchAllAsArray(array('where' => $where));
+        $result = $this->fetchOneAsArray(array('where' => $where));
+
         if (empty($result)) {
             return false;
         }
-        if (isset($result[0]['value'])) {
-            if ($result[0]['value'] == '1') {
-                return true;
-            }
+
+        if (isset($result['value']) && $result['value'] == '1') {
+            return true;
         }
         return false;
     }
 
     /**
      * insertCommentsDisabled
-     * insert a post with comments disabled or not
+     * insert a post/page with comments disabled or not
      *
-     * @param $post_id
+     * @param $id
      * @param $bool default false
      * @return array
      */
-    public function insertCommentsDisabled($post_id, $bool = false)
+    public function insertCommentsDisabled($id, $bool = false)
     {
         $data = array(
-            'post_id' => $post_id,
+            'post_id' => $id,
             'name' => 'comments_disabled',
             'type' => 0,
             'value' => $bool,
         );
         $this->insert($data);
+    }
+
+    /**
+     * updateCommentsDisabled
+     * update post/page with comments disabled or not
+     *
+     * @param $id
+     * @param $bool default false
+     * @return array
+     */
+    public function updateCommentsDisabled($id, $bool = false)
+    {
+        $where = array(
+            'post_id = ?' => $id,
+            'name = ?' => 'comments_disabled',
+        );
+        $data = array(
+            'value' => $bool,
+        );
+        $this->update($data, $where);
     }
 }

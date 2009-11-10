@@ -55,7 +55,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Adapter.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Adapter.php 4139 2009-10-06 20:40:19Z pmjones $
  * 
  * @todo Support multipart/form-data and file uploads (must be in conjunction).
  * <http://www.w3.org/TR/html4/interact/forms.html#h-17.13.4.2>  Probably need
@@ -889,7 +889,7 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
                 $response[$i]->setCookie(
                     $cookie['name'],
                     $cookie['value'],
-                    $cookie['expire'],
+                    $cookie['expires'],
                     $cookie['path'],
                     $cookie['domain'],
                     $cookie['secure'],
@@ -1068,7 +1068,7 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
      * @param string $text The Set-Cookie text string value.
      * 
      * @return array An array with keys for each element of the cookie: name,
-     * value, expire, etc.
+     * value, expires, etc.
      * 
      * @todo This is probably a brain-dead algorithm; do some research to see if
      * it's truly viable.
@@ -1079,7 +1079,7 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
         $cookie = array(
             'name'      => null,
             'value'     => null,
-            'expire'    => null,
+            'expires'    => null,
             'path'      => null,
             'domain'    => null,
             'secure'    => false,
@@ -1097,7 +1097,7 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
             $data = explode('=', trim($item));
             switch ($data[0]) {
             // string-literal values
-            case 'expire':
+            case 'expires':
             case 'path':
             case 'domain':
                 $cookie[$data[0]] = $data[1];

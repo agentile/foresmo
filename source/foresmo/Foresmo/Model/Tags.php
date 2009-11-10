@@ -49,7 +49,7 @@ class Foresmo_Model_Tags extends Solar_Sql_Model {
                 'order'  => array (
                     'tag ASC'
                 ),
-                'group' => array('foresmo_tags.id'),
+                'group' => array($this->_config['prefix'] . 'tags.id'),
                 'eager'  => array(
                     'posts' => array(
                         'join_only' => true,
@@ -83,5 +83,50 @@ class Foresmo_Model_Tags extends Solar_Sql_Model {
             )
         );
         return $results;
+    }
+
+    /**
+     * fetchTagsByID
+     * Fetch tags by content id
+     *
+     * @param int $id
+     * @return array
+     */
+    public function fetchTagsByID($id)
+    {
+        if ((int) $id != $id) {
+            return array();
+        }
+
+        $id = (int) $id;
+
+        return $this->fetchAllAsArray(array(
+                'cache' => false,
+                'eager' => array(
+                    'posts' => array(
+                        'join_only' => true,
+                        'join_cond' => array(
+                            'posts.id = ?' => $id,
+                        )
+                    )
+                )
+            )
+        );
+    }
+
+    /**
+     * fetchTagIdBySlug
+     * Fetch tag id by tag slug
+     *
+     * @param string $tag_slug
+     */
+    public function fetchTagIdBySlug($tag_slug)
+    {
+        return $this->fetchValue(
+            array(
+                'cols' => array('id'),
+                'where' => array('tag_slug = ?' => $tag_slug),
+            )
+        );
     }
 }

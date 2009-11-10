@@ -4,11 +4,11 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>Admin | <?php echo $this->blog_title; ?></title>
 <?php
-echo $this->style('Foresmo/default/styles/admin.css')."\n";
-echo $this->script('Foresmo/default/scripts/mootools-1.2.2-core.js')."\n";
-echo $this->script('Foresmo/default/scripts/mootools-1.2.2.2-more.js')."\n";
-echo $this->script('Foresmo/default/scripts/tiny_mce/tiny_mce.js')."\n";
-echo $this->script('Foresmo/default/scripts/admin.js')."\n";
+echo $this->style("Foresmo/{$this->blog_admin_theme}/styles/admin.css")."\n";
+echo $this->script("Foresmo/{$this->blog_admin_theme}/scripts/mootools-1.2.2-core.js")."\n";
+echo $this->script("Foresmo/{$this->blog_admin_theme}/scripts/mootools-1.2.2.2-more.js")."\n";
+echo $this->script("Foresmo/{$this->blog_admin_theme}/scripts/tiny_mce/tiny_mce.js")."\n";
+echo $this->script("Foresmo/{$this->blog_admin_theme}/scripts/admin.js")."\n";
 ?>
 </head>
 <body>
@@ -44,12 +44,12 @@ echo $this->script('Foresmo/default/scripts/admin.js')."\n";
                 </ul>
             </li>
             <li>
-                <a href="/admin/users">Users</a>
+                <a href="#">Users</a>
                 <ul>
                     <li><a href="/admin/users/add">Add user</a></li>
                     <li><a href="/admin/users/manage">Manage users</a></li>
-                    <li><a href="/admin/roles/add">Add role</a></li>
-                    <li><a href="/admin/roles/manage">Manage roles</a></li>
+                    <li><a href="/admin/groups/add">Add user group</a></li>
+                    <li><a href="/admin/groups/manage">Manage user groups</a></li>
                 </ul>
             </li>
             <li>
@@ -69,6 +69,10 @@ echo $this->script('Foresmo/default/scripts/admin.js')."\n";
         </ul>
     </div>
     <div id="main_content" class="container_16">
+        <noscript>
+            <div class="admin_message">Foresmo blog administration requires JavaScript to be enabled.
+            </div>
+        </noscript>
         <?php
             if (isset($this->message)) {
                 echo '<div class="admin_message">';

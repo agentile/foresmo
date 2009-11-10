@@ -12,7 +12,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Eager.php 4094 2009-09-24 20:42:34Z pmjones $
+ * @version $Id: Eager.php 4097 2009-09-25 02:13:15Z pmjones $
  * 
  */
 class Solar_Sql_Model_Params_Eager extends Solar_Sql_Model_Params {
@@ -113,7 +113,10 @@ class Solar_Sql_Model_Params_Eager extends Solar_Sql_Model_Params {
      * Sets the join condition to use; note that this overrides the existing
      * join condition.
      * 
-     * @param string $cond The join type to use (null, 'left', or 'inner').
+     * @param string $cond The ON condition.
+     * 
+     * @param string $val A value to quote into the condition, replacing
+     * question-mark placeholders.
      * 
      * @return Solar_Sql_Model_Params_Eager
      * 

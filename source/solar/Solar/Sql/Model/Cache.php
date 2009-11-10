@@ -24,7 +24,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Cache.php 4089 2009-09-24 19:20:21Z pmjones $
+ * @version $Id: Cache.php 4097 2009-09-25 02:13:15Z pmjones $
  * 
  */
 class Solar_Sql_Model_Cache extends Solar_Base
@@ -150,7 +150,7 @@ class Solar_Sql_Model_Cache extends Solar_Base
      * If the params include a `cache_key` entry, that value is used instead
      * of $hash.
      * 
-     * @param array $params The fetch parameters for a select.
+     * @param array $fetch The fetch parameters for a select.
      * 
      * @return string The versioned cache entry key.
      * 

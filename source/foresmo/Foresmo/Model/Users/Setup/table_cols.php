@@ -1,6 +1,6 @@
 <?php
 return array (
-  'id' => 
+  'id' =>
   array (
     'name' => 'id',
     'type' => 'smallint',
@@ -11,7 +11,7 @@ return array (
     'primary' => true,
     'autoinc' => true,
   ),
-  'group_id' => 
+  'group_id' =>
   array (
     'name' => 'group_id',
     'type' => 'smallint',
@@ -22,7 +22,7 @@ return array (
     'primary' => false,
     'autoinc' => false,
   ),
-  'username' => 
+  'username' =>
   array (
     'name' => 'username',
     'type' => 'varchar',
@@ -33,7 +33,7 @@ return array (
     'primary' => false,
     'autoinc' => false,
   ),
-  'email' => 
+  'email' =>
   array (
     'name' => 'email',
     'type' => 'varchar',
@@ -44,7 +44,7 @@ return array (
     'primary' => false,
     'autoinc' => false,
   ),
-  'password' => 
+  'password' =>
   array (
     'name' => 'password',
     'type' => 'varchar',

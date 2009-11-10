@@ -40,7 +40,7 @@
                     var response = JSON.decode(response);
                     $('message').set('html', response.message);
                     if (response.success) {
-                        window.location = '/admin/pages/manage';
+                        window.location = '/admin/posts/manage';
                     }
                 }});
                 $('post_edit').send();
@@ -51,7 +51,7 @@
         $tags = '';
         $comments_disabled = false;
         foreach ($this->data[0]['postinfo'] as $key => $info) {
-            if ($info['name'] == 'comments_disabled') {
+            if ($info['name'] == 'comments_disabled' && $info['value'] == '1') {
                 $comments_disabled = true;
             }
         }
@@ -89,8 +89,9 @@
         <div class="grid_7">
             <label for="post_title">Post Title</label><br/>
             <input type="text" name="post_title" class="input" style="width: 694px;" value="<?php echo $this->data[0]['title'];?>"/><br/><br/>
-            <input type="hidden" name="ajax_action" value="admin_posts_edit" />
-            <input type="hidden" name="post_type" value="2" />
+            <input type="hidden" name="ajax_action" value="admin_post_edit" />
+            <input type="hidden" name="id" value="<?php echo $this->data[0]['id']; ?>" />
+            <input type="hidden" name="post_type" value="1" />
             <input type="textarea" id="post_content" name="post_content" value='<?php echo $this->data[0]['content'];?>'/><br/>
             <input type="submit" id="post_edit_submit" name="submit" value="Submit" class="submit_input"/>
 

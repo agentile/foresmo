@@ -22,5 +22,16 @@ class Foresmo_Model_Permissions extends Solar_Sql_Model {
 
         $this->_table_name = $this->_config['prefix'] . Solar_File::load($dir . 'table_name.php');
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
+
+        $this->_hasMany('groups_permissions', array(
+            'foreign_class' => 'Foresmo_Model_GroupsPermissions',
+            'foreign_key' => 'permission_id',
+        ));
+
+        $this->_hasMany('groups', array(
+             'foreign_class' => 'Foresmo_Model_Groups',
+             'through'       => 'groups_permissions',
+             'through_key'   => 'group_id',
+        ));
     }
 }

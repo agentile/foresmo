@@ -77,7 +77,7 @@
         <div class="grid_7">
             <label for="post_title">Page Title</label><br/>
             <input type="text" name="post_title" class="input" style="width: 694px;"/><br/><br/>
-            <input type="hidden" name="ajax_action" value="admin_pages_new" />
+            <input type="hidden" name="ajax_action" value="admin_page_new" />
             <input type="hidden" name="post_type" value="2" />
             <input type="textarea" id="post_content" name="post_content" /><br/>
             <input type="submit" id="post_new_submit" name="submit" value="Submit" class="submit_input"/>
