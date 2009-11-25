@@ -11,6 +11,7 @@ $config = array();
  */
 $system = dirname(dirname(__FILE__));
 $config['Solar']['system']  = $system;
+$config['Solar']['web_root']  = $system . '/docroot/';
 
 
 /**
@@ -65,20 +66,22 @@ $config['Solar_Sql_Adapter_Mysql'] = array(
 );
 
 // Foresmo settings
-$config['Foresmo'] = array(
-    'installed' => false,
-    'dev' => false,
-);
+$config['Foresmo']['installed'] = true;
 
-// Test Notes
-//./script/solar run-tests Test_Foresmo_Modules
-// Need to have symlink to source/foresmo/tests/Test/Foresmo in includes/Test/Foresmo
+// Foresmo Cache
+$config['Foresmo']['cache'] = array(
+    // which adapter class to use
+    'adapter' => 'Solar_Cache_Adapter_File',
+    // where the cache files will be stored
+    'path' => '/tmp/Solar_Cache/',
+    // the cache entry lifetime in seconds
+    'life' => 1800,
+);
 
 // Authentication source
 $config['Solar_Auth'] = array(
     'adapter' => 'Solar_Auth_Adapter_Sql',
 );
-
 
 /**
  * front controller

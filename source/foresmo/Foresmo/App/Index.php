@@ -22,43 +22,6 @@ class Foresmo_App_Index extends Foresmo_App_Base {
     protected function _preRender()
     {
         parent::_preRender();
-        if (Solar_Config::get('Foresmo', 'dev')) {
-            xdebug_stop_trace();
-            $trace_file = explode("\n", file_get_contents('/var/www/foresmo/tmp/trace.xt'));
-            $trace_file_count = count($trace_file);
-            $trace_dump = array();
-            $defined_funcs = get_defined_functions();
-            foreach ($trace_file as $line => $value) {
-                if ($line == 0 || $line >= ($trace_file_count - 4)
-                    || strstr($value, 'include(') || strstr($value, 'require(')) {
-                    continue;
-                }
-                $tl = explode('-> ', $value);
-                $tl = explode(' ', $tl[1]);
-                if (!in_array(str_replace('()', '', $tl[0]), $defined_funcs['internal'])
-                    && strstr($tl[0], 'Foresmo')
-                    && !in_array($tl[0], $trace_dump)) {
-                    $trace_dump[] = $tl[0];
-                }
-            }
-            $tests = array();
-            // Lets organize our trace dump calls to that we can easily check/run tests
-            foreach ($trace_dump as $call) {
-                if (strstr($call, '->')) {
-                    $class_method = explode('->', $call);
-                } else {
-                    $class_method = explode('::', $call);
-                }
-                if (!isset($tests[$class_method[0]])) {
-                    $tests[$class_method[0]] = array($class_method[1]);
-                } else {
-                    $tests[$class_method[0]][] = $class_method[1];
-                }
-            }
-            var_dump($trace_dump);
-            var_dump($tests);
-            die();
-        }
     }
 
     protected function _postRender()
@@ -146,6 +109,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
 
         if (empty($posts) && !empty($this->_info)) {
             $this->_view = 'notfound';
+            $this->msg = 'The page/post you are looking for cannot be found.';
         } elseif (empty($posts) && empty($this->_info)) {
             $posts = $this->_model->posts->fetchPublishedPosts();
         }
@@ -171,6 +135,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         $this->posts = $this->_model->posts->fetchPublishedPostsByPage($page);
         if (empty($this->posts)) {
             $this->_view = 'notfound';
+            $this->msg = 'This page number does not contain any posts/pages.';
         } else {
             $this->_view = 'main';
         }
@@ -195,6 +160,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         $this->posts = $this->_model->posts->fetchPostsByTag($tags);
         if (empty($this->posts)) {
             $this->_view = 'notfound';
+            $this->msg = 'There are no associated posts/pages for the given tag(s)';
         } else {
             $this->_view = 'main';
         }
@@ -230,6 +196,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         $this->posts = $this->_model->posts->fetchPublishedPostsByDate($year, $month, $day);
         if (empty($this->posts)) {
             $this->_view = 'notfound';
+            $this->msg = 'There are no associated posts/pages for the given date';
         } else {
             $this->_view = 'main';
         }

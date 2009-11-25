@@ -9,6 +9,7 @@ class Foresmo_Modules extends Solar_Base {
 
     protected $_Foresmo_Modules = array('model' => null);
     protected $_model;
+    public $web_root;
 
     /**
      * _postConstruct
@@ -19,6 +20,7 @@ class Foresmo_Modules extends Solar_Base {
     {
         parent::_postConstruct();
         $this->_model = $this->_config['model'];
+        $this->web_root = Solar::$system . '/docroot/';
     }
 
     /**
@@ -44,6 +46,7 @@ class Foresmo_Modules extends Solar_Base {
      */
     public function getModuleData($name)
     {
+        $this->loadModule($name);
         $module = Solar::factory("Foresmo_Modules_{$name}", array('model' => $this->_model));
         $module->start();
         return $module->output;
@@ -61,6 +64,7 @@ class Foresmo_Modules extends Solar_Base {
      */
     public function processRequest($name, $data)
     {
+        $this->loadModule($name);
         $module = Solar::factory("Foresmo_Modules_{$name}", array('model' => $this->_model));
         if (method_exists($module, 'request')) {
             try {
@@ -89,6 +93,7 @@ class Foresmo_Modules extends Solar_Base {
      */
     public function processAjaxRequest($name, $data)
     {
+        $this->loadModule($name);
         $module = Solar::factory("Foresmo_Modules_{$name}", array('model' => $this->_model));
         if (method_exists($module, 'ajaxRequest')) {
             try {
@@ -117,6 +122,7 @@ class Foresmo_Modules extends Solar_Base {
         $enabled_modules = $this->_model->modules->fetchEnabledModules();
         foreach ($enabled_modules as $module) {
             $name = ucfirst(strtolower($module['name']));
+            $this->loadModule($name);
             $module_obj = Solar::factory("Foresmo_Modules_{$name}", array('model' => $this->_model));
             if (isset($module_obj->register) && is_array($module_obj->register)) {
                 $hooks[$name] = $module_obj->register;
@@ -125,5 +131,14 @@ class Foresmo_Modules extends Solar_Base {
         }
 
         return $hooks;
+    }
+
+    public function loadModule($name)
+    {
+        try {
+            require_once $this->web_root . 'modules/' . $name . '.php';
+        } catch (Exception $e) {
+            return false;
+        }
     }
 }

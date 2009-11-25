@@ -2,46 +2,27 @@
 return "
 CREATE TABLE [prefix]users (
   id MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  group_id SMALLINT UNSIGNED NOT NULL,
   username VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
   password VARCHAR(255) NOT NULL,
   PRIMARY KEY (id),
+  KEY group_id (group_id),
   UNIQUE KEY username (username)
-) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
-
-CREATE TABLE [prefix]blogs_users (
-  id MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  user_id MEDIUMINT UNSIGNED NOT NULL,
-  blog_id SMALLINT UNSIGNED NOT NULL,
-  group_id SMALLINT UNSIGNED NOT NULL,
-  PRIMARY KEY (id),
-  KEY user_id(user_id),
-  KEY blog_id(blog_id),
-  KEY group_id(group_id)
 ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE [prefix]user_info (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  blog_id SMALLINT UNSIGNED NOT NULL,
   user_id MEDIUMINT UNSIGNED NOT NULL,
   name VARCHAR(255) NOT NULL,
   type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   value TEXT,
   PRIMARY KEY (id),
-  KEY blog_id (blog_id),
   KEY user_id (user_id)
 ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
-CREATE TABLE [prefix]blogs (
-  id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  host VARCHAR(255) NOT NULL,
-  title VARCHAR(255) NOT NULL,
-  PRIMARY KEY (id)
-) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
-
-CREATE TABLE [prefix]blog_options (
+CREATE TABLE [prefix]options (
   id MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  blog_id SMALLINT UNSIGNED NOT NULL,
   name VARCHAR(255) NOT NULL,
   type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   value TEXT,
@@ -51,29 +32,27 @@ CREATE TABLE [prefix]blog_options (
 CREATE TABLE [prefix]permissions (
   id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
-  PRIMARY KEY  (id)
+  PRIMARY KEY (id)
 ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE [prefix]groups (
   id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  blog_id SMALLINT UNSIGNED NOT NULL,
   name VARCHAR(255) NOT NULL,
-  PRIMARY KEY  (id),
-  KEY blog_id (blog_id)
+  PRIMARY KEY (id)
 ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE [prefix]groups_permissions (
   id SMALLINT UNSIGNED NOT NULL AUTO_INCREMENT,
   group_id SMALLINT UNSIGNED NOT NULL,
   permission_id SMALLINT UNSIGNED NOT NULL,
-  PRIMARY KEY  (id),
+  PRIMARY KEY (id),
   KEY group_id (group_id),
   KEY permission_id (permission_id)
 ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE [prefix]posts (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  blog_id SMALLINT UNSIGNED NOT NULL,
+  user_id MEDIUMINT UNSIGNED NOT NULL,
   slug VARCHAR(255) NOT NULL,
   content_type SMALLINT UNSIGNED NOT NULL,
   title VARCHAR(255) NOT NULL,
@@ -82,7 +61,7 @@ CREATE TABLE [prefix]posts (
   pubdate INT UNSIGNED NOT NULL,
   modified INT UNSIGNED NOT NULL,
   PRIMARY KEY (id),
-  KEY blog_id (blog_id)
+  KEY user_id(user_id)
 ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE [prefix]post_info  (
@@ -98,38 +77,25 @@ CREATE TABLE [prefix]post_info  (
 CREATE TABLE [prefix]modules  (
   id MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
+  enabled TINYINT UNSIGNED NOT NULL,
   PRIMARY KEY (id)
-) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
-
-CREATE TABLE [prefix]blogs_modules  (
-  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  blog_id SMALLINT UNSIGNED NOT NULL,
-  module_id MEDIUMINT UNSIGNED NOT NULL,
-  enabled SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-  PRIMARY KEY (id),
-  KEY blog_id(blog_id),
-  KEY module_id(module_id)
 ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE [prefix]module_info  (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  blog_id SMALLINT UNSIGNED NOT NULL,
   module_id INT UNSIGNED NOT NULL,
   name VARCHAR(255) NOT NULL,
   type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   value TEXT,
   PRIMARY KEY (id),
-  KEY blog_id (blog_id),
   KEY module_id(module_id)
 ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE  [prefix]tags (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  blog_id SMALLINT UNSIGNED NOT NULL,
   tag VARCHAR(255) NOT NULL,
   tag_slug VARCHAR(255) NOT NULL,
   PRIMARY KEY (id),
-  KEY blog_id (blog_id),
   UNIQUE KEY tag_slug (tag_slug)
 ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
@@ -144,7 +110,6 @@ CREATE TABLE [prefix]posts_tags  (
 
 CREATE TABLE [prefix]comments (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  blog_id SMALLINT UNSIGNED NOT NULL,
   post_id INT UNSIGNED NOT NULL,
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
@@ -155,7 +120,6 @@ CREATE TABLE [prefix]comments (
   date INT UNSIGNED NOT NULL,
   type SMALLINT UNSIGNED NOT NULL,
   PRIMARY KEY (id),
-  KEY blog_id (blog_id),
   KEY post_id (post_id)
 ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
@@ -170,12 +134,10 @@ CREATE TABLE [prefix]comment_info (
 
 CREATE TABLE [prefix]links (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  blog_id SMALLINT UNSIGNED NOT NULL,
   url varchar(255) NOT NULL,
   name varchar(255) NOT NULL,
   target varchar(25) NOT NULL,
   status SMALLINT UNSIGNED NOT NULL,
-  PRIMARY KEY  (id),
-  KEY blog_id (blog_id)
+  PRIMARY KEY (id)
  ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 ";

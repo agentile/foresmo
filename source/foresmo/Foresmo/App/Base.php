@@ -103,9 +103,6 @@ class Foresmo_App_Base extends Solar_App_Base {
      */
     protected function _setup()
     {
-        if (Solar_Config::get('Foresmo', 'dev')) {
-            xdebug_start_trace('/var/www/foresmo/tmp/trace');
-        }
         if (!isset($this->session)) {
             $this->session = Solar::factory('Solar_Session', array('class' => 'Foresmo_App'));
         }
@@ -120,12 +117,12 @@ class Foresmo_App_Base extends Solar_App_Base {
         if ($this->connect) {
             $this->_adapter = $adapter;
             $this->installed = (bool) Solar_Config::get('Foresmo', 'installed');
-            if (!$this->installed && $this->_controller != 'install') {
+            if (!$this->installed && $this->_controller != 'install' && $this->_controller != 'ajax') {
                 $this->_redirect('/install');
             } elseif (!$this->installed) {
                 return;
             }
-            $this->web_root = Solar::$system . '/content/';
+            $this->web_root = Solar_Config::get('Solar', 'web_root');
             $this->_model = Solar_Registry::get('model_catalog');
             $cache_settings = Solar_Config::get('Foresmo', 'cache');
             if (isset($cache_settings['adapter'])) {
@@ -352,7 +349,7 @@ class Foresmo_App_Base extends Solar_App_Base {
 
         // add theme view path
         $theme_name = ($this->_controller == 'admin') ? $this->blog_admin_theme : $this->blog_theme;
-        $theme_view_path = Solar::$system . '/themes/' . $theme_name;
+        $theme_view_path = $this->web_root . 'themes/' . $theme_name;
         $theme_view_path = str_replace('Foresmo', $theme_view_path, $stack[0]);
         array_unshift($stack, $theme_view_path);
 
@@ -381,7 +378,7 @@ class Foresmo_App_Base extends Solar_App_Base {
 
         // add theme layout path
         $theme_name = ($this->_controller == 'admin') ? $this->blog_admin_theme : $this->blog_theme;
-        $theme_layout_path = Solar::$system . '/themes/' . $theme_name;
+        $theme_layout_path = $this->web_root . 'themes/' . $theme_name;
         $theme_layout_path_base = str_replace('Foresmo', $theme_layout_path, $stack[1]);
         $theme_layout_path = str_replace('Foresmo', $theme_layout_path, $stack[0]);
         array_unshift($stack, $theme_layout_path, $theme_layout_path_base);

@@ -656,10 +656,6 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
     'adapter' => 'Solar_Auth_Adapter_Sql',
 );
 
-// Salt for password - change to something unique and strong.
-\$config['Solar_Auth_Adapter_Sql']['salt'] = '".$this->random_str."';
-
-
 /**
  * front controller
  */
