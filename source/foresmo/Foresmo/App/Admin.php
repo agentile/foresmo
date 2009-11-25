@@ -18,7 +18,7 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
     public $recent_comments = array();
     public $quick_stats = array();
     public $message;
-    public $data;
+    public $data = array();
 
     public function _setup()
     {
@@ -175,9 +175,38 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
      * @access public
      * @since .09
      */
-    public function actionModules()
+    public function actionModules($act = null, $slug = null)
     {
+        if ($act == null) {
+            $this->actionModules('manage');
+            return;
+        }
+        $act = strtolower($act);
+        switch ($act) {
+            case 'manage':
+                $this->_modules->scanForModules();
+                $this->_view = 'modules_manage';
+                $this->data = $this->_model->modules->fetchModules();
+            break;
+            case 'edit':
+                $this->_view = 'modules_edit';
+                if ($slug === null) {
+                    $this->message = 'Please select a module to edit.';
+                    $this->_view = 'modules_manage';
+                    $this->data = $this->_model->modules->fetchModules();
+                    return;
+                }
 
+                $this->data = $this->_model->modules->fetchModuleInfoByName($slug);
+
+                if (empty($this->data)) {
+                    $this->message = "$slug is not a valid module. Please select a module to edit.";
+                    $this->_view = 'modules_manage';
+                    $this->data = $this->_model->modules->fetchModules();
+                    return;
+                }
+            break;
+        }
     }
 
     /**

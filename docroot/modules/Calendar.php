@@ -8,7 +8,8 @@ class Foresmo_Modules_Calendar extends Solar_Base {
 
     protected $_Foresmo_Modules_Calendar = array('model' => null);
     protected $_model;
-    protected $_name = 'Calendar';
+    public $name = 'Calendar';
+    public $description = 'A Calendar that marks days for which posts have been made.';
     protected $_view;
     protected $_view_path;
     protected $_view_file;
@@ -26,10 +27,15 @@ class Foresmo_Modules_Calendar extends Solar_Base {
     {
         parent::_postConstruct();
         $this->_model = $this->_config['model'];
-        $this->_view_path = Solar_Config::get('Solar', 'web_root') . 'modules/' . $this->_name . '/View';
+        if (isset($_SERVER['DOCUMENT_ROOT'])) {
+            $web_root = $_SERVER['DOCUMENT_ROOT'];
+        } else {
+            $web_root = Solar::$system . '/docroot/';
+        }
+        $this->_view_path = $web_root . 'modules/' . $this->name . '/View';
         $this->_view_file = 'index.php';
         $this->_view = Solar::factory('Solar_View', array('template_path' => $this->_view_path));
-        $this->_module_info = $this->_model->modules->fetchModuleInfoByName($this->_name);
+        $this->_module_info = $this->_model->modules->fetchModuleInfoByName($this->name);
     }
 
     /**
@@ -68,8 +74,8 @@ class Foresmo_Modules_Calendar extends Solar_Base {
 
         $start_day = 0;
 
-        if (isset($this->_module_info[0]['moduleinfo'])) {
-            foreach ($this->_module_info[0]['moduleinfo'] as $row) {
+        if (isset($this->_module_info['moduleinfo'])) {
+            foreach ($this->_module_info['moduleinfo'] as $row) {
                 if ($row['name'] == 'start_of_week') {
                     $start_day = (int) $row['value'];
                 }
@@ -150,5 +156,21 @@ class Foresmo_Modules_Calendar extends Solar_Base {
             'year' => $year,
             'today' => $current_time_info['mday'],
         );
+    }
+
+    public function install()
+    {
+        $id = (int) $this->_module_info['id'];
+        $data = array(
+            'name'  => 'start_of_week',
+            'type'  => 0,
+            'value' => 0,
+        );
+        $this->_model->module_info->insertModuleEntry($id, $data);
+    }
+
+    public function uninstall()
+    {
+
     }
 }

@@ -41,7 +41,7 @@ class Foresmo_App_Module extends Foresmo_App_Base {
             $module_output = $this->_modules->processRequest($module_name, $data);
             if ($module_output && $module_output != '') {
                 foreach ($this->enabled_modules_data as $key => $module_data) {
-                    if ($module_data['name'] == $module_name) {
+                    if ($module_data['class_suffix'] == $module_name) {
                         $this->enabled_modules_data[$key]['output'] = $module_output;
                     }
                 }

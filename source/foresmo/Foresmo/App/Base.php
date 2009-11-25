@@ -103,6 +103,7 @@ class Foresmo_App_Base extends Solar_App_Base {
      */
     protected function _setup()
     {
+        $this->web_root = (isset($_SERVER['DOCUMENT_ROOT'])) ? $_SERVER['DOCUMENT_ROOT'] : Solar::$system . '/docroot/';
         if (!isset($this->session)) {
             $this->session = Solar::factory('Solar_Session', array('class' => 'Foresmo_App'));
         }
@@ -122,7 +123,6 @@ class Foresmo_App_Base extends Solar_App_Base {
             } elseif (!$this->installed) {
                 return;
             }
-            $this->web_root = Solar_Config::get('Solar', 'web_root');
             $this->_model = Solar_Registry::get('model_catalog');
             $cache_settings = Solar_Config::get('Foresmo', 'cache');
             if (isset($cache_settings['adapter'])) {
@@ -211,6 +211,9 @@ class Foresmo_App_Base extends Solar_App_Base {
             break;
             case 'admin_page_edit':
                 return $this->isValidPermission('edit_page');
+            break;
+            case 'admin_modules_change_status':
+                return $this->isValidPermission('manage_modules');
             break;
         }
         return false;

@@ -77,8 +77,12 @@ CREATE TABLE [prefix]post_info  (
 CREATE TABLE [prefix]modules  (
   id MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT,
   name VARCHAR(255) NOT NULL,
-  enabled TINYINT UNSIGNED NOT NULL,
-  PRIMARY KEY (id)
+  class_suffix VARCHAR(255) NOT NULL,
+  description TEXT,
+  status TINYINT UNSIGNED NOT NULL,
+  position MEDIUMINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (id),
+  UNIQUE KEY name (name)
 ) ENGINE=INNODB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
 
 CREATE TABLE [prefix]module_info  (

@@ -24,4 +24,23 @@ class Foresmo_Model_ModuleInfo extends Solar_Sql_Model {
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
     }
 
+    public function insertModuleEntry($id, $data)
+    {
+        if (!isset($data['name']) || !isset($data['value'])) {
+            return false;
+        }
+
+        if (isset($data['type'])) {
+            $type = $data['type'];
+        } else {
+            $type = 0;
+        }
+        $arr = array(
+            'module_id' => (int) $id,
+            'name'      => $data['name'],
+            'type'      => $type,
+            'value'     => $data['value'],
+        );
+        $this->insert($arr);
+    }
 }

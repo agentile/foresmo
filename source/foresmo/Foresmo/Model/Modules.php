@@ -37,10 +37,48 @@ class Foresmo_Model_Modules extends Solar_Sql_Model {
      */
     public function fetchEnabledModules()
     {
-        $where = array('enabled = ?' => 1);
+        $where = array('status = ?' => 1);
         $results = $this->fetchAllAsArray(
             array(
                 'where' => $where,
+                'eager' => 'moduleinfo'
+            )
+        );
+        return $results;
+    }
+
+    /**
+     * registerModule
+     * make an entry for the module if doesn't already exists
+     */
+    public function registerModule($name, $class, $description)
+    {
+        $module = $this->fetchModuleInfoByName($name);
+        if (empty($module)) {
+            $data = array(
+                'name' => $name,
+                'class_suffix' => $class,
+                'description' => $description,
+                'status' => 2,
+                'position' => 0,
+            );
+            return $this->insert($data);
+        }
+        return false;
+    }
+
+    /**
+     * fetchModules
+     *
+     * fetch all modules
+     *
+     * @return array
+     */
+    public function fetchModules()
+    {
+        $results = $this->fetchAllAsArray(
+            array(
+                'cache' => false,
                 'eager' => 'moduleinfo'
             )
         );
@@ -59,11 +97,45 @@ class Foresmo_Model_Modules extends Solar_Sql_Model {
     {
         $enabled_modules = $this->fetchEnabledModules();
         foreach ($enabled_modules as $enabled_module) {
-            if (strtolower($enabled_module['name']) == strtolower($name)) {
+            if (strtolower($enabled_module['class_suffix']) == strtolower($name)) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * enabledModuleByID
+     *
+     * enable a module that is disabled
+     *
+     */
+    public function enableModuleByID($id)
+    {
+        $data = array(
+            'status' => 1,
+        );
+        $where = array(
+            'id = ? AND status = ?' => array((int) $id, 0),
+        );
+        $this->update($data, $where);
+    }
+
+    /**
+     * disableModuleByID
+     *
+     * disable a module that is enabled
+     *
+     */
+    public function disableModuleByID($id)
+    {
+        $data = array(
+            'status' => 0,
+        );
+        $where = array(
+            'id = ? AND status = ?' => array((int) $id, 1),
+        );
+        $this->update($data, $where);
     }
 
     /**
@@ -76,10 +148,34 @@ class Foresmo_Model_Modules extends Solar_Sql_Model {
      */
     public function fetchModuleInfoByName($name)
     {
-        $results = $this->fetchAllAsArray(
+        $results = $this->fetchOneAsArray(
             array(
                 'where' => array(
                     'name = ?' => array($name),
+                ),
+                'eager' => array(
+                    'moduleinfo'
+                )
+            )
+        );
+
+        return $results;
+    }
+
+    /**
+     * fetchModuleByID
+     *
+     * fetch Module by ID
+     *
+     * @param string $name module name
+     * @return array
+     */
+    public function fetchModuleInfoByID($id)
+    {
+        $results = $this->fetchOneAsArray(
+            array(
+                'where' => array(
+                    'id = ?' => array((int) $id),
                 ),
                 'eager' => array(
                     'moduleinfo'

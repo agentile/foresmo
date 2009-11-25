@@ -8,7 +8,8 @@ class Foresmo_Modules_Archives extends Solar_Base {
 
     protected $_Foresmo_Modules_Archives = array('model' => null);
     protected $_model;
-    protected $_name = 'Archives';
+    public $name = 'Archives';
+    public $description = 'Archive list of posts.';
     protected $_view;
     protected $_view_path;
     protected $_view_file;
@@ -24,7 +25,12 @@ class Foresmo_Modules_Archives extends Solar_Base {
     {
         parent::_postConstruct();
         $this->_model = $this->_config['model'];
-        $this->_view_path = Solar_Config::get('Solar', 'web_root') . 'modules/' . $this->_name . '/View';
+        if (isset($_SERVER['DOCUMENT_ROOT'])) {
+            $web_root = $_SERVER['DOCUMENT_ROOT'];
+        } else {
+            $web_root = Solar::$system . '/docroot/';
+        }
+        $this->_view_path = $web_root . 'modules/' . $this->name . '/View';
         $this->_view_file = 'index.php';
         $this->_view = Solar::factory('Solar_View', array('template_path' => $this->_view_path));
     }
@@ -42,7 +48,7 @@ class Foresmo_Modules_Archives extends Solar_Base {
         $blog_start = explode('/', date('n/j/Y', $blog_start));
         $current = getdate();
 
-        $archive = $this->getArchiveArray($blog_start[0], $blog_start[2], $current['mon'], $current['year']);
+        $archive = $this->_getArchiveArray($blog_start[0], $blog_start[2], $current['mon'], $current['year']);
 
         foreach ($posts as $key => $post) {
             if ((int) $post['status'] != 1) {
@@ -74,7 +80,7 @@ class Foresmo_Modules_Archives extends Solar_Base {
         $this->output = $this->_view->fetch($this->_view_file);
     }
 
-    protected function getArchiveArray($start_mon, $start_year, $end_mon, $end_year)
+    protected function _getArchiveArray($start_mon, $start_year, $end_mon, $end_year)
     {
         $start_mon = (int) $start_mon;
         $start_year = (int) $start_year;
@@ -90,6 +96,16 @@ class Foresmo_Modules_Archives extends Solar_Base {
             }
         }
         return $arr;
+    }
+
+    public function install()
+    {
+
+    }
+
+    public function uninstall()
+    {
+
     }
 }
 

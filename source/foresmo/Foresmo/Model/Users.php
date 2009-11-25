@@ -160,6 +160,7 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
         }
 
         return $this->fetchOneAsArray(array(
+            'cache' => false,
             'where' => array(
                 'id = ?' => (int) $user_id
             ),
@@ -181,6 +182,7 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
     public function fetchUserByUsername($username)
     {
         return $this->fetchOneAsArray(array(
+            'cache' => false,
             'where' => array(
                 'username = ?' => (string) $username
             ),

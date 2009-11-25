@@ -11,7 +11,6 @@ $config = array();
  */
 $system = dirname(dirname(__FILE__));
 $config['Solar']['system']  = $system;
-$config['Solar']['web_root']  = $system . '/docroot/';
 
 
 /**

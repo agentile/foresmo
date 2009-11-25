@@ -9,7 +9,8 @@ class Foresmo_Modules_Tags extends Solar_Base {
 
     protected $_Foresmo_Modules_Tags = array('model' => null);
     protected $_model;
-    protected $_name = 'Tags';
+    public $name = 'Tags';
+    public $description = 'Listing of available tags and their post count.';
     protected $_view;
     protected $_view_path;
     protected $_view_file;
@@ -25,7 +26,12 @@ class Foresmo_Modules_Tags extends Solar_Base {
     {
         parent::_postConstruct();
         $this->_model = $this->_config['model'];
-        $this->_view_path = Solar_Config::get('Solar', 'web_root') . 'modules/' . $this->_name . '/View';
+        if (isset($_SERVER['DOCUMENT_ROOT'])) {
+            $web_root = $_SERVER['DOCUMENT_ROOT'];
+        } else {
+            $web_root = Solar::$system . '/docroot/';
+        }
+        $this->_view_path = $web_root . 'modules/' . $this->name . '/View';
         $this->_view_file = 'index.php';
         $this->_view = Solar::factory('Solar_View', array('template_path' => $this->_view_path));
     }
@@ -44,4 +50,13 @@ class Foresmo_Modules_Tags extends Solar_Base {
         $this->output = $this->_view->fetch($this->_view_file);
     }
 
+    public function install()
+    {
+
+    }
+
+    public function uninstall()
+    {
+
+    }
 }

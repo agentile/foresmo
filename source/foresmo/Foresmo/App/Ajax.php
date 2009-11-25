@@ -256,6 +256,39 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         return json_encode($ret);
     }
 
+    public function ajax_admin_modules_change_status($post_data)
+    {
+        switch ($post_data['action']) {
+            case 'enable':
+                foreach ($post_data['modules'] as $id) {
+                    $this->_model->modules->enableModuleByID($id);
+                }
+            break;
+            case 'disable':
+                foreach ($post_data['modules'] as $id) {
+                    $this->_model->modules->disableModuleByID($id);
+                }
+            break;
+            case 'install':
+                foreach ($post_data['modules'] as $id) {
+                    $this->_modules->installModuleByID($id);
+                }
+            break;
+            case 'uninstall':
+                foreach ($post_data['modules'] as $id) {
+                    $this->_modules->uninstallModuleByID($id);
+                }
+            break;
+        }
+
+        $ret = array(
+            'success' => true,
+            'message' => '',
+        );
+
+        return json_encode($ret);
+    }
+
     /**
      * ajax_blog_install
      * This ajax action handles blog installation
@@ -384,6 +417,10 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         $adapter->insert($table, $data);
         $permissions[] = $adapter->lastInsertId($table, 'id');
 
+        $data = array('name' => 'manage_modules');
+        $adapter->insert($table, $data);
+        $permissions[] = $adapter->lastInsertId($table, 'id');
+
         $table = $post_data['db_prefix'] . 'groups_permissions';
         foreach($permissions as $permission) {
             $data = array(
@@ -484,81 +521,31 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         $adapter->insert($table, $data);
         $table = $post_data['db_prefix'] . 'modules';
         $data = array(
-            'name' => 'Pages',
-            'enabled' => 1,
-        );
-        $adapter->insert($table, $data);
-        $data = array(
-            'name' => 'Search',
-            'enabled' => 1,
-        );
-        $adapter->insert($table, $data);
-        $data = array(
             'name' => 'Calendar',
-            'enabled' => 1,
+            'class_suffix' => 'Calendar',
+            'status' => 1,
+            'description' => 'A Calendar that marks days for which posts have been made.',
+            'position' => 1,
         );
         $adapter->insert($table, $data);
         $data = array(
             'name' => 'Tags',
-            'enabled' => 1,
+            'class_suffix' => 'Tags',
+            'status' => 1,
+            'description' => 'Listing of available tags and their post count.',
+            'position' => 2,
         );
         $adapter->insert($table, $data);
-        $data = array(
-            'name' => 'Links',
-            'enabled' => 1,
-        );
-        $adapter->insert($table, $data);
-        $data = array(
-            'name' => 'Archives',
-            'enabled' => 1,
-        );
-        $adapter->insert($table, $data);
-        $data = array(
-            'name' => 'Flickr',
-            'enabled' => 0,
-        );
-        $adapter->insert($table, $data);
-        $data = array(
-            'name' => 'Twitter',
-            'enabled' => 0,
-        );
-        $adapter->insert($table, $data);
-        $data = array(
-            'name' => 'Sections',
-            'enabled' => 0,
-        );
-        $adapter->insert($table, $data);
+
         $table = $post_data['db_prefix'] . 'module_info';
         $data = array(
-            'module_id' => 3,
+            'module_id' => 1,
             'name' => 'start_of_week',
             'type' => 0,
             'value' => 0,
         );
         $adapter->insert($table, $data);
-        if ($db_type == 'Mysql') {
-            $data = array(
-                'module_id' => 2,
-                'name' => 'search_adapter',
-                'type' => 0,
-                'value' => 'mysql',
-            );
-        } else {
-            $data = array(
-                'module_id' => 2,
-                'name' => 'search_adapter',
-                'type' => 0,
-                'value' => 'default',
-            );
-        }
-        $adapter->insert($table, $data);
-        $data = array(
-            'module_id' => 2,
-            'name' => 'search_adapter_settings',
-            'type' => 0,
-            'value' => 'a:5:{s:7:"Default";a:0:{}s:6:"Google";a:0:{}s:5:"Mysql";a:0:{}s:6:"Lucene";a:0:{}s:5:"Sphinx";a:0:{}}',
-        );
-        $adapter->insert($table, $data);
+
         return 'Foresmo installed! Click <a href="/">here</a> to check it out! Also, don\'t forget to change the permissions of the config back to read only.';
     }
 

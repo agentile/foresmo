@@ -27,8 +27,8 @@ class Foresmo_App_Search extends Foresmo_App_Base {
     {
         parent::_preRun();
         $module_info = $this->_model->modules->fetchModuleInfoByName('Search');
-        if (isset($module_info[0]['moduleinfo'])) {
-            foreach ($module_info[0]['moduleinfo'] as $row) {
+        if (isset($module_info['moduleinfo'])) {
+            foreach ($module_info['moduleinfo'] as $row) {
                 if ($row['name'] == 'search_adapter') {
                     $this->search_adapter = ucfirst(strtolower($row['value']));
                 }
