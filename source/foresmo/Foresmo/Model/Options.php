@@ -62,4 +62,13 @@ class Foresmo_Model_Options extends Solar_Sql_Model {
             )
         );
     }
+
+    /**
+     * fetchAllOptions
+     *
+     */
+    public function fetchAllOptions()
+    {
+        return $this->fetchAllAsArray();
+    }
 }

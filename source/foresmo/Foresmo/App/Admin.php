@@ -163,7 +163,7 @@ class Foresmo_App_Admin extends Foresmo_App_Base {
      */
     public function actionSettings()
     {
-
+        $this->data = $this->_model->options->fetchAllOptions();
     }
 
     /**
