@@ -1,0 +1,316 @@
+/*
+ * @author  Bedrich Rios
+ * @web     http://bedrichrios.com
+ * @version 0.1
+ *
+ */
+
+/*
+LESS variables
+-------------------------------------------------- */
+@type-main:         Georgia, 'Times New Roman', serif;
+@type-sec:          Helvetica, Arial, Verdana, sans-serif;
+@type-mono:         Inconsolata, Courier, monospace;
+                    
+@black:             #222;
+@brown:             #281c12;
+@gray:              #444;
+@gray-light:        #ddd;
+@green:             #ce6;
+@green-dark:        #597700;
+@off-white:         #fcfaf9;
+@off-white-dark:    #f7f2ed;
+@red:               #E97F02;
+@red-dark:          #d86e01;
+
+
+/*
+Utilities & LESS mixins
+-------------------------------------------------- */
+.clear:after{ 
+    content: '.'; 
+    clear: both; 
+    display: block; 
+    height: 0; 
+    visibility: hidden;
+}
+
+.clear{ 
+    display: inline-block; 
+}
+
+.clear{ 
+    display: block; 
+}
+
+.rounded(@radius: 3px){
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+}
+
+tbody tr{
+    border-bottom: 1px dashed @gray-light;
+}
+
+tr.even{
+    background: @off-white-dark;
+}
+
+td.today{
+    color: @red;
+    font-style: italic;
+    font-weight: 600;
+}
+
+td.pad{
+    background: url(../images/diagonal_border.png) 0 0 repeat #fff;
+}
+
+/* Pagination */
+ul.pages li.page{
+    list-style: none;
+}
+
+ul.pages li.page a{
+    background-color: @green;
+    color: @green-dark;
+    display: block;
+    float: left;
+    font: 300 12px/22px @type-sec;
+    margin: 0 3px 3px 0;
+    padding: 0 3px;
+    text-align: center;
+    width: 11px;
+    -webkit-transition: background .2s linear;
+}
+
+ul.pages li.page a:hover{
+    background-color: @red;
+    color: #fff;
+}
+
+
+/*
+Global Styles
+-------------------------------------------------- */
+body{
+    background: @off-white;
+}
+
+p,
+ul,
+ol{
+    color: @brown;
+    font: 400 14px/22px @type-main;
+    margin: 11px 0;
+    padding: 0;
+}
+
+h1{
+    font-size: 21px;
+    line-height: 44px;
+}
+
+h2{
+    font-size: 18px;
+}
+
+h3{
+    font-size: 16px;
+}
+
+h2,
+h3{
+    line-height: 22px;
+}
+
+a{
+    border-bottom: 1px solid @green;
+    color: @green-dark;
+    text-decoration: none;
+    -webkit-transition: color .2s linear;
+}
+
+a:hover{
+    border-bottom: 1px solid @gray-light;
+    color: @red;
+}
+
+table{
+    border-collapse: collapse;
+}
+
+small{
+    color: @gray;
+    font: 300 11px/22px @type-sec;
+}
+
+code{
+    background-color: @off-white-dark;
+    border-left: 2px solid @red;
+    display: block;
+    font: 300 13px/22px @type-mono;
+    overflow-x: auto;
+    padding: 0 5px;
+}
+
+pre{
+    overflow-x: auto;
+}
+
+
+/*
+Post Listing
+-------------------------------------------------- */
+
+.post{
+    border-bottom: 1px solid @gray-light;
+    margin-bottom: 19px;
+    padding-bottom: 2px;
+}
+
+.post-excerpt{
+    border-bottom: 1px solid @gray-light;
+    padding-bottom: 21px;
+}
+
+ul.post-meta{
+    color: @gray;
+    list-style: none;
+}
+
+ul.post-meta li{
+    border-bottom: 1px solid @gray-light;
+    font: 300 12px/21px @type-sec;
+}
+
+ul.post-meta li a{
+    border: none;
+}
+
+
+/*
+Site Title & Main Navigation
+-------------------------------------------------- */
+h1#site-title{
+    padding: 11px 0;
+}
+
+ul#nav-main{
+    background: url(../images/navigation_border.png) left 42px repeat-x transparent;
+    margin: 0;
+    padding-bottom: 0;
+}
+
+ul#nav-main li{
+    float: left;
+    list-style: none;
+}
+
+ul#nav-main li.current{
+    background: url(../images/current_marker.png) center bottom no-repeat;
+    padding-bottom: 11px;
+}
+
+ul#nav-main li.current a{
+    background-color: @red;
+    border-right: 1px solid @red;
+    color: #fff;
+}
+
+ul#nav-main li a{
+    border: none;
+    border-right: 1px dotted @gray-light;
+    display: block;
+    line-height: 22px;
+    padding: 11px 21px 10px;
+}
+
+ul#nav-main li:first-child a{
+    border-left: 1px dotted @gray-light;
+    padding: 11px 20px 10px;
+}
+
+ul#nav-main li.current:first-child a{
+    border-left: 1px solid @red;
+}
+
+
+/*
+Sidebar & Modules
+-------------------------------------------------- */
+
+.module{
+    font: 300 12px/21px @type-sec;
+    margin: 0 0 33px;
+}
+
+.module ul li{
+    list-style: none;
+}
+
+h3.module-title{
+    border-bottom: 1px solid @gray-light;
+    color: @gray;
+    font-family: @type-main;
+    font-style: italic;
+    font-weight: 300;
+    margin: 0 0 10px;
+}
+
+/* Calendar */
+
+.module-calendar-container span.prev,
+.module-calendar-container span.next,
+.module-calendar-container p.title{
+    display: block;
+    float: left;
+    font: 300 12px/21px @type-sec;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    width: 25%;
+}
+
+.module-calendar-container a{
+    border-bottom: none;
+    text-decoration: none;
+}
+
+.module-calendar-container p.title{
+    text-align: center;
+    width: 50%;
+}
+
+.module-calendar{
+    width: 100%;
+}
+
+.module-calendar th{
+    background: @off-white-dark;
+    border-bottom: 1px solid @gray-light;
+    border-top: 1px solid @gray-light;
+    text-transform: uppercase;
+}
+
+.module-calendar-container .caption,
+.module-calendar th,
+.module-calendar td{
+    text-align: center;
+}
+
+.module-calendar-container .caption{
+    line-height: 22px;
+}
+
+/* Twitter */
+
+p.module_twitter_tweet{
+    margin-bottom: 0;
+}
+
+small.module_twitter_timestamp{
+    display: block;
+    padding-bottom: 11px;
+}

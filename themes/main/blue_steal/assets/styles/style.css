@@ -1,0 +1,282 @@
+/*
+-----------------------------------------------
+Author:  Bryden Tweedy
+Date:    Feb. 11, 2010
+----------------------------------------------- */
+
+
+body {
+  background-color:#fff;
+  margin:0;
+  padding:0;
+  font:10px/1 Georgia,Arial,Sans-serif;
+  color:#597d93;
+  background: url("../images/bg.png");
+  background-position: top;
+  background-repeat: repeat-x;
+  }
+  
+#header {
+	padding-bottom: 5.5em;
+	margin-top: 0;
+}
+
+#contentContainer{
+	background: url("../images/contentBG.png");
+	background-position: top;
+	background-repeat: repeat-x;
+	margin-top: 2em;
+	border-top: .1em dotted #c9d6df;
+}
+
+#content {
+	padding-top: 1em;
+}
+
+table {
+    margin-bottom: 1em;
+    width: 100%;
+}
+
+input {
+    border: .1em solid #C9D6Df;
+    font-family: Verdana; sans-serif;
+    margin: 0;
+}
+
+textarea {
+    border: .1em solid #c9d6df;
+    font-family: Verdana; sans-serif;
+    width: 100%;
+    margin: 0;
+}
+
+dt {
+    font-size: 1.5em;
+}
+
+dd {
+    padding-bottom: 1em;
+}
+
+.spam_empty {
+    display: none;
+}
+
+hr {
+    width: 75%;
+    background-color: #C9D6DF;
+    color: #C9D6Df;
+}
+  /* =Links
+----------------------------------------------- */
+a {
+  color:#94aebe;
+  text-decoration:none;
+  }
+
+a:hover {
+  color:#c5d3dc !important;
+  }
+
+  
+  /* =Navigation
+----------------------------------------------- */
+#nav {
+	text-align: right;
+}
+
+.underlinemenu{
+font-weight: bold;
+width: 100%;
+}
+
+.underlinemenu ul{
+padding: .6em 0 .7em 0;
+margin: 0;
+text-align: right; 
+}
+
+.underlinemenu ul li{
+display: inline;
+}
+
+.underlinemenu ul li a{
+color: #fff;
+padding: .6em .3em .2em .3em; 
+margin-right: 2em; 
+text-decoration: none;
+border-bottom: .1em solid #809fb2; 
+text-transform: lowercase;
+}
+
+.underlinemenu ul li a:hover, .underlinemenu ul li a.selected{
+border-bottom-color: #fff;
+}
+
+  /* =Branding
+----------------------------------------------- */
+#branding {
+	margin: 0;
+}
+
+#branding h1 {
+	color: #809fb2;
+	font-size: 1.7em;
+}
+
+#branding h1 a {
+	color: #809fb2;
+	text-decoration: none;
+}
+
+  /* =Posts
+----------------------------------------------- */
+.postInfo {
+        clear: both;
+}
+
+#data {
+	color: #809fb2;
+	margin: 0;
+}
+
+#data .date {
+	font-size: 2.5em;
+}
+
+#data .postedBy {
+	margin-top: 1.5em;
+	font-style: italic;
+	font-size: 1em;
+	color: #777;
+}
+
+#post {
+	margin: 0;
+        padding-bottom: 2em;
+}
+
+#post h2 {
+	font-weight: normal;
+	font-family: Georgia;
+	font-size: 2.5em;
+	color: #5a7f95;
+	margin: 0;
+	padding-bottom: 1em;
+}
+
+#post h2 a {
+	color: #5a7f95;
+	text-decoration: none;
+}
+
+#post h2 a:hover {
+	color: #5a7f95;
+	border-bottom: .1em dotted #c9d6df;
+}
+
+#post .content {
+	line-height: 1.6em;
+	color: #5a7f95;
+	font-size: 1.3em;
+        font-family: Georgia, Arial, Sans-serif;
+}
+
+#post .content p:first-letter {
+	font-size:1.8em;
+	font-family; baskerville, 'palatino linotype', 'times new roman', serif;
+        color: #809FB2;
+}
+
+/* =Pages
+----------------------------------------------- */
+#page {
+    font-size: 1.5em;
+    line-height: 1.5em;
+    font-family: Georgia;
+}
+
+#page h2 {
+    color: #5a7f95;
+    font-family: Georgia;
+    font-size: 2.5em;
+    font-weight: normal;
+    margin: 0;
+    border-bottom: .1em solid #5a7f95;
+}
+
+
+/* =Comments
+----------------------------------------------- */
+#commentsContent {
+    padding-top: 1em;
+}
+
+#comments .admin {
+    border-top: .5em solid #809FB2;
+}
+
+#comments .odd {
+    border-top: .5em solid #688DA4;
+}
+
+#comments .even {
+    border-top: .5em solid #809FB2;
+}
+
+#comments .comment {
+    width: 100%;
+    padding: .5em;
+    margin-bottom: 1em;
+    float: left;
+}
+
+#comments .comment-author {
+    float: left;
+    width: 20%;
+}
+
+#comments .comment-message {
+    float: left;
+    width: 70%;
+}
+
+#comments .comment-link {
+    float: right;
+    width: 10%;
+}
+
+
+/* =Content Right
+----------------------------------------------- */
+#content-right {
+	color: #344955;
+}
+
+#content-right a {
+	color: #5a7f95;
+}
+
+
+  /* =Modules
+----------------------------------------------- */
+#module {
+    padding-bottom: 1em;
+    font-size: 1.1em;
+    text-align: right;
+}
+
+
+#module h2 {
+    color: #688da4;
+    font-size: 1.3em;
+    margin: 0;
+    border-bottom: .1em solid #688da4;
+    text-align: left;
+    margin-bottom: 1em;
+}
+
+#module img a {
+        border: none;
+}
