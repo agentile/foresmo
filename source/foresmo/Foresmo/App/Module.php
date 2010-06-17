@@ -23,26 +23,24 @@ class Foresmo_App_Module extends Foresmo_App_Base {
      *
      * @return void
      */
-    public function actionIndex()
+    public function actionIndex($module = null, $params = array())
     {
         $this->_layout = null;
         $this->_view = null;
-        $f_args = func_get_args();
         // Check if module exists and is enabled
-        if (isset($f_args[0]) && $this->_model->modules->isEnabled($f_args[0])) {
-            $module_name = ucfirst(strtolower($f_args[0]));
-            array_shift($f_args);
+        if (isset($module) && $this->_model->modules->isEnabled($module)) {
+            $module_name = ucfirst(strtolower($module));
             $data = array(
                 'POST' => $this->_request->post(),
                 'GET' => $this->_request->get(),
-                'PARAMS' => $f_args,
+                'PARAMS' => $params,
             );
 
             $module_output = $this->_modules->processRequest($module_name, $data);
             if ($module_output && $module_output != '') {
-                foreach ($this->enabled_modules_data as $key => $module_data) {
+                foreach ($this->enabled_modules->all as $key => $module_data) {
                     if ($module_data['class_suffix'] == $module_name) {
-                        $this->enabled_modules_data[$key]['output'] = $module_output;
+                        $this->enabled_modules->all[$key]['output'] = $module_output;
                     }
                 }
             }
@@ -61,7 +59,7 @@ class Foresmo_App_Module extends Foresmo_App_Base {
             $action = 'main';
         }
 
-        $redirect_obj->enabled_modules_data = $this->enabled_modules_data;
+        $redirect_obj->enabled_modules->all = $this->enabled_modules->all;
 
         if (empty($redirect_info['params'])) {
             $data = $redirect_obj->fetch($action);
@@ -73,4 +71,24 @@ class Foresmo_App_Module extends Foresmo_App_Base {
         $this->_response->content = $data->content;
     }
 
+    // TODO: Use Router for this
+    /**
+     * _notFound
+     * Insert description here
+     *
+     * @param $action
+     * @param $params
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
+    protected function _notFound($action, $params = null)
+    {
+        $this->_info[0] = $action;
+        $this->actionIndex($action, $params);
+    }
 }

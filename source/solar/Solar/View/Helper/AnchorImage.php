@@ -5,13 +5,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_View
+ * @package Solar_View_Helper
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: AnchorImage.php 3282 2008-07-30 14:57:27Z pmjones $
+ * @version $Id: AnchorImage.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  */
 class Solar_View_Helper_AnchorImage extends Solar_View_Helper
@@ -30,7 +30,7 @@ class Solar_View_Helper_AnchorImage extends Solar_View_Helper
      * 
      * @return string An <a href="..."><img ... /></a> tag set.
      * 
-     * @see Solar_View_Helper_Image
+     * @see [[Solar_View_Helper_Image]]
      * 
      */
     public function anchorImage($spec, $src, $a_attribs = array(),

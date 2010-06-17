@@ -12,7 +12,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Fetch.php 4088 2009-09-24 19:17:15Z pmjones $
+ * @version $Id: Fetch.php 4498 2010-03-05 17:28:00Z pmjones $
  * 
  */
 class Solar_Sql_Model_Params_Fetch extends Solar_Sql_Model_Params { 
@@ -95,6 +95,7 @@ class Solar_Sql_Model_Params_Fetch extends Solar_Sql_Model_Params {
             'name' => null,
             'cond' => null,
             'cols' => null,
+            'keep' => null,
         );
         
         foreach ($spec as $join) {
@@ -105,6 +106,7 @@ class Solar_Sql_Model_Params_Fetch extends Solar_Sql_Model_Params {
                 'name' => $join['name'],
                 'cond' => $join['cond'],
                 'cols' => $join['cols'],
+                'keep' => $join['keep'],
             );
         }
         
@@ -307,6 +309,34 @@ class Solar_Sql_Model_Params_Fetch extends Solar_Sql_Model_Params {
     {
         $this->_data['count_pages'] = (bool) $flag;
         return $this;
+    }
+    
+    /**
+     * 
+     * Returns a clone with only the joins we keep for native selects (i.e., 
+     * for page counts and for the native-by-select strategy in relateds).
+     * 
+     * @return Solar_Sql_Model_Params_Fetch
+     * 
+     */
+    public function cloneForKeeps()
+    {
+        $clone = clone($this);
+        
+        // drop all eagers so they don't get re-added
+        $clone->_data['eager'] = array();
+        
+        // drop joins not needed for keeps
+        foreach ($clone->_data['join'] as $key => $join) {
+            $keep = $join['keep'] === true
+                 || $join['keep'] === null && $join['type'] != 'left';
+            if (! $keep) {
+                unset($clone->_data['join'][$key]);
+            }
+        }
+        
+        // done
+        return $clone;
     }
     
     /**

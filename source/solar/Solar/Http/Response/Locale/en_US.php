@@ -11,10 +11,14 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: en_US.php 2556 2007-06-27 20:58:18Z pmjones $
+ * @version $Id: en_US.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
 return array(
+    'ERR_HTTP_VERSION'      => 'HTTP version "{:version}" is unknown.',
+    'ERR_REDIRECT_NO_URI'   => 'No URI was specified for the redirect.',
+    'ERR_STATUS_CODE'       => 'Status code "{:code}" is not valid.',
+    
     'STATUS_100' => 'Continue',
     'STATUS_101' => 'Switching Protocols',
     

@@ -18,56 +18,6 @@ class Test_Solar_Getopt extends Solar_Test {
     
     // -----------------------------------------------------------------
     // 
-    // Support methods.
-    // 
-    // -----------------------------------------------------------------
-    
-    /**
-     * 
-     * Constructor.
-     * 
-     * @param array $config User-defined configuration parameters.
-     * 
-     */
-    public function __construct($config = null)
-    {
-        parent::__construct($config);
-    }
-    
-    /**
-     * 
-     * Destructor; runs after all methods are complete.
-     * 
-     * @param array $config User-defined configuration parameters.
-     * 
-     */
-    public function __destruct()
-    {
-        parent::__destruct();
-    }
-    
-    /**
-     * 
-     * Setup; runs before each test method.
-     * 
-     */
-    public function setup()
-    {
-        parent::setup();
-    }
-    
-    /**
-     * 
-     * Setup; runs after each test method.
-     * 
-     */
-    public function teardown()
-    {
-        parent::teardown();
-    }
-    
-    // -----------------------------------------------------------------
-    // 
     // Test methods.
     // 
     // -----------------------------------------------------------------
@@ -131,6 +81,26 @@ class Test_Solar_Getopt extends Solar_Test {
     public function testValidate()
     {
         $this->todo('stub');
+    }
+    
+    public function testValidate_paramOpt()
+    {
+        
+    }
+    
+    public function testValidate_paramOptHasDefault()
+    {
+        
+    }
+    
+    public function testValidate_paramReq()
+    {
+        
+    }
+    
+    public function testValidate_paramReqHasDefault()
+    {
+        
     }
     
     /**

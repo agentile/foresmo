@@ -1,12 +1,10 @@
 <IfModule rewrite_module>
     # turn on rewriting
     RewriteEngine On
-    RewriteBase /
-
 
     # hint the Solar_Uri_Action class as to the base path
     SetEnv SOLAR_URI_ACTION_PATH /
-
+    
     # turn empty reqests into requests for "index.html",
     # keeping the query string intact
     RewriteRule ^$ index.html [QSA]

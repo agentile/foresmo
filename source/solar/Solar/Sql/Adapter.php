@@ -32,7 +32,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Adapter.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Adapter.php 4570 2010-05-15 19:38:27Z pmjones $
  * 
  */
 abstract class Solar_Sql_Adapter extends Solar_Base {
@@ -326,7 +326,7 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
     
     /**
      * 
-     * Injects a cache dependency for [[$_cache]].
+     * Injects a cache dependency for `$_cache`.
      * 
      * @param mixed $spec A [[Solar::dependency()]] specification.
      * 
@@ -557,9 +557,11 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
      * }}
      * 
      * To help prevent SQL injection attacks, you should **always** quote
-     * the values used in a direct query. Use [[quote()]], [[quoteInto()]],
-     * or [[quoteMulti()]] to accomplish this. Even easier, use the automated
-     * value binding provided by the query() method:
+     * the values used in a direct query. Use [[Solar_Sql_Adapter::quote() | quote()]],
+     * [[Solar_Sql_Adapter::quoteInto() | quoteInto()]], or 
+     * [[Solar_Sql_Adapter::quoteMulti() | quoteMulti()]] to accomplish this.
+     * Even easier, use the automated value binding provided by the query() 
+     * method:
      * 
      * {{code: php
      *     // BAD AND SCARY:
@@ -575,11 +577,11 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
      * Note that adapters provide convenience methods to automatically quote
      * values on common operations:
      * 
-     * - [[Solar_Sql::insert()]]
-     * - [[Solar_Sql::update()]]
-     * - [[Solar_Sql::delete()]]
+     * - [[Solar_Sql_Adapter::insert()]]
+     * - [[Solar_Sql_Adapter::update()]]
+     * - [[Solar_Sql_Adapter::delete()]]
      * 
-     * Additionally, the [[Class::Solar_Sql_Select | ]] class is dedicated to
+     * Additionally, the [[Solar_Sql_Select]] class is dedicated to
      * safely creating portable SELECT statements, so you may wish to use that
      * instead of writing literal SELECTs.
      * 
@@ -633,20 +635,17 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
         try {
             $prep->execute();
         } catch (PDOException $e) {
-            throw $this->_exception(
-                'ERR_QUERY_FAILED',
-                array(
-                    'pdo_code'  => $e->getCode(),
-                    'pdo_text'  => $e->getMessage(),
-                    'host'      => $this->_config['host'],
-                    'port'      => $this->_config['port'],
-                    'user'      => $this->_config['user'],
-                    'name'      => $this->_config['name'],
-                    'stmt'      => $stmt,
-                    'data'      => $data,
-                    'pdo_trace' => $e->getTraceAsString(),
-                )
-            );
+            throw $this->_exception('ERR_QUERY_FAILED', array(
+                'pdo_code'  => $e->getCode(),
+                'pdo_text'  => $e->getMessage(),
+                'host'      => $this->_config['host'],
+                'port'      => $this->_config['port'],
+                'user'      => $this->_config['user'],
+                'name'      => $this->_config['name'],
+                'stmt'      => $stmt,
+                'data'      => $data,
+                'pdo_trace' => $e->getTraceAsString(),
+            ));
         }
         
         // retain the profile data?
@@ -673,20 +672,17 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
             $prep = $this->_pdo->prepare($stmt);
             $prep->solar_conn = $this->_pdo->solar_conn;
         } catch (PDOException $e) {
-            throw $this->_exception(
-                'ERR_PREPARE_FAILED',
-                array(
-                    'pdo_code'  => $e->getCode(),
-                    'pdo_text'  => $e->getMessage(),
-                    'host'      => $this->_config['host'],
-                    'port'      => $this->_config['port'],
-                    'sock'      => $this->_config['sock'],
-                    'user'      => $this->_config['user'],
-                    'name'      => $this->_config['name'],
-                    'stmt'      => $stmt,
-                    'pdo_trace' => $e->getTraceAsString(),
-                )
-            );
+            throw $this->_exception('ERR_PREPARE_FAILED', array(
+                'pdo_code'  => $e->getCode(),
+                'pdo_text'  => $e->getMessage(),
+                'host'      => $this->_config['host'],
+                'port'      => $this->_config['port'],
+                'sock'      => $this->_config['sock'],
+                'user'      => $this->_config['user'],
+                'name'      => $this->_config['name'],
+                'stmt'      => $stmt,
+                'pdo_trace' => $e->getTraceAsString(),
+            ));
         }
         
         return $prep;
@@ -853,7 +849,8 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
      * 
      * Inserts a row of data into a table.
      * 
-     * Automatically applies Solar_Sql::quote() to the data values for you.
+     * Automatically applies [[Solar_Sql_Adapter::quote() | ]] to the data 
+     * values for you.
      * 
      * For example:
      * 
@@ -909,7 +906,8 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
      * 
      * Updates a table with specified data based on a WHERE clause.
      * 
-     * Automatically applies Solar_Sql::quote() to the data values for you.
+     * Automatically applies [[Solar_Sql_Adapter::quote() | ]] to the data 
+     * values for you.
      * 
      * @param string $table The table to udpate.
      * 
@@ -1266,9 +1264,10 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
         // add columns
         $stmt .= implode(",\n    ", $parts['cols']) . "\n";
         
-        // from these tables
-        $stmt .= "FROM ";
-        $stmt .= implode(", ", $parts['from']) . "\n";
+        // from these tables. wrap in parens to force precedence for MySQL.
+        $stmt .= "FROM (\n    ";
+        $stmt .= implode(",\n    ", $parts['from']) . "\n";
+        $stmt .= ")\n";
         
         // joined to these tables
         if ($parts['join']) {
@@ -1874,15 +1873,23 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
      * Returns a list of database tables from the cache; if the cache entry
      * is not available, queries the database for the list of tables.
      * 
+     * @param string $schema Fetch tbe list of tables in this database
+     * schema; when empty, uses the current or default schema.
+     * 
      * @return array A sequential array of table names in the database.
      * 
      */
-    public function fetchTableList()
+    public function fetchTableList($schema = null)
     {
-        $key = $this->_getCacheKey('table_list');
+        if ($schema) {
+            $key = $this->_getCacheKey("table_list/$schema");
+        } else {
+            $key = $this->_getCacheKey("table_list");
+        }
+        
         $result = $this->_cache->fetch($key);
         if (! $result) {
-            $result = $this->_fetchTableList();
+            $result = $this->_fetchTableList($schema);
             $this->_cache->add($key, $result);
         }
         return $result;
@@ -1892,10 +1899,13 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
      * 
      * Returns a list of database tables.
      * 
+     * @param string $schema Fetch tbe list of tables in this database
+     * schema; when empty, uses the current or default schema.
+     * 
      * @return array A sequential array of table names in the database.
      * 
      */
-    abstract protected function _fetchTableList();
+    abstract protected function _fetchTableList($schema);
     
     /**
      * 
@@ -1903,17 +1913,18 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
      * entry is not available, queries the database for the column
      * descriptions.
      * 
-     * @param string $table The table name to fetch columns for.
+     * @param string $spec The table or schema.table to fetch columns for.
      * 
      * @return array An array of table columns.
      * 
      */
-    public function fetchTableCols($table)
+    public function fetchTableCols($spec)
     {
-        $key = $this->_getCacheKey("table/$table/cols");
+        $key = $this->_getCacheKey("table/$spec/cols");
         $result = $this->_cache->fetch($key);
         if (! $result) {
-            $result = $this->_fetchTableCols($table);
+            list($schema, $table) = $this->_splitSchemaIdent($spec);
+            $result = $this->_fetchTableCols($table, $schema);
             $this->_cache->add($key, $result);
         }
         return $result;
@@ -1925,10 +1936,12 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
      * 
      * @param string $table The table name to fetch columns for.
      * 
+     * @param string $schema The schema in which the table resides.
+     * 
      * @return array An array of table columns.
      * 
      */
-    abstract protected function _fetchTableCols($table);
+    abstract protected function _fetchTableCols($table, $schema);
     
     /**
      * 
@@ -1985,17 +1998,19 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
      * Returns an array describing table indexes from the cache; if the cache
      * entry is not available, queries the database for the index information.
      * 
-     * @param string $table The table name to fetch indexes for.
+     * @param string $spec The table or schema.table name to fetch indexes
+     * for.
      * 
      * @return array An array of table indexes.
      * 
      */
-    public function fetchIndexInfo($table)
+    public function fetchIndexInfo($spec)
     {
-        $key = $this->_getCacheKey("table/$table/index");
+        $key = $this->_getCacheKey("table/$spec/index");
         $result = $this->_cache->fetch($key);
         if (! $result) {
-            $result = $this->_fetchIndexInfo($table);
+            list($schema, $table) = $this->_splitSchemaIdent($spec);
+            $result = $this->_fetchIndexInfo($table, $schema);
             $this->_cache->add($key, $result);
         }
         return $result;
@@ -2007,10 +2022,12 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
      * 
      * @param string $table The table name to fetch indexes for.
      * 
+     * @param string $schema The schema in which the table resides.
+     * 
      * @return array An array of table indexes.
      * 
      */
-    abstract protected function _fetchIndexInfo($table);
+    abstract protected function _fetchIndexInfo($table, $schema);
     
     // -----------------------------------------------------------------
     // 
@@ -2046,8 +2063,6 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
      * @param array $cols Array of columns to create.
      * 
      * @return string An SQL string.
-     * 
-     * @todo Instead of stacking errors, stack info, then throw in exception.
      * 
      */
     public function createTable($table, $cols)
@@ -2086,19 +2101,13 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
         foreach ($cols as $name => $info) {
             try {
                 $coldef[] = $this->_sqlColdef($name, $info);
-            } catch (Exception $e) {
+            } catch (Solar_Sql_Exception $e) {
+                throw $this->_exception('ERR_TABLE_NOT_CREATED', array(
+                    'table' => $table,
+                    'error' => $e->getMessage(),
+                ));
                 $err[$name] = array($e->getCode(), $e->getInfo());
             }
-        }
-        
-        // were there errors?
-        if ($err) {
-            // add the table name to the info and throw the exception
-            $err['__table'] = $table;
-            throw $this->_exception(
-                'ERR_TABLE_NOT_CREATED',
-                $err
-            );
         }
         
         // no errors, build a return the CREATE statement
@@ -2419,10 +2428,10 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
         
         // is it a recognized column type?
         if (! array_key_exists($type, $this->_solar_native)) {
-            throw $this->_exception(
-                'ERR_COL_TYPE',
-                array('col' => $name, 'type' => $type)
-            );
+            throw $this->_exception('ERR_COL_TYPE', array(
+                'col' => $name,
+                'type' => $type,
+            ));
         }
         
         // basic declaration string
@@ -2432,10 +2441,10 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
         case 'varchar':
             // does it have a valid size?
             if ($size < 1 || $size > 255) {
-                throw $this->_exception(
-                    'ERR_COL_SIZE',
-                    array('col' => $name, 'size' => $size)
-                );
+                throw $this->_exception('ERR_COL_SIZE', array(
+                    'col' => $name,
+                    'size' => $size,
+                ));
             } else {
                 // replace the 'size' placeholder
                 $coldef = $this->_solar_native[$type] . "($size)";
@@ -2445,17 +2454,19 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
         case 'numeric':
         
             if ($size < 1 || $size > 255) {
-                throw $this->_exception(
-                    'ERR_COL_SIZE',
-                    array('col' => $name, 'size' => $size, 'scope' => $scope)
-                );
+                throw $this->_exception('ERR_COL_SIZE', array(
+                    'col' => $name,
+                    'size' => $size,
+                    'scope' => $scope,
+                ));
             }
             
             if ($scope < 0 || $scope > $size) {
-                throw $this->_exception(
-                    'ERR_COL_SCOPE',
-                    array('col' => $name, 'size' => $size, 'scope' => $scope)
-                );
+                throw $this->_exception('ERR_COL_SCOPE', array(
+                    'col' => $name,
+                    'size' => $size,
+                    'scope' => $scope,
+                ));
             }
             
             // replace the 'size' and 'scope' placeholders
@@ -2504,55 +2515,113 @@ abstract class Solar_Sql_Adapter extends Solar_Base {
     
     /**
      * 
-     * Check if a table, column, or index name is a valid portable identifier.
+     * Check if a table, index, or column name is a valid portable identifier.
+     * Throws an exception on failure.
      * 
      * @param string $type The indentifier type: table, index, sequence, etc.
      * 
      * @param string $name The identifier name to check.
      * 
-     * @return bool True if valid, false if not.
+     * @return void
      * 
      */
     protected function _checkIdentifier($type, $name)
     {
+        if ($type == 'column') {
+            $this->_checkIdentifierColumn($name);
+        } else {
+            list($schema, $ident) = $this->_splitSchemaIdent($name);
+            if ($schema) {
+                $this->_checkIdentifierPart($type, $name, $schema);
+            }
+            $this->_checkIdentifierPart($type, $name, $ident);
+        }
+    }
+    
+    /**
+     * 
+     * Checks one part of a dotted identifier (schema.table, database.table,
+     * etc).  Throws an exception on failure.
+     * 
+     * @param string $type The identifier type (table, index, etc).
+     * 
+     * @param string $name The full identifier name (with dots, if any).
+     * 
+     * @param string $part The part of the name that we're checking.
+     * 
+     * @return void
+     * 
+     */
+    protected function _checkIdentifierPart($type, $name, $part)
+    {
         // validate identifier length
-        $len = strlen($name);
+        $len = strlen($part);
         if ($len < 1 || $len > $this->_maxlen) {
-            throw $this->_exception(
-                'ERR_IDENTIFIER_LENGTH',
-                array(
-                    'type' => $type,
-                    'name' => $name,
-                    'min'  => 1,
-                    'max'  => $this->_maxlen,
-                )
-            );
+            throw $this->_exception('ERR_IDENTIFIER_LENGTH', array(
+                'type' => $type,
+                'name' => $name,
+                'part' => $part,
+                'min'  => 1,
+                'max'  => $this->_maxlen,
+                'len'  => $len,
+            ));
         }
         
         // only a-z, 0-9, and _ are allowed in words.
         // must start with a letter, not a number or underscore.
         $regex = '/^[a-z][a-z0-9_]*$/';
         if (! preg_match($regex, $name)) {
-            throw $this->_exception(
-                'ERR_IDENTIFIER_CHARS',
-                array(
-                    'type'  => $type,
-                    'name'  => $name,
-                    'regex' => $regex,
-                )
-            );
+            throw $this->_exception('ERR_IDENTIFIER_CHARS', array(
+                'type'  => $type,
+                'name'  => $name,
+                'part'  => $part,
+                'regex' => $regex,
+            ));
         }
+    }
+    
+    /**
+     * 
+     * Checks a column name.
+     * 
+     * @param string $name The column name.
+     * 
+     * @return void
+     * 
+     */
+    protected function _checkIdentifierColumn($name)
+    {
+        $this->_checkIdentifierPart('column', $name, $name);
         
-        // must not have two or more underscores in a row
+        // also, must not have two or more underscores in a row
         if (strpos($name, '__') !== false) {
-            throw $this->_exception(
-                'ERR_IDENTIFIER_UNDERSCORES',
-                array(
-                    'type'  => $type,
-                    'name'  => $name,
-                    'regex' => $regex,
-                )
-            );
+            throw $this->_exception('ERR_IDENTIFIER_UNDERSCORES', array(
+                'type'  => 'column',
+                'name'  => $name,
+            ));
         }
+    }
+    
+    /**
+     * 
+     * Splits a `schema.table` identifier into its component parts.
+     * 
+     * @param string $spec The `table` or `schema.table` identifier.
+     * 
+     * @return array A sequential array where element 0 is the schema and
+     * element 1 is the table name.
+     * 
+     */
+    protected function _splitSchemaIdent($spec)
+    {
+        $pos = strpos($spec, '.');
+        if ($pos !== false) {
+            $schema = substr($spec, 0, $pos);
+            $ident  = substr($spec, $pos + 1);
+        } else {
+            $schema = null;
+            $ident  = $spec;
+        }
+        return array($schema, $ident);
     }
 }

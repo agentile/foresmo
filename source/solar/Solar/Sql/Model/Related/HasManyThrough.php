@@ -15,12 +15,11 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: HasManyThrough.php 4091 2009-09-24 20:30:39Z pmjones $
+ * @version $Id: HasManyThrough.php 4489 2010-03-02 15:34:14Z pmjones $
  * 
  */
 class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToMany
 {
-
     /**
      * 
      * The relationship name through which we find foreign records.
@@ -32,7 +31,8 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
     
     /**
      * 
-     * The "through" table name.
+     * The "through" table name. Not definable by the user; is taken from
+     * the "through" relationship definition.
      * 
      * @var string
      * 
@@ -41,7 +41,8 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
     
     /**
      * 
-     * The "through" table alias.
+     * The "through" table alias. Not definable by the user; is taken from
+     * the "through" relationship definition.
      * 
      * @var string
      * 
@@ -68,13 +69,31 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
     
     /**
      * 
-     * The virtual element `through_key` automatically 
-     * populates the 'through_foreign_col' value for you.
+     * The virtual element `through_key` automatically populates the 
+     * 'through_foreign_col' value for you.
      * 
      * @var string.
      * 
      */
     public $through_key;
+    
+    /**
+     * 
+     * The conditions retrieved from the "through" model.
+     * 
+     * @var string|array
+     * 
+     */
+    public $through_conditions;
+    
+    /**
+     * 
+     * The type of join for the "through" model.
+     * 
+     * @var string
+     * 
+     */
+    public $through_join_type;
     
     /**
      * 
@@ -116,9 +135,11 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
      */
     protected function _setRelated($opts)
     {
-        // get the "through" relationship control
-        $through = $this->_native_model->getRelated($opts['through']);
+        // retain the name of the "through" related
         $this->through = $opts['through'];
+        
+        // get the "through" relationship control
+        $through = $this->_native_model->getRelated($this->through);
         
         // the foreign column
         if (empty($opts['foreign_col'])) {
@@ -136,31 +157,18 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
             $this->native_col = $opts['native_col'];
         }
         
-        // get the through-table
-        if (empty($opts['through_table'])) {
-            if ($this->through) {
-                $this->through_table = $through->foreign_table;
-            } else {
-                // guess an appropriate table name.
-                // if 'through' is not specified, this should generally be
-                $this->through_table = 
-                    $this->_native_model->table_name . '_' . 
-                    $this->_foreign_model->table_name;
-            }
+        // retain the "through join type"
+        if (empty($opts['through_join_type'])) {
+            $this->through_join_type = 'left';
         } else {
-            $this->through_table = $opts['through_table'];
+            $this->through_join_type = $opts['through_join_type'];
         }
         
+        // get the through-table
+        $this->through_table = $through->foreign_table;
+        
         // get the through-alias
-        if (empty($opts['through_alias'])) {
-            if ($this->through) {
-                $this->through_alias = $through->foreign_alias;
-            } else {
-                $this->through_alias = $this->name . '_through';
-            }
-        } else {
-            $this->through_alias = $opts['through_alias'];
-        }
+        $this->through_alias = $through->foreign_alias;
         
         // a little magic
         if (empty($opts['through_native_col']) &&
@@ -173,11 +181,7 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
         
         // what's the native model key in the through table?
         if (empty($opts['through_native_col'])) {
-            if ($this->through) {
-                $this->through_native_col = $through->foreign_col;
-            } else {
-                 $this->through_native_col = $this->_native_model->foreign_col;
-            }
+            $this->through_native_col = $this->_native_model->foreign_col;
         } else {
             $this->through_native_col = $opts['through_native_col'];
         }
@@ -188,12 +192,15 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
         } else {
             $this->through_foreign_col = $opts['through_foreign_col'];
         }
+        
+        // retain the "through where" mods
+        $this->through_conditions = $through->getForeignConditions($this->through_alias);
     }
     
     /**
      * 
-     * Modifies the native fetch with eager joins so that the through table
-     * and the foreign table are joined properly.
+     * Modifies the native fetch params with eager joins so that the through 
+     * table and the foreign table are joined properly.
      * 
      * @param Solar_Sql_Model_Params_Eager $eager The eager params.
      * 
@@ -201,48 +208,67 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
      * 
      * @return void
      * 
+     * @see modEagerFetch()
+     * 
      */
-    protected function _modEagerFetchJoin($eager, $fetch)
+    protected function _modEagerFetch($eager, $fetch)
     {
         // first, join the native table to the through table
-        $join = array(
-            'type' => 'inner',
+        $thru = array(
+            'type' => strtolower($this->through_join_type),
             'name' => "{$this->through_table} AS {$this->through_alias}",
-            'cond' => "{$fetch['alias']}.{$this->native_col} = "
-                    . "{$this->through_alias}.{$this->through_native_col}",
-            'cols' => null,
-        );
-        $fetch->join($join);
-        
-        // then join to the through table to the foreign table
-        $join = array(
-            'type' => $eager['join_type'],
-            'name' => "{$this->foreign_table} AS {$eager['alias']}",
-            'cond' => "{$eager['alias']}.{$this->foreign_col} = "
-                    . "{$this->through_alias}.{$this->through_foreign_col}",
+            'cond' => array(),
             'cols' => null,
         );
         
-        // extra conditions for the parent fetch
-        if ($eager['join_cond']) {
-            // what type of join?
-            if ($join['type'] == 'left') {
-                // convert the eager conditions to a WHERE clause
-                foreach ((array) $eager['join_cond'] as $cond => $val) {
-                    $fetch->where($cond, $val);
-                }
-            } else {
-                // merge join conditions
-                $join['cond'] = array_merge(
-                    (array) $join['cond'],
-                    (array) $eager['join_cond']
-                );
-            }
+        $thru['cond'][] = "{$fetch['alias']}.{$this->native_col} = "
+                        . "{$this->through_alias}.{$this->through_native_col}";
+        
+        $thru['cond'] = array_merge(
+            $thru['cond'],
+            $this->through_conditions
+        );
+        
+        // keep for countPages() calls?
+        if ($thru['type'] != 'left') {
+            $thru['keep'] = true;
+        } else {
+            $thru['keep'] = false;
         }
         
+        $fetch->join($thru);
+        
+        // now join to the through table to the foreign table
+        $join = array(
+            'type' => strtolower($eager['join_type']),
+            'name' => "{$this->foreign_table} AS {$eager['alias']}",
+            'cond' => array(),
+            'cols' => null,
+        );
+        
+        $join['cond'][] = "{$eager['alias']}.{$this->foreign_col} = "
+                        . "{$this->through_alias}.{$this->through_foreign_col}";
+        
+        // foreign and eager conditions
+        $join['cond'] = array_merge(
+            $join['cond'],
+            $this->getForeignConditions($eager['alias']),
+            (array) $eager['conditions']
+        );
+        
+        // keep for countPages() calls only if we kept "through", and the
+        // foreign join is not a left join
+        if ($thru['keep'] && $join['type'] != 'left') {
+            $join['keep'] = true;
+        } else {
+            $join['keep'] = false;
+        }
         
         // done!
         $fetch->join($join);
+        
+        // always DISTINCT so we don't get multiple duplicate native rows
+        $fetch->distinct(true);
     }
     
     /**
@@ -258,23 +284,36 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
      */
     protected function _fetchIntoArrayOne($eager, &$array)
     {
-        $join = array(
+        // build the "through" join and its conditions
+        $thru = array(
             'type' => 'inner',
             'name' => "{$this->through_table} AS {$this->through_alias}",
-            'cond' => "{$eager['alias']}.{$this->foreign_col} = "
-                    . "{$this->through_alias}.{$this->through_foreign_col}",
+            'cond' => array(),
             'cols' => null,
         );
         
-        $where = $this->where;
+        $thru['cond'][] = "{$eager['alias']}.{$this->foreign_col} = "
+                        . "{$this->through_alias}.{$this->through_foreign_col}";
         
+        $thru['cond'] = array_merge(
+            $thru['cond'],
+            $this->through_conditions
+        );
+        
+        // build the foreign where conditions
+        $where = array();
         $col = "{$this->through_alias}.{$this->through_native_col}";
         $where["$col = ?"] = $array[$this->native_col];
+        
+        $where = array_merge(
+            $where,
+            $this->getForeignConditions($eager['alias'])
+        );
         
         $params = array(
             'alias' => $eager['alias'],
             'cols'  => $eager['cols'],
-            'join'  => $join,
+            'join'  => $thru,
             'where' => $where,
             'order' => $this->order,
             'eager' => $eager['eager'],
@@ -300,32 +339,48 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
      */
     protected function _fetchIntoArrayAll($eager, &$array, $fetch)
     {
+        // build the "through" join and its conditions
+        $index_col = "{$this->native_alias}__{$this->through_native_col}";
+        $thru = array(
+            'type' => 'inner',
+            'name' => "{$this->through_table} AS {$this->through_alias}",
+            'cond' => array(),
+            'cols' => "{$this->through_native_col} AS {$index_col}",
+        );
+        
+        $thru['cond'][] = "{$eager['alias']}.{$this->foreign_col} = "
+                        . "{$this->through_alias}.{$this->through_foreign_col}";
+        
+        $thru['cond'] = array_merge(
+            $thru['cond'],
+            $this->through_conditions
+        );
+        
+        // build the foreign join or where
         $col = "{$this->through_alias}.{$this->through_native_col}";
         
         $use_select = $eager['native_by'] == 'select'
                    || count($array) > $eager['wherein_max'];
         
+        $join = null;
+        $where = null;
         if ($use_select) {
-            $join[] = $this->_getNativeBySelect($eager, $fetch, $col);
-            $where  = $this->where;
+            $join = $this->_getNativeBySelect($eager, $fetch, $col);
+            $join['cond'] = array_merge(
+                (array) $join['cond'],
+                $this->getForeignConditions($eager['alias'])
+            );
         } else {
-            $where  = $this->_getNativeByWherein($eager, $array, $col);
+            $where = array_merge(
+                $this->_getNativeByWherein($eager, $array, $col),
+                $this->getForeignConditions($eager['alias'])
+            );
         }
-        
-        $index_col = "{$this->native_alias}__{$this->through_native_col}";
-        $join = array();
-        $join[] = array(
-            'type' => 'inner',
-            'name' => "{$this->through_table} AS {$this->through_alias}",
-            'cond' => "{$eager['alias']}.{$this->foreign_col} = "
-                    . "{$this->through_alias}.{$this->through_foreign_col}",
-            'cols' => "{$this->through_native_col} AS {$index_col}",
-        );
         
         $params = array(
             'alias' => $eager['alias'],
             'cols'  => $eager['cols'],
-            'join'  => $join,
+            'join'  => ($join) ? array($thru, $join) : $thru,
             'where' => $where,
             'order' => $this->order,
             'eager' => $eager['eager'],
@@ -342,7 +397,7 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
             if (! empty($data[$key])) {
                 $row[$this->name] = $data[$key];
             } else {
-                $row[$this->name] = $this->fetchEmpty();
+                $row[$this->name] = $this->_getEmpty();
             }
         }
     }
@@ -366,26 +421,45 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
             $native_id = $spec;
         }
         
-        $join = array(
+        // build up the "through" join
+        $thru = array(
             'type' => 'inner',
             'name' => "{$this->through_table} AS {$this->through_alias}",
-            'cond' => "{$this->foreign_alias}.{$this->foreign_col} = "
-                    . "{$this->through_alias}.{$this->through_foreign_col}",
+            'cond' => array(),
             'cols' => null,
         );
         
-        $where = $this->where;
+        $thru['cond'][] = "{$this->foreign_alias}.{$this->foreign_col} = "
+                        . "{$this->through_alias}.{$this->through_foreign_col}";
+        
+        $thru['cond'] = array_merge(
+            $thru['cond'],
+            $this->through_conditions
+        );
+        
+        // build up the "where" conditions
+        $where = array();
         $cond  = "{$this->through_alias}.{$this->through_native_col} = ?";
         $where[$cond] = $native_id;
+        $where = array_merge(
+            $where,
+            $this->getForeignConditions($this->foreign_alias)
+        );
         
+        // build the fetch, and go
         $fetch = array(
             'alias' => $this->foreign_alias,
-            'join'  => $join,
+            'join'  => $thru,
             'where' => $where,
             'order' => $this->order,
         );
         
         $obj = $this->_foreign_model->fetchAll($fetch);
+        
+        if (! $obj) {
+            $obj = $this->fetchEmpty();
+        }
+        
         return $obj;
     }
     
@@ -415,6 +489,18 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
     
     /**
      * 
+     * Returns a new, empty collection when there is no related data.
+     * 
+     * @return Solar_Sql_Model_Collection
+     * 
+     */
+    public function fetchEmpty()
+    {
+        return $this->fetchNew();
+    }
+    
+    /**
+     * 
      * Saves the related "through" collection *and* the foreign collection
      * from a native record.
      * 
@@ -434,13 +520,8 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
         // get the through collection to work with
         $through = $native->{$this->through};
         
-        // if no foreign, and no through, we're done
-        if (! $foreign && ! $through) {
-            return;
-        }
-        
         // if no foreign records, kill off all through records
-        if (! $foreign) {
+        if ($foreign->isEmpty()) {
             $through->deleteAll();
             return;
         }
@@ -448,13 +529,6 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
         // save the foreign records as they are, which creates the necessary
         // primary key values the through mapping will need
         $foreign->save();
-        
-        // we need a through mapping
-        if (! $through) {
-            // make a new collection
-            $through = $native->newRelated($this->through);
-            $native->{$this->through} = $through;
-        }
         
         // the list of existing foreign values
         $foreign_list = $foreign->getColVals($this->foreign_col);
@@ -469,7 +543,7 @@ class Solar_Sql_Model_Related_HasManyThrough extends Solar_Sql_Model_Related_ToM
             }
         }
         
-        // make sure all existing "through" have the right native IDs on the
+        // make sure all existing "through" have the right native IDs on them
         foreach ($through as $record) {
             $record->{$this->through_native_col} = $native->{$this->native_col};
         }

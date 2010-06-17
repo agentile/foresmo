@@ -11,10 +11,10 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: MakeApp.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: MakeApp.php 4436 2010-02-25 21:38:34Z pmjones $
  * 
  */
-class Solar_Cli_MakeApp extends Solar_Cli_Base
+class Solar_Cli_MakeApp extends Solar_Controller_Command
 {
     /**
      * 
@@ -151,6 +151,10 @@ class Solar_Cli_MakeApp extends Solar_Cli_Base
         // write files in the View dir
         $this->_writeViews();
         
+        // link public dir for app
+        $link_public = Solar::factory('Solar_Cli_LinkPublic');
+        $link_public->exec($class);
+        
         // done!
         $this->_outln("Done.");
     }
@@ -205,7 +209,7 @@ class Solar_Cli_MakeApp extends Solar_Cli_Base
             $this->_outln('App directory exists.');
         }
         
-        $list = array('Layout', 'Locale', 'View');
+        $list = array('Layout', 'Locale', 'Public', 'View');
         
         foreach ($list as $sub) {
             if (! file_exists("$dir/$sub")) {
@@ -330,13 +334,9 @@ class Solar_Cli_MakeApp extends Solar_Cli_Base
      */
     protected function _setTarget()
     {
-        $target = $this->_options['target'];
-        if (! $target) {
-            // use the solar system "include" directory.
-            // that should automatically point to the right vendor for us.
-            $target = Solar::$system . "/include";
-        }
-        
+        // use the solar system "include" directory.
+        // that should automatically point to the right vendor for us.
+        $target = Solar::$system . "/include";
         $this->_target = Solar_Dir::fix($target);
     }
     
@@ -372,8 +372,8 @@ class Solar_Cli_MakeApp extends Solar_Cli_Base
         // look at the vendor name and find a controller class
         $vendor = Solar_Class::vendor($class);
         if ($this->_model_name) {
-            $name = "{$vendor}_Controller_Model";
-            $file = $this->_target . "$vendor/Controller/Model.php";
+            $name = "{$vendor}_Controller_Bread";
+            $file = $this->_target . "$vendor/Controller/Bread.php";
         } else {
             $name = "{$vendor}_Controller_Page";
             $file = $this->_target . "$vendor/Controller/Page.php";

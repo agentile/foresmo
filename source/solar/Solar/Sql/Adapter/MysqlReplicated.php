@@ -16,7 +16,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: MysqlReplicated.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: MysqlReplicated.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  */
 class Solar_Sql_Adapter_MysqlReplicated extends Solar_Sql_Adapter_Mysql
@@ -97,7 +97,7 @@ class Solar_Sql_Adapter_MysqlReplicated extends Solar_Sql_Adapter_Mysql
     
     /**
      * 
-     * Which slave key the [[$_dsn]] property was built from.
+     * Which slave key the `$_dsn` property was built from.
      * 
      * @var mixed
      * 
@@ -108,7 +108,7 @@ class Solar_Sql_Adapter_MysqlReplicated extends Solar_Sql_Adapter_Mysql
      * 
      * A PDO-style DSN for the master server.
      * 
-     * The [[$_dsn]] property is for the slave server.
+     * The `$_dsn` property is for the slave server.
      * 
      * @var string
      * 
@@ -119,7 +119,7 @@ class Solar_Sql_Adapter_MysqlReplicated extends Solar_Sql_Adapter_Mysql
      * 
      * A PDO object for accessing the master server.
      * 
-     * The [[$_pdo]] property is for the slave server.
+     * The `$_pdo` property is for the slave server.
      * 
      * @var PDO
      * 
@@ -436,20 +436,17 @@ class Solar_Sql_Adapter_MysqlReplicated extends Solar_Sql_Adapter_Mysql
             }
         } catch (PDOException $e) {
             // note that we use $config as set in the try block above
-            throw $this->_exception(
-                'ERR_PREPARE_FAILED',
-                array(
-                    'pdo_code'  => $e->getCode(),
-                    'pdo_text'  => $e->getMessage(),
-                    'host'      => $config['host'],
-                    'port'      => $config['port'],
-                    'sock'      => $config['sock'],
-                    'user'      => $config['user'],
-                    'name'      => $config['name'],
-                    'stmt'      => $stmt,
-                    'pdo_trace' => $e->getTraceAsString(),
-                )
-            );
+            throw $this->_exception('ERR_PREPARE_FAILED', array(
+                'pdo_code'  => $e->getCode(),
+                'pdo_text'  => $e->getMessage(),
+                'host'      => $config['host'],
+                'port'      => $config['port'],
+                'sock'      => $config['sock'],
+                'user'      => $config['user'],
+                'name'      => $config['name'],
+                'stmt'      => $stmt,
+                'pdo_trace' => $e->getTraceAsString(),
+            ));
         }
         
         return $prep;

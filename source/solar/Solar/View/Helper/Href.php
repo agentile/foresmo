@@ -5,13 +5,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_View
+ * @package Solar_View_Helper
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Href.php 3366 2008-08-26 01:36:49Z pmjones $
+ * @version $Id: Href.php 4285 2009-12-31 02:18:15Z pmjones $
  * 
  */
 class Solar_View_Helper_Href extends Solar_View_Helper

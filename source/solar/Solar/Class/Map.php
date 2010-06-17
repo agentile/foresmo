@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Map.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Map.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
 class Solar_Class_Map extends Solar_Base
@@ -177,7 +177,9 @@ class Solar_Class_Map extends Solar_Base
         }
         
         // still no base, we have a problem
-        throw $this->_exception('ERR_NO_BASE_DIR');
+        throw $this->_exception('ERR_NO_BASE_DIR', array(
+            'class' => $class,
+        ));
     }
     
     /**

@@ -28,20 +28,10 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
             'foreign_key' => 'user_id',
         ));
 
-        $this->_hasOne('groups_permissions', array(
-            'foreign_class' => 'Foresmo_Model_GroupsPermissions',
-            'foreign_key' => 'group_id',
-        ));
-
-        $this->_hasMany('permissions', array(
-             'foreign_class' => 'Foresmo_Model_Permissions',
-             'through'       => 'groups_permissions',
-             'through_key'   => 'permission_id',
-        ));
-
         $this->_hasOne('groups', array(
             'foreign_class' => 'Foresmo_Model_Groups',
-            'foreign_key' => 'id',
+            'native_col' => 'group_id',
+            'foreign_col' => 'id',
         ));
     }
 
@@ -140,8 +130,11 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
         return $this->fetchAllAsArray(array(
             'eager' => array(
                 'userinfo',
-                'permissions',
-                'groups',
+                'groups' => array(
+                    'eager' => array(
+                        'permissions'
+                        )
+                    ),
                 )
             )
         );
@@ -166,8 +159,11 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
             ),
             'eager' => array(
                 'userinfo',
-                'permissions',
-                'groups',
+                'groups' => array(
+                    'eager' => array(
+                        'permissions'
+                        )
+                    ),
                 )
             )
         );
@@ -188,8 +184,11 @@ class Foresmo_Model_Users extends Solar_Sql_Model {
             ),
             'eager' => array(
                 'userinfo',
-                'permissions',
-                'groups',
+                'groups' => array(
+                    'eager' => array(
+                        'permissions'
+                        )
+                    ),
                 )
             )
         );

@@ -5,7 +5,7 @@
  * 
  * @category Solar
  * 
- * @package Solar_App
+ * @package Solar_App Example applications bundled with Solar.
  * 
  * @subpackage Solar_App_Hello
  * 
@@ -13,7 +13,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Hello.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: Hello.php 4407 2010-02-21 19:19:49Z pmjones $
  * 
  */
 class Solar_App_Hello extends Solar_Controller_Page
@@ -29,12 +29,13 @@ class Solar_App_Hello extends Solar_Controller_Page
     
     /**
      * 
-     * Action with no code at all; only passes to the view.
+     * Action with no code at all; only passes to the view, with no layout.
      * 
      * @return void
      * 
      */
     public function actionIndex()
     {
+        $this->_layout = null;
     }
 }

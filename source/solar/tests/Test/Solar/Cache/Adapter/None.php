@@ -228,8 +228,24 @@ class Test_Solar_Cache_Adapter_None extends Test_Solar_Cache_Adapter {
     public function testSave_object()
     {
         $id = 'coyote';
-        $data = Solar::factory('Solar_Example');
+        $data = Solar::factory('Mock_Solar_Example');
         $this->assertTrue($this->_adapter->save($id, $data));
+        $this->assertFalse($this->_adapter->fetch($id));
+    }
+    
+    // save with a custom lifespan
+    public function testSave_life()
+    {
+        $id = 'coyote';
+        $data = 'Wile E. Coyote';
+        $life = 3;
+        $this->assertTrue($this->_adapter->save($id, $data, $life));
+        $this->assertFalse($this->_adapter->fetch($id), $data);
+        
+        sleep($life - 1);
+        $this->assertFalse($this->_adapter->fetch($id), $data);
+        
+        sleep(2);
         $this->assertFalse($this->_adapter->fetch($id));
     }
 }

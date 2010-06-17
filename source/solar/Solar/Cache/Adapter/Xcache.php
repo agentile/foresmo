@@ -18,7 +18,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Xcache.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Xcache.php 4442 2010-02-26 16:33:06Z pmjones $
  * 
  * @todo Does not work with objects.  Need to add custom support for them.
  * <http://trac.lighttpd.net/xcache/wiki/XcacheApi>
@@ -57,10 +57,9 @@ class Solar_Cache_Adapter_Xcache extends Solar_Cache_Adapter
     {
         parent::_preConfig();
         if (! (extension_loaded('xcache') && ini_get('xcache.cacher'))) {
-            throw $this->_exception(
-                'ERR_EXTENSION_NOT_LOADED',
-                array('extension' => 'xcache')
-            );
+            throw $this->_exception('ERR_EXTENSION_NOT_LOADED', array(
+                'extension' => 'xcache'
+            ));
         }
     }
     
@@ -72,10 +71,13 @@ class Solar_Cache_Adapter_Xcache extends Solar_Cache_Adapter
      * 
      * @param mixed $data The data to write into the entry.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return bool True on success, false on failure.
      * 
      */
-    public function save($key, $data)
+    public function save($key, $data, $life = null)
     {
         if (! $this->_active) {
             return;
@@ -84,8 +86,13 @@ class Solar_Cache_Adapter_Xcache extends Solar_Cache_Adapter
         // modify the key to add the prefix
         $key = $this->entry($key);
         
+        // life value
+        if ($life === null) {
+            $life = $this->_life;
+        }
+        
         // save in xcache
-        return xcache_set($key, $data, $this->_life);
+        return xcache_set($key, $data, $life);
     }
     
     /**
@@ -96,10 +103,13 @@ class Solar_Cache_Adapter_Xcache extends Solar_Cache_Adapter
      * 
      * @param mixed $data The data to write into the entry.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return bool True on success, false on failure.
      * 
      */
-    public function add($key, $data)
+    public function add($key, $data, $life = null)
     {
         if (! $this->_active) {
             return;
@@ -108,13 +118,18 @@ class Solar_Cache_Adapter_Xcache extends Solar_Cache_Adapter
         // modify the key to add the prefix
         $key = $this->entry($key);
         
+        // life value
+        if ($life === null) {
+            $life = $this->_life;
+        }
+        
         // don't save if already there
         if (xcache_isset($key)) {
             return false;
         }
         
         // add to xcache
-        return xcache_set($key, $data, $this->_life);
+        return xcache_set($key, $data, $life);
     }
     
     /**

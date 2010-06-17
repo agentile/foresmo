@@ -5,13 +5,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_Test
+ * @package Solar_Test Unit-testing tools.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Test.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Test.php 4380 2010-02-14 16:06:52Z pmjones $
  * 
  */
 class Solar_Test extends Solar_Base
@@ -85,23 +85,23 @@ class Solar_Test extends Solar_Base
     
     /**
      * 
-     * Setup before each method test.
+     * Runs before each test method; used for preparing state.
      * 
      * @return void
      * 
      */
-    public function setup()
+    public function preTest()
     {
     }
     
     /**
      * 
-     * Teardown after each method test.
+     * Runs after each test method; used for restoring state.
      * 
      * @return void
      * 
      */
-    public function teardown()
+    public function postTest()
     {
     }
     

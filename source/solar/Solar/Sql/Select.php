@@ -58,7 +58,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Select.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Select.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  */
 class Solar_Sql_Select extends Solar_Base
@@ -1718,7 +1718,7 @@ class Solar_Sql_Select extends Solar_Base
      * @return string An SQL-safe quoted value (or a string of 
      * separated-and-quoted values).
      * 
-     * @see Solar_Sql::quote()
+     * @see Solar_Sql_Adapter::quote()
      * 
      */
     public function quote($val)
@@ -1737,7 +1737,7 @@ class Solar_Sql_Select extends Solar_Base
      * @return mixed An SQL-safe quoted value (or string of separated values)
      * placed into the orignal text.
      * 
-     * @see Solar_Sql::quoteInto()
+     * @see Solar_Sql_Adapter::quoteInto()
      * 
      */
     public function quoteInto($txt, $val)
@@ -1760,7 +1760,7 @@ class Solar_Sql_Select extends Solar_Base
      * @return string An SQL-safe string composed of the list keys and
      * quoted values.
      * 
-     * @see Solar_Sql::quoteMulti()
+     * @see Solar_Sql_Adapter::quoteMulti()
      * 
      */
     public function quoteMulti($list, $sep = null)

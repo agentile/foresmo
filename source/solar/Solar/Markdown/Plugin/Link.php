@@ -33,7 +33,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Link.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: Link.php 4263 2009-12-07 19:25:31Z pmjones $
  * 
  */
 class Solar_Markdown_Plugin_Link extends Solar_Markdown_Plugin
@@ -163,7 +163,7 @@ class Solar_Markdown_Plugin_Link extends Solar_Markdown_Plugin
      * @return string The replacement text.
      * 
      */
-    function _parseInline($matches)
+    protected function _parseInline($matches)
     {
         $alt_text = $this->_escape($matches[2]);
         $href     = $this->_escape($matches[3]);

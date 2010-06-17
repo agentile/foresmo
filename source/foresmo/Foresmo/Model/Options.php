@@ -33,7 +33,7 @@ class Foresmo_Model_Options extends Solar_Sql_Model {
      */
     public function fetchOptionValue($key)
     {
-        $results = $this->fetchAllAsArray(
+        $results = $this->fetchOneAsArray(
             array(
                 'where' => array(
                     'name = ?' => $key
@@ -41,10 +41,26 @@ class Foresmo_Model_Options extends Solar_Sql_Model {
             )
         );
 
-        if (isset($results[0])) {
-            return $results[0]['value'];
+        if (isset($results['value'])) {
+            return $results['value'];
         }
         return null;
+    }
+
+    /**
+     * updateOption
+     * udate blog option
+     *
+     */
+    public function updateOption($name, $value)
+    {
+        $data = array(
+            'value' => $value
+        );
+        $where = array(
+            'name = ?' => $name
+        );
+        $this->update($data, $where);
     }
 
     /**
@@ -67,8 +83,32 @@ class Foresmo_Model_Options extends Solar_Sql_Model {
      * fetchAllOptions
      *
      */
-    public function fetchAllOptions()
+    public function fetchAllOptions($cache = true)
     {
-        return $this->fetchAllAsArray();
+        return $this->fetchAllAsArray(array('cache'=>$cache));
+    }
+
+    /**
+     * updateTheme
+     *
+     * @param string $theme_name theme name
+     * @param bool $admin admin theme or blog theme?
+     * @return void
+     */
+    public function updateTheme($theme_name, $admin = false)
+    {
+        $data = array(
+            'value' => $theme_name,
+        );
+        if ($admin) {
+            $where = array(
+                'name = ?' => array('blog_admin_theme'),
+            );
+        } else {
+            $where = array(
+                'name = ?' => array('blog_theme'),
+            );
+        }
+        $this->update($data, $where);
     }
 }

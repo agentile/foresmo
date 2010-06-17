@@ -26,7 +26,8 @@
  * 
  * @category Solar
  * 
- * @package Solar_Markdown
+ * @package Solar_Markdown Plugin-based system to implement standard Markdown
+ * syntax.
  * 
  * @author John Gruber <http://daringfireball.net/projects/markdown/>
  * 
@@ -36,7 +37,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Markdown.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Markdown.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  * @todo How to configure plugins at the start?
  * 
@@ -270,7 +271,9 @@ class Solar_Markdown extends Solar_Base
         // use tidy?
         if ($this->_config['tidy'] && ! extension_loaded('tidy')) {
             // tidy requested but not loaded
-            throw $this->_exception('ERR_TIDY_NOT_LOADED');
+            throw $this->_exception('ERR_EXTENSION_NOT_LOADED', array(
+                'extension' => 'tidy',
+            ));
         }
         
         // load each plugin object

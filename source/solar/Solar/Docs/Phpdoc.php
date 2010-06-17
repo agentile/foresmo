@@ -64,7 +64,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Phpdoc.php 3847 2009-06-24 15:32:20Z pmjones $
+ * @version $Id: Phpdoc.php 4381 2010-02-14 16:17:22Z pmjones $
  * 
  */
 class Solar_Docs_Phpdoc extends Solar_Base
@@ -129,33 +129,25 @@ class Solar_Docs_Phpdoc extends Solar_Base
         $this->_loadInfo($tech);
         
         // now take the summary line off the narrative.
-        // look for the first sentence-punctuation followed by whitespace.
-        preg_match('/^(.*[\.\?\!])(\s|\n|$)/AUms', $narr, $matches);
-        if ($matches) {
-            $punct = strlen($matches[1]);
+        // look for the first sentence-punctuation followed by whitespace,
+        // or the first double-newline.
+        $punct_ws  = "\n\s*(\n|$)";
+        $double_nl = "[\.\?\!](\s|\n|$)";
+        preg_match("/^.*(($punct_ws)|($double_nl))/AUms", $narr, $matches);
+        if (! empty($matches[0])) {
+            $summ = $matches[0];
+            $narr = substr($narr, strlen($matches[0]));
         } else {
-            $punct = false;
+            $summ = $narr;
+            $narr = '';
         }
         
-        // alternatively, look for the first newline only.
-        $newline = strpos($narr, "\n");
-        
-        if ($punct !== false) {
-            // summary is first sentence
-            $pos = $punct;
-        } elseif ($newline !== false) {
-            // summary is first line
-            $pos = $newline;
-        } else {
-            // appears there is no summary line, go only
-            // with the narrative.
-            $pos = 0;
-        }
+        $summ = str_replace("\n", " ", $summ);
         
         // return the summary, narrative, and technical portions
         return array(
-            'summ' => str_replace("\n", " ", trim(substr($narr, 0, $pos))),
-            'narr' => trim(substr($narr, $pos)),
+            'summ' => trim($summ),
+            'narr' => trim($narr),
             'tech' => $this->_info,
         );
         
@@ -269,7 +261,7 @@ class Solar_Docs_Phpdoc extends Solar_Base
     
     /**
      * 
-     * Parses one ore more @todo lines into $this->_info.
+     * Parses one or more @todo lines into $this->_info.
      * 
      * @param string $line The block line.
      * 
@@ -383,7 +375,13 @@ class Solar_Docs_Phpdoc extends Solar_Base
      */
     public function parsePackage($line)
     {
-        $this->_info['package'] = $this->_1part($line);
+        $parts = $this->_2part($line);
+        if ($parts) {
+            $this->_info['package'] = array(
+                'name' => $parts[0],
+                'summ' => $parts[1],
+            );
+        }
     }
     
     /**

@@ -26,6 +26,20 @@
 #
 # Edited by Anthony Gentile 09/30/09 for PHP5, SolarPHP naming convention
 # and to set some additional properties for salt and enc type
+/**
+ * Foresmo_Hashing
+ * Insert description here
+ *
+ * @category
+ * @package
+ * @author
+ * @copyright
+ * @license
+ * @version
+ * @link
+ * @see
+ * @since
+ */
 class Foresmo_Hashing {
 
     public $itoa64;
@@ -35,6 +49,20 @@ class Foresmo_Hashing {
     public $hash_type;
     public $salt;
 
+    /**
+     * __construct
+     * Insert description here
+     *
+     * @param $iteration_count_log2
+     * @param $portable_hashes
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
     public function __construct($iteration_count_log2, $portable_hashes)
     {
         $this->itoa64 = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -47,6 +75,19 @@ class Foresmo_Hashing {
         $this->random_state = microtime() . getmypid();
     }
 
+    /**
+     * _getRandomBytes
+     * Insert description here
+     *
+     * @param $count
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
     protected function _getRandomBytes($count)
     {
         $output = '';
@@ -68,6 +109,20 @@ class Foresmo_Hashing {
         return $output;
     }
 
+    /**
+     * _encode64
+     * Insert description here
+     *
+     * @param $input
+     * @param $count
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
     protected function _encode64($input, $count)
     {
         $output = '';
@@ -91,6 +146,19 @@ class Foresmo_Hashing {
         return $output;
     }
 
+    /**
+     * _genSaltPrivate
+     * Insert description here
+     *
+     * @param $input
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
     protected function _genSaltPrivate($input)
     {
         $output = '$P$';
@@ -101,6 +169,20 @@ class Foresmo_Hashing {
         return $output;
     }
 
+    /**
+     * _cryptPrivate
+     * Insert description here
+     *
+     * @param $password
+     * @param $setting
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
     protected function _cryptPrivate($password, $setting)
     {
         $output = '*0';
@@ -144,6 +226,19 @@ class Foresmo_Hashing {
         return $output;
     }
 
+    /**
+     * _genSaltExtended
+     * Insert description here
+     *
+     * @param $input
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
     protected function _genSaltExtended($input)
     {
         $count_log2 = min($this->iteration_count_log2 + 8, 24);
@@ -162,6 +257,19 @@ class Foresmo_Hashing {
         return $output;
     }
 
+    /**
+     * _genSaltBlowfish
+     * Insert description here
+     *
+     * @param $input
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
     protected function _genSaltBlowfish($input)
     {
         # This one needs to use a different order of characters and a
@@ -203,6 +311,19 @@ class Foresmo_Hashing {
         return $output;
     }
 
+    /**
+     * hashPassword
+     * Insert description here
+     *
+     * @param $password
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
     public function hashPassword($password)
     {
         $random = '';
@@ -242,6 +363,20 @@ class Foresmo_Hashing {
         return '*';
     }
 
+    /**
+     * checkPassword
+     * Insert description here
+     *
+     * @param $password
+     * @param $stored_hash
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
     public function checkPassword($password, $stored_hash)
     {
         $hash = $this->_cryptPrivate($password, $stored_hash);

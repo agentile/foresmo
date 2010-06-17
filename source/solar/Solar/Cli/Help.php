@@ -5,16 +5,16 @@
  * 
  * @category Solar
  * 
- * @package Solar_Cli
+ * @package Solar_Cli CLI commands.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Help.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: Help.php 4434 2010-02-25 21:31:44Z pmjones $
  * 
  */
-class Solar_Cli_Help extends Solar_Cli_Base
+class Solar_Cli_Help extends Solar_Controller_Command
 {
     /**
      * 
@@ -47,8 +47,6 @@ class Solar_Cli_Help extends Solar_Cli_Base
      */
     protected function _displayCommandHelp($cmd = null)
     {
-        $this->_outln();
-        
         // the list of known command-to-class mappings
         $list = $this->_console->getCommandList();
         
@@ -60,7 +58,7 @@ class Solar_Cli_Help extends Solar_Cli_Base
         
         $class = $list[$cmd];
         $obj = Solar::factory($class);
-        $help = $obj->getInfoHelp();
+        $help = rtrim($obj->getInfoHelp());
         if ($help) {
             $this->_outln($help);
         } else {

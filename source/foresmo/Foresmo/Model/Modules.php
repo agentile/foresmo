@@ -146,10 +146,11 @@ class Foresmo_Model_Modules extends Solar_Sql_Model {
      * @param string $name module name
      * @return array
      */
-    public function fetchModuleInfoByName($name)
+    public function fetchModuleInfoByName($name, $cache = true)
     {
         $results = $this->fetchOneAsArray(
             array(
+                'cache' => $cache,
                 'where' => array(
                     'name = ?' => array($name),
                 ),

@@ -4,7 +4,7 @@
  * Stack for loading classes from user-defined hierarchies.
  * 
  * As you add classes to the stack, they are searched-for first when you 
- * call [[Solar_Stack_Class::load()]].
+ * call [[Solar_Class_Stack::load()]].
  * 
  * @category Solar
  * 
@@ -14,7 +14,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Stack.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Stack.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  */
 class Solar_Class_Stack extends Solar_Base
@@ -328,13 +328,10 @@ class Solar_Class_Stack extends Solar_Base
         
         // failed to find the class in the stack
         if ($throw) {
-            throw $this->_exception(
-                'ERR_CLASS_NOT_FOUND',
-                array(
-                    'name'  => $name,
-                    'stack' => $this->_stack,
-                )
-            );
+            throw $this->_exception('ERR_CLASS_NOT_FOUND', array(
+                'class' => $name,
+                'stack' => $this->_stack,
+            ));
         } else {
             return false;
         }

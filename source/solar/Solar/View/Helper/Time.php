@@ -5,13 +5,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_View
+ * @package Solar_View_Helper
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Time.php 3858 2009-06-25 22:57:34Z pmjones $
+ * @version $Id: Time.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  */
 class Solar_View_Helper_Time extends Solar_View_Helper_Timestamp
@@ -20,7 +20,7 @@ class Solar_View_Helper_Time extends Solar_View_Helper_Timestamp
      * 
      * Default configuration values.
      * 
-     * @config string format The default output formatting using [[php:date() | ]] codes.
+     * @config string format The default output formatting using [[php::date() | ]] codes.
      *   Default is 'H:i:s'.
      * 
      * @var array

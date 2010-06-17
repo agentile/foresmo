@@ -5,13 +5,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_View
+ * @package Solar_View_Helper
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Title.php 3732 2009-04-29 17:27:56Z pmjones $
+ * @version $Id: Title.php 4569 2010-05-15 19:20:31Z pmjones $
  * 
  */
 class Solar_View_Helper_Title extends Solar_View_Helper
@@ -22,11 +22,18 @@ class Solar_View_Helper_Title extends Solar_View_Helper
      * 
      * @param string $text The title string.
      * 
+     * @param bool $raw When true, output the title without escaping; default
+     * false.
+     * 
      * @return string The <title ... /> tag.
      * 
      */
-    public function title($text)
+    public function title($text, $raw = false)
     {
-        return '<title>' . $this->_view->escape($text) . '</title>';
+        if (! $raw) {
+            $text = $this->_view->escape($text);
+        }
+        
+        return "<title>{$text}</title>";
     }
 }

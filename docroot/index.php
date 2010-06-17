@@ -1,25 +1,24 @@
 <?php
-// Solar system directory
 $system = dirname(dirname(__FILE__));
 
-// set the include-path, load Solar based on sym-link capable
-if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
-    set_include_path($system);
-    require_once "$system/source/solar/Solar.php";
-} else {
-    set_include_path("$system/include");
-    require_once "Solar.php";
-}
+// set the include-path
+set_include_path("$system/include");
+
+// load Solar
+require_once 'Solar.php';
 
 // start Solar with system config file
-$config = "$system/config/Solar.config.php";
-
+$config = "$system/config.php";
 Solar::start($config);
 
-require_once "$system/source/foresmo/Foresmo.php";
+// load Foresmo
+require_once 'Foresmo.php';
+
+// load HTMLPurifier
+require_once 'HTMLPurifier.auto.php';
 
 // instantiate and run the front controller
-$front = Solar::factory('Solar_Controller_Front');
+$front = Solar_Registry::get('controller_front');
 $front->display();
 
 // Done!

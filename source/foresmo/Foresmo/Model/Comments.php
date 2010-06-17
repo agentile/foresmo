@@ -18,6 +18,7 @@
 class Foresmo_Model_Comments extends Solar_Sql_Model {
 
     public $link_count_limit = 3;
+    public $default_status = 3;
 
     /**
      *
@@ -39,7 +40,7 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
             'foreign_class' => 'Foresmo_Model_CommentInfo',
             'foreign_key' => 'comment_id',
         ));
-        $this->_hasOne('posts', array(
+        $this->_hasOne('post', array(
             'foreign_class' => 'Foresmo_Model_Posts',
             'foreign_key' => 'id',
         ));
@@ -64,17 +65,36 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
         if ($this->_overLinkLimit($form_data['comment'])) {
             return true;
         }
+        if ($this->_previousSpammer($form_data['email'])) {
+            return true;
+        }
         return false;
+    }
+    
+    /**
+     * _previousSpammer
+     *
+     */
+    private function _previousSpammer($email)
+    {
+        $ip = sprintf("%u", ip2long(Foresmo::getIP()));
+        $results = $this->fetchAllAsArray(array(
+            'where' => array('(email = ? OR ip = ?) AND status = 2' => array($email, $ip))
+        ));
+        return (count($results) > 0) ? true : false;
     }
 
     /**
-     *
+     * _overLinkLimit
      *
      */
     private function _overLinkLimit($comment)
     {
         $count = 0;
+        $count2 = 0;
         preg_replace("'<a ([^<]*?)</a>'", "", $comment, -1, $count);
+        preg_replace("#(^|[\n ])([\w]+?://[\w]+[^ \"\n\r\t<]*)#ise", '', $comment, -1, $count2);
+        $count = $count + $count2;
         if ($count <= $this->link_count_limit) {
             return false;
         }
@@ -90,7 +110,8 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
      */
     private function _hasOnlyLinks($comment)
     {
-        $comment = preg_replace("'<a ([^<]*?)</a>'", "", $comment);
+        $comment = preg_replace("'<a ([^<]*?)</a>'", '', $comment);
+        $comment = preg_replace("#(^|[\n ])([\w]+?://[\w]+[^ \"\n\r\t<]*)#ise", '', $comment);
         $comment = trim($comment);
         return (empty($comment)) ? true : false;
     }
@@ -108,16 +129,19 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
     {
         $comment_data['post_id'] = (int) $comment_data['post_id'];
         $comment_data['url'] = $this->_cleanURL($comment_data['url']);
-        if ($spam) {
-            $status = 2;
-        } else {
-            $status = 1;
-        }
-
+        
         if (isset($_SESSION['Foresmo_App']['Foresmo_user_id'])) {
             $type = 1;
         } else {
             $type = 0;
+        }
+        
+        if ($spam) {
+            $status = 2;
+        } elseif ($type == 1) {
+            $status = 1;
+        } else {
+            $status = $this->default_status;
         }
 
         $data = array(
@@ -164,20 +188,21 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
      * @param int $limit limit (default 10)
      * @return array result set
      */
-    public function fetchRecentComments($limit = null)
+    public function fetchRecentComments($limit = 10, $spam = false)
     {
-        if (is_null($limit)) {
-            $limit = 10;
-        }
         $limit = (int) $limit;
+        
+        if ($spam) {
+            $where = array('comments.type = ?' => array(0));
+        } else {
+            $where = array('comments.status <> ? AND comments.type = ?' => array(2, 0));
+        }
 
         $results = $this->fetchAllAsArray(
             array(
-                'where' => array(
-                    'type = ?' => array(0)
-                ),
+                'where' => $where,
                 'eager' => array(
-                    'commentinfo', 'posts'
+                    'commentinfo', 'post'
                 ),
                 'order'  => array (
                     'id DESC'
@@ -186,7 +211,60 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
             )
         );
         Foresmo::dateFilter($results);
-        Foresmo::sanitize($results);
+        Foresmo::escape($results);
+        return $results;
+    }
+    
+    /**
+     * fetchComments
+     * Fetch all comments
+     *
+     * @return array result set
+     */
+    public function fetchComments($spam = false)
+    {
+        if ($spam) {
+            $where = array();
+        } else {
+            $where = array('comments.status <> ?' => array(2));
+        }
+        $results = $this->fetchAllAsArray(
+            array(
+                'where' => $where,
+                'eager' => array(
+                    'commentinfo', 'post'
+                ),
+                'order'  => array (
+                    'id DESC'
+                ),
+            )
+        );
+        Foresmo::dateFilter($results);
+        Foresmo::escape($results);
+        return $results;
+    }
+    
+    /**
+     * fetchSpam
+     * Fetch all spam comments
+     *
+     * @return array result set
+     */
+    public function fetchSpam()
+    {
+        $results = $this->fetchAllAsArray(
+            array(
+                'where' => array('comments.status = ?' => array(2)),
+                'eager' => array(
+                    'commentinfo', 'post'
+                ),
+                'order'  => array (
+                    'id DESC'
+                ),
+            )
+        );
+        Foresmo::dateFilter($results);
+        Foresmo::escape($results);
         return $results;
     }
 
@@ -212,5 +290,48 @@ class Foresmo_Model_Comments extends Solar_Sql_Model {
             )
         );
         return (int) $result[0]['count'];
+    }
+    
+    public function updateCommentsStatus($comments, $status)
+    {
+        if (!is_array($comments)) {
+            return false;
+        }
+        
+        foreach ($comments as $comment_id) {
+            $this->updateCommentStatus($comment_id, $status);
+        }
+    }
+    
+    public function updateCommentStatus($comment_id, $status)
+    {
+        $comment_id = (int) $comment_id;
+        $status = (int) $status;
+
+        $data = array(
+            'status' => $status,
+        );
+        
+        $where = array('id = ?' => $comment_id);
+        
+        $this->update($data, $where);
+    }
+    
+    public function deleteComments($comments)
+    {
+        if (!is_array($comments)) {
+            return false;
+        }
+        
+        foreach ($comments as $comment_id) {
+            $this->deleteComment($comment_id);
+        }
+    }
+    
+    public function deleteComment($comment_id)
+    {
+        $where = array('id = ?' => $comment_id);
+        
+        $this->delete($where);
     }
 }

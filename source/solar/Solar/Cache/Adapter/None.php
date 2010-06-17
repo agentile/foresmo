@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: None.php 3519 2008-10-21 14:36:36Z pmjones $
+ * @version $Id: None.php 4442 2010-02-26 16:33:06Z pmjones $
  * 
  */
 class Solar_Cache_Adapter_None extends Solar_Cache_Adapter
@@ -24,10 +24,13 @@ class Solar_Cache_Adapter_None extends Solar_Cache_Adapter
      * 
      * @param mixed $data The data to write into the entry.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return true Always reports a successsful save.
      * 
      */
-    public function save($key, $data)
+    public function save($key, $data, $life = null)
     {
         if (! $this->_active) {
             return;
@@ -44,10 +47,13 @@ class Solar_Cache_Adapter_None extends Solar_Cache_Adapter
      * 
      * @param mixed $data The data to write into the entry.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return true Always reports a successsful add.
      * 
      */
-    public function add($key, $data)
+    public function add($key, $data, $life = null)
     {
         if (! $this->_active) {
             return;

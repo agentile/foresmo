@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Ldap.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Ldap.php 4405 2010-02-18 04:27:25Z pmjones $
  * 
  */
 class Solar_Role_Adapter_Ldap extends Solar_Role_Adapter
@@ -56,10 +56,9 @@ class Solar_Role_Adapter_Ldap extends Solar_Role_Adapter
     {
         parent::_preConfig();
         if (! extension_loaded('ldap')) {
-            throw $this->_exception(
-                'ERR_EXTENSION_NOT_LOADED',
-                array('extension' => 'ldap')
-            );
+            throw $this->_exception('ERR_EXTENSION_NOT_LOADED', array(
+                'extension' => 'ldap',
+            ));
         }
     }
     
@@ -79,10 +78,9 @@ class Solar_Role_Adapter_Ldap extends Solar_Role_Adapter
         
         // did the connection work?
         if (! $conn) {
-            throw $this->_exception(
-                'ERR_CONNECTION_FAILED',
-                array('url' => $this->_config['url'])
-            );
+            throw $this->_exception('ERR_CONNECTION_FAILED', array(
+                'url' => $this->_config['url'],
+            ));
         }
         
         // upgrade to LDAP3 when possible

@@ -7,13 +7,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_Sql_Model
+ * @package Solar_Filter
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: ValidateUnique.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: ValidateUnique.php 4389 2010-02-14 20:10:24Z pmjones $
  * 
  */
 class Solar_Filter_ValidateUnique extends Solar_Filter_Abstract

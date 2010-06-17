@@ -11,11 +11,32 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Curl.php 3525 2008-10-28 01:08:00Z pmjones $
+ * @version $Id: Curl.php 4405 2010-02-18 04:27:25Z pmjones $
  * 
  */
 class Solar_Http_Request_Adapter_Curl extends Solar_Http_Request_Adapter
 {
+
+
+    /**
+     * 
+     * Throws an exception if the curl extension isn't loaded
+     * 
+     * @return void
+     * 
+     * @author Bahtiar Gadimov <bahtiar@gadimov.de>
+     * 
+     */
+    public function _preConfig()
+    {
+        parent::_preConfig();
+        if (! extension_loaded('curl')) {
+            throw $this->_exception('ERR_EXTENSION_NOT_LOADED', array(
+                'extension' => 'curl',
+            ));
+        }
+    }
+
     /**
      * 
      * Support method to make the request, then return headers and content.
@@ -40,27 +61,15 @@ class Solar_Http_Request_Adapter_Curl extends Solar_Http_Request_Adapter
         
         // did we hit any errors?
         if ($response === false || $response === null) {
-            throw $this->_exception(
-                'ERR_CONNECTION_FAILED',
-                array(
-                    'code' => curl_errno($ch),
-                    'text' => curl_error($ch),
-                )
-            );
+            throw $this->_exception('ERR_CONNECTION_FAILED', array(
+                'code' => curl_errno($ch),
+                'text' => curl_error($ch),
+            ));
         }
         
         // get the metadata and close the connection
         $meta = curl_getinfo($ch);
         curl_close($ch);
-        
-        // // did it time out?
-        // if ($meta['timed_out']) {
-        //     throw $this->_exception('ERR_CONNECTION_TIMEOUT', array(
-        //         'uri'     => $uri,
-        //         'meta'    => $meta,
-        //         'content' => $content,
-        //     ));
-        // }
         
         // get the header lines from the response
         $headers = explode(
@@ -103,11 +112,17 @@ class Solar_Http_Request_Adapter_Curl extends Solar_Http_Request_Adapter
          * request method
          */
         switch ($this->_method) {
-        case 'GET':
+        case Solar_Http_Request::METHOD_GET:
             curl_setopt($ch, CURLOPT_HTTPGET, true);
             break;
-        case 'POST':
+        case Solar_Http_Request::METHOD_POST:
             curl_setopt($ch, CURLOPT_POST, true);
+            break;
+        case Solar_Http_Request::METHOD_PUT:
+            curl_setopt($ch, CURLOPT_PUT, true);
+            break;
+        case Solar_Http_Request::METHOD_HEAD:
+            curl_setopt($ch, CURLOPT_HEAD, true);
             break;
         default:
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->_method);
@@ -164,8 +179,8 @@ class Solar_Http_Request_Adapter_Curl extends Solar_Http_Request_Adapter
          */
         
         // only send content if we're POST or PUT
-        $send_content = $this->_method == 'POST'
-                     || $this->_method == 'PUT';
+        $send_content = $this->_method == Solar_Http_Request::METHOD_POST
+                     || $this->_method == Solar_Http_Request::METHOD_PUT;
         
         if ($send_content && ! empty($content)) {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $content);

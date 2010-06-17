@@ -5,13 +5,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_Smtp
+ * @package Solar_Smtp Adapters for sending email via SMTP.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Smtp.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Smtp.php 4380 2010-02-14 16:06:52Z pmjones $
  * 
  */
 class Solar_Smtp extends Solar_Factory

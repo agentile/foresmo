@@ -13,7 +13,15 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
 
     protected $_action_default = 'index';
 
-    public $random_str;
+    // Ajax response properties
+    public $success = false;
+    public $error = null;
+    public $message = null;
+    public $data = null;
+
+    // POST and GET data
+    protected $_post = array();
+    protected $_get  = array();
 
     /**
      * actionIndex
@@ -27,30 +35,96 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
     {
         $this->_layout = null;
         $this->_view = null;
-        $post_data = $this->_request->post();
-        if (isset($post_data['ajax_action'])) {
-            $method = 'ajax_' . $post_data['ajax_action'];
-            if (stristr($post_data['ajax_action'], 'admin_')) {
-                if ($this->session->get('Foresmo_username', false) === false
-                    || !$this->session->get('Foresmo_username')) {
-                    $ret = array(
-                        'success' => false,
-                        'message' => 'Please login <a href="/login">here</a>.',
-                    );
-                    $this->_response->content = json_encode($ret);
-                    return;
-                }
-                if (!$this->allowAjaxAction($post_data['ajax_action'])) {
-                    $ret = array(
-                        'success' => false,
-                        'message' => 'You are not authorized to perform this action.',
-                    );
-                    $this->_response->content = json_encode($ret);
-                    return;
-                }
-            }
-            $this->_response->content = self::$method($post_data);
+
+        $this->_post = $this->_request->post();
+        $this->_get  = $this->_request->get();
+
+        // look for ajax_action to properly dispatch
+        if (isset($this->_post['ajax_action'])) {
+            $action = $this->_post['ajax_action'];
+        } elseif (isset($this->_get['ajax_action'])) {
+            $action = $this->_get['ajax_action'];
+        } else {
+            $action = false;
         }
+
+        // look for csrf_token to make sure this is a valid request
+        if (isset($this->_post['csrf_token'])) {
+            $token = $this->_post['csrf_token'];
+        } elseif (isset($this->_get['csrf_token'])) {
+            $token = $this->_get['csrf_token'];
+        } else {
+            $token = false;
+        }
+
+        if ($action === false) {
+            $this->error = 'No ajax_action data found.';
+            $this->success = false;
+            $this->message = 'An AJAX action was not found in your request.';
+        } elseif ($token === false) {
+            $this->error = 'No csrf_token data found.';
+            $this->success = false;
+            $this->message = 'A CSRF token was not found in your request.';
+        } elseif ($this->_getToken() !== $token) {
+            $this->error = 'Invalid CSRF Token.';
+            $this->success = false;
+            $this->message = 'The CSRF token found in your request is invalid.';
+        } else {
+            $method = 'ajax_' . $action;
+            if (method_exists($this, $method)) {
+                $allow = true;
+                $authorized = true;
+                if (stristr($action, 'admin') !== false) {
+                    if ($this->session->get('Foresmo_username', false) === false
+                        || !$this->session->get('Foresmo_username')) {
+                        $allow = false;
+                    }
+                }
+                if ($action !== 'blog_install' && !$this->allowAjaxAction($action)) {
+                    $authorized = false;
+                }
+
+                if ($allow && $authorized) {
+                    try {
+                        $this->$method();
+                    } catch (Exception $e) {
+                        $this->error = $e->getMessage();
+                    }
+                } elseif ($authorized){
+                    $this->error = 'This request requires an appropriate login';
+                    $this->success = false;
+                    $this->message = 'This request requires an appropriate login';
+                } elseif($allow) {
+                    $this->error = 'You are not authorized to perform this action.';
+                    $this->success = false;
+                    $this->message = 'You are not authorized to perform this action.';
+                }
+            } else {
+                $this->error = 'Invalid AJAX Action.';
+                $this->success = false;
+                $this->message = 'The AJAX Action specified could not be found.';
+            }
+        }
+
+        $this->_returnResponse();
+    }
+
+    /**
+     * _returnResponse
+     * JSON encodes properties set by AJAX functions
+     *
+     * @return void
+     */
+    protected function _returnResponse()
+    {
+        $ret = array(
+            'success' => $this->success,
+            'error'   => $this->error,
+            'message' => $this->message,
+            'data'    => $this->data
+        );
+
+        $this->_response->content = json_encode($ret);
     }
 
     /**
@@ -66,10 +140,7 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
         $this->_layout = null;
         $this->_view = null;
         $f_args = func_get_args();
-        $ret = array(
-            'success' => false,
-            'message' => '',
-        );
+
         // Check if module exists and is enabled
         if (isset($f_args[0]) && $this->_model->modules->isEnabled($f_args[0])) {
             $module_name = ucfirst(strtolower($f_args[0]));
@@ -82,579 +153,299 @@ class Foresmo_App_Ajax extends Foresmo_App_Base {
 
             $module_output = $this->_modules->processAjaxRequest($module_name, $data);
             if ($module_output && $module_output != '') {
-                $ret = array(
-                    'success' => true,
-                    'message' => $module_output,
-                );
+                $this->success = true;
+                $this->data = array('output' => $module_output);
             }
         }
-        $this->_response->content = json_encode($ret);
+
+        $this->_returnResponse();
+    }
+
+    /**
+     * ajax_admin_blog_settings
+     * update blog settings
+     *
+     * @return string
+     */
+    public function ajax_admin_blog_settings()
+    {
+        foreach ($this->_post as $key => $value) {
+            switch ($key) {
+                case 'blog_title':
+                    if (trim($value) != '') {
+                        $this->_model->options->updateOption('blog_title', $value);
+                    }
+                break;
+                case 'blog_date_format':
+                    if (!isset($this->_post['blog_date_format_preset']) && trim($value) != '') {
+                        $this->_model->options->updateOption('blog_date_format', $value);
+                    }
+                break;
+                case 'blog_date_format_preset':
+                    if (trim($value) != '') {
+                        $this->_model->options->updateOption('blog_date_format', $value);
+                    }
+                break;
+            }
+        }
+
+        $this->success = true;
+        $this->message = 'Successfully updated settings';
     }
 
     /**
      * ajax_admin_pages_new
      * New page post
      *
-     * @param $post_data
      * @return string
      */
-    public function ajax_admin_page_new($post_data)
+    public function ajax_admin_page_new()
     {
-        return $this->addContent($post_data);
+        return $this->addContent();
     }
 
     /**
      * ajax_admin_post_new
      * New blog post
      *
-     * @param $post_data
      * @return string
      */
-    public function ajax_admin_post_new($post_data)
+    public function ajax_admin_post_new()
     {
-        return $this->addContent($post_data);
-    }
-
-    /**
-     * ajax_admin_post_edit
-     * Edit blog post
-     *
-     * @param $post_data
-     * @return string
-     */
-    public function ajax_admin_post_edit($post_data)
-    {
-        return $this->editContent($post_data);
+        return $this->addContent();
     }
 
     /**
      * ajax_admin_page_edit
      * Edit blog page
      *
-     * @param $post_data
      * @return string
      */
-    public function ajax_admin_page_edit($post_data)
+    public function ajax_admin_page_edit()
     {
-        return $this->editContent($post_data);
+        return $this->editContent();
+    }
+
+    /**
+     * ajax_admin_post_edit
+     * Edit blog post
+     *
+     * @return string
+     */
+    public function ajax_admin_post_edit()
+    {
+        return $this->editContent();
+    }
+
+    /**
+     * ajax_admin_theme_update
+     * Update blog theme
+     *
+     * @return void
+     */
+    public function ajax_admin_theme_update()
+    {
+        return $this->_updateTheme(false);
+    }
+
+    /**
+     * ajax_admin_theme_admin_update
+     * Update admin theme
+     *
+     * @return void
+     */
+    public function ajax_admin_theme_admin_update()
+    {
+        return $this->_updateTheme(true);
+    }
+
+    /**
+     * _updateTheme
+     * Update theme
+     *
+     * @param bool $admin admin theme?
+     * @return void
+     */
+    protected function _updateTheme($admin = false)
+    {
+        if ($admin) {
+            $this->_model->options->updateTheme($this->_post['theme'], true);
+            $msg = 'Successfully changed admin theme';
+        } else {
+            $this->_model->options->updateTheme($this->_post['theme']);
+            $msg = 'Successfully changed blog theme';
+        }
+        $this->success = true;
+        $this->message = $msg;
     }
 
     /**
      * addContent
      * New blog post/page
      *
-     * @param $post_data
-     * @return string
+     * @return void
      */
-    public function addContent($post_data)
+    public function addContent()
     {
         $errors = array();
-        if (!isset($post_data['post_title']) || $this->validate('validateBlank', $post_data['post_title'])) {
+        if (!isset($this->_post['post_title']) || $this->validate('validateBlank', $this->_post['post_title'])) {
             $errors[] = 'Title cannot be blank.';
         }
-        if (!isset($post_data['post_content']) || $this->validate('validateBlank', $post_data['post_title'])) {
+        if (!isset($this->_post['post_content']) || $this->validate('validateBlank', $this->_post['post_title'])) {
             $errors[] = 'Content cannot be blank.';
         }
-        $post_data['post_slug'] = Foresmo::makeSlug($post_data['post_title']);
-        if (in_array(strtolower($post_data['post_slug']), $this->_restricted_names)) {
-            $errors[] = 'The slug for this post/page "'.$post_data['post_slug'].'" is restricted. Please choose a different slug/title';
+        $this->_post['post_slug'] = Foresmo::makeSlug($this->_post['post_title']);
+        if (in_array(strtolower($this->_post['post_slug']), $this->_restricted_names)) {
+            $errors[] = 'The slug for this post/page "'.$this->_post['post_slug'].'" is restricted. Please choose a different slug/title';
         }
         if (count($errors) > 0) {
             $message = implode('<br/>', $errors);
-            $ret = array(
-                'success' => false,
-                'message' => $message,
-            );
-            return json_encode($ret);
+            $this->success = false;
+            $this->message = $message;
+            return;
         }
-        $last_insert_id = $this->_model->posts->insertContent($post_data);
-        if (!$this->validate('validateBlank', $post_data['post_tags'])) {
-            $tags = explode(',', rtrim(trim($post_data['post_tags']), ','));
+
+        if (!isset($this->_post['post_excerpt']) || $this->validate('validateBlank', $this->_post['post_excerpt'])) {
+            $this->_post['post_excerpt'] = Foresmo::makeExcerpt($this->_post['post_content'], 60, '...');
+        }
+
+        $last_insert_id = $this->_model->posts->insertContent($this->_post);
+        if (!$this->validate('validateBlank', $this->_post['post_tags'])) {
+            $tags = explode(',', rtrim(trim($this->_post['post_tags']), ','));
             foreach ($tags as $key => $tag) {
                 $tags[$key] = trim($tag);
             }
             $this->_model->posts_tags->insertContentTags($last_insert_id, $tags);
         }
-        if (isset($post_data['post_comments_disabled']) && $post_data['post_comments_disabled'] == 'true') {
+        if (isset($this->_post['post_comments_disabled']) && $this->_post['post_comments_disabled'] == 'true') {
             $this->_model->post_info->insertCommentsDisabled($last_insert_id, true);
         } else {
             $this->_model->post_info->insertCommentsDisabled($last_insert_id, false);
         }
 
-        if ((int) $post_data['post_type'] == 1) {
-            $message = "Successly created new post! <a href=\"/{$post_data['post_slug']}\">View post</a>.";
-        } elseif ((int) $post_data['post_type'] == 2) {
-            $message = "Successly created new page! <a href=\"/{$post_data['post_slug']}\">View page</a>.";
+        if ((int) $this->_post['post_type'] == 1) {
+            $message = "Successly created new post! <a href=\"/{$this->_post['post_slug']}\">View post</a>.";
+        } elseif ((int) $this->_post['post_type'] == 2) {
+            $message = "Successly created new page! <a href=\"/{$this->_post['post_slug']}\">View page</a>.";
         }
 
-        $ret = array(
-            'success' => true,
-            'id' => $last_insert_id,
-            'message' => $message,
-        );
-        return json_encode($ret);
+        $this->success = true;
+        $this->data = array('id' => $last_insert_id);
+        $this->message = $message;
     }
 
     /**
      * editContent
      * Edit post/page
      *
-     * @param array $post_data POST data
-     * @return array JSON return array
+     * @return void
      */
-    public function editContent($post_data)
+    public function editContent()
     {
         $errors = array();
-        if (!isset($post_data['post_title']) || $this->validate('validateBlank', $post_data['post_title'])) {
+        if (!isset($this->_post['post_title']) || $this->validate('validateBlank', $this->_post['post_title'])) {
             $errors[] = 'Title cannot be blank.';
         }
-        if (!isset($post_data['post_content']) || $this->validate('validateBlank', $post_data['post_title'])) {
+        if (!isset($this->_post['post_content']) || $this->validate('validateBlank', $this->_post['post_title'])) {
             $errors[] = 'Content cannot be blank.';
         }
-        $post_data['id'] = (int) $post_data['id'];
-        $post_data['post_slug'] = $this->_model->posts->fetchContentValue($post_data['id'], 'slug');
+        $this->_post['id'] = (int) $this->_post['id'];
+        $this->_post['post_slug'] = $this->_model->posts->fetchContentValue($this->_post['id'], 'slug');
 
-        if (in_array(strtolower($post_data['post_slug']), $this->_restricted_names)) {
-            $errors[] = 'The slug for this post/page "'.$post_data['post_slug'].'" is restricted. Please choose a different slug/title';
+        if (in_array(strtolower($this->_post['post_slug']), $this->_restricted_names)) {
+            $errors[] = 'The slug for this post/page "'.$this->_post['post_slug'].'" is restricted. Please choose a different slug/title';
         }
         if (count($errors) > 0) {
             $message = implode('<br/>', $errors);
-            $ret = array(
-                'success' => false,
-                'message' => $message,
-            );
-            return json_encode($ret);
+            $this->success = false;
+            $this->message = $message;
+            return;
         }
 
-        $this->_model->posts->updateContent($post_data);
+        if (!isset($this->_post['post_excerpt'])) {
+            $this->_post['post_excerpt'] = '';
+        }
 
-        if (!$this->validate('validateBlank', $post_data['post_tags'])) {
-            $tags = explode(',', rtrim(trim($post_data['post_tags']), ','));
+        $this->_model->posts->updateContent($this->_post);
+
+        if (!$this->validate('validateBlank', $this->_post['post_tags'])) {
+            $tags = explode(',', rtrim(trim($this->_post['post_tags']), ','));
             foreach ($tags as $key => $tag) {
                 $tags[$key] = trim($tag);
             }
-            $this->_model->posts_tags->updateContentTags($post_data['id'], $tags);
+            $this->_model->posts_tags->updateContentTags($this->_post['id'], $tags);
         }
-        if (isset($post_data['post_comments_disabled']) && $post_data['post_comments_disabled'] == 'true') {
-            $this->_model->post_info->updateCommentsDisabled($post_data['id'], true);
+        if (isset($this->_post['post_comments_disabled']) && $this->_post['post_comments_disabled'] == 'true') {
+            $this->_model->post_info->updateCommentsDisabled($this->_post['id'], true);
         } else {
-            $this->_model->post_info->updateCommentsDisabled($post_data['id'], false);
+            $this->_model->post_info->updateCommentsDisabled($this->_post['id'], false);
         }
 
-        if ((int) $post_data['post_type'] == 1) {
-            $message = "Successly edited post! <a href=\"/{$post_data['post_slug']}\">View post</a>.";
-        } elseif ((int) $post_data['post_type'] == 2) {
-            $message = "Successly edited page! <a href=\"/{$post_data['post_slug']}\">View page</a>.";
+        if ((int) $this->_post['post_type'] == 1) {
+            $message = "Successly edited post! <a href=\"/{$this->_post['post_slug']}\">View post</a>.";
+        } elseif ((int) $this->_post['post_type'] == 2) {
+            $message = "Successly edited page! <a href=\"/{$this->_post['post_slug']}\">View page</a>.";
         }
 
-        $ret = array(
-            'success' => true,
-            'id' => $post_data['id'],
-            'message' => $message,
-        );
-
-        return json_encode($ret);
+        $this->success = true;
+        $this->data = array('id' => $this->_post['id']);
+        $this->message = $message;
     }
 
-    public function ajax_admin_modules_change_status($post_data)
+    /**
+     * ajax_admin_modules_change_status
+     * Insert description here
+     *
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
+    public function ajax_admin_modules_change_status()
     {
-        switch ($post_data['action']) {
+        switch ($this->_post['action']) {
             case 'enable':
-                foreach ($post_data['modules'] as $id) {
+                foreach ($this->_post['modules'] as $id) {
                     $this->_model->modules->enableModuleByID($id);
                 }
             break;
             case 'disable':
-                foreach ($post_data['modules'] as $id) {
+                foreach ($this->_post['modules'] as $id) {
                     $this->_model->modules->disableModuleByID($id);
                 }
             break;
             case 'install':
-                foreach ($post_data['modules'] as $id) {
+                foreach ($this->_post['modules'] as $id) {
                     $this->_modules->installModuleByID($id);
                 }
             break;
             case 'uninstall':
-                foreach ($post_data['modules'] as $id) {
+                foreach ($this->_post['modules'] as $id) {
                     $this->_modules->uninstallModuleByID($id);
                 }
             break;
         }
 
-        $ret = array(
-            'success' => true,
-            'message' => '',
-        );
-
-        return json_encode($ret);
+        $this->success = true;
     }
 
     /**
      * ajax_blog_install
      * This ajax action handles blog installation
      *
-     * @param $post_data
+     * @param $this->_post
      * @return string
      */
-    public function ajax_blog_install($post_data)
+    public function ajax_blog_install()
     {
-        if ($this->installed) {
-            return 'Blog is already installed!';
-        }
-        if (!empty($post_data['db_type'])) {
-            $db_type = ucfirst($post_data['db_type']);
-            $adapter = 'Solar_Sql_Adapter_' . $db_type;
-        } else {
-            return 'DB Type cannot be blank!';
-        }
-        Solar_Config::set('Solar_Sql', 'adapter', $adapter);
-        Solar_Config::set($adapter, 'host', $post_data['db_host']);
-        Solar_Config::set($adapter, 'user', $post_data['db_username']);
-        Solar_Config::set($adapter, 'pass', $post_data['db_password']);
-        Solar_Config::set($adapter, 'name', $post_data['db_name']);
-        Solar_Config::set($adapter, 'prefix', $post_data['db_prefix']);
-        $adapter = Solar::factory($adapter);
-        try {
-            $adapter->connect();
-        } catch (Exception $e) {
-            return 'Cannot connect to database! Please ensure valid DB info.';
-        }
-
-        $this->random_str = Foresmo::randomString(18);
-        $config_file = Solar::$system . '/config/Solar.config.php';
-        $config_content = $this->_getConfigContent($post_data);
-        if(($handle = @fopen($config_file, 'w')) !== false) {
-            if (@fwrite($handle, $config_content) === false) {
-                fclose($handle);
-                return "Cannot write to: {$config_file}. Please set the permissions to 777 for this file.";
-            } else {
-                fclose($handle);
-            }
-        } else {
-            return "Could not open {$config_file}, please ensure that this file exists and is writable.";
-        }
-
-        $schema = Solar::$system . '/source/foresmo/Foresmo/Schemas/' . $db_type . '.php';
-        $schema_sql = Solar_File::load($schema);
-        $schema_sql = str_replace('[prefix]', $post_data['db_prefix'], $schema_sql);
-        try {
-            $adapter->query($schema_sql);
-        } catch (Exception $e) {
-            // tables already exist?
-        }
-
-        $errors = array();
-        $matches = array();
-        $ret_str = '';
-        $post_data['blog_user'] = trim($post_data['blog_user']);
-        if (empty($post_data['blog_password']) == true
-            || empty($post_data['blog_password2']) == true
-            || empty($post_data['blog_user']) == true
-            || empty($post_data['blog_title']) == true
-            || empty($post_data['blog_email']) == true) {
-
-            $errors[] = 'No fields should be left blank!';
-        }
-
-        preg_match('/^([.0-9a-z_-]+)@(([0-9a-z-]+\.)+[0-9a-z]{2,4})$/i', $post_data['blog_email'], $matches);
-        if (count($matches) == 0) {
-            $errors[] = 'Not a valid email address.';
-        }
-
-        if (strlen($post_data['blog_password']) < 7) {
-            $errors[] = 'The user password must be seven characters or more';
-        }
-
-        if ($post_data['blog_password'] !== $post_data['blog_password2']) {
-            $errors[] = 'The user password fields did not match!';
-        }
-
-        if (count($errors) > 0) {
-            $ret_str .= '<p class="error"><b>Validation Errors:</b></p>';
-            foreach ($errors as $error) {
-                $ret_str .= '<span class="error">' . $error . '</span><br />';
-            }
-            return $ret_str;
-        }
-
-        $username = $post_data['blog_user'];
-        $password = $post_data['blog_password'];
-        $hasher = new Foresmo_Hashing(8, false);
-        $pwhash = $hasher->hashPassword($password);
-        $email = trim($post_data['blog_email']);
-
-        $table = $post_data['db_prefix'] . 'groups';
-        $data = array(
-            'name' => 'Admin',
-        );
-
-        $adapter->insert($table, $data);
-        $last_insert_id = $adapter->lastInsertId($table, 'id');
-        $permissions = array();
-        $table = $post_data['db_prefix'] . 'permissions';
-
-        $data = array('name' => 'create_post');
-        $adapter->insert($table, $data);
-        $permissions[] = $adapter->lastInsertId($table, 'id');
-
-        $data = array('name' => 'edit_post');
-        $adapter->insert($table, $data);
-        $permissions[] = $adapter->lastInsertId($table, 'id');
-
-        $data = array('name' => 'delete_post');
-        $adapter->insert($table, $data);
-        $permissions[] = $adapter->lastInsertId($table, 'id');
-
-        $data = array('name' => 'create_page');
-        $adapter->insert($table, $data);
-        $permissions[] = $adapter->lastInsertId($table, 'id');
-
-        $data = array('name' => 'edit_page');
-        $adapter->insert($table, $data);
-        $permissions[] = $adapter->lastInsertId($table, 'id');
-
-        $data = array('name' => 'delete_page');
-        $adapter->insert($table, $data);
-        $permissions[] = $adapter->lastInsertId($table, 'id');
-
-        $data = array('name' => 'manage_modules');
-        $adapter->insert($table, $data);
-        $permissions[] = $adapter->lastInsertId($table, 'id');
-
-        $table = $post_data['db_prefix'] . 'groups_permissions';
-        foreach($permissions as $permission) {
-            $data = array(
-                'group_id' => $last_insert_id,
-                'permission_id' => (int) $permission,
-            );
-            $adapter->insert($table, $data);
-        }
-
-        $table = $post_data['db_prefix'] . 'users';
-        $data = array(
-            'group_id' => $last_insert_id,
-            'username'=> $username,
-            'password' => $pwhash,
-            'email' => strtolower($email),
-        );
-        $adapter->insert($table, $data);
-
-        $table = $post_data['db_prefix'] . 'options';
-        $data = array(
-            'name' => 'blog_installed',
-            'type' => 1,
-            'value' => time(),
-        );
-        $adapter->insert($table, $data);
-        $data = array(
-            'name' => 'blog_theme',
-            'type' => 0,
-            'value' => 'default',
-        );
-        $adapter->insert($table, $data);
-        $data = array(
-            'name' => 'blog_title',
-            'type' => 0,
-            'value' => $post_data['blog_title'],
-        );
-        $adapter->insert($table, $data);
-        $data = array(
-            'name' => 'blog_date_format',
-            'type' => 0,
-            'value' => 'F j, Y, g:ia',
-        );
-        $adapter->insert($table, $data);
-        $data = array(
-            'name' => 'blog_timezone',
-            'type' => 0,
-            'value' => '-4:00',
-        );
-        $adapter->insert($table, $data);
-        $data = array(
-            'name' => 'blog_posts_per_page',
-            'type' => 0,
-            'value' => 10,
-        );
-        $adapter->insert($table, $data);
-        $data = array(
-            'name' => 'blog_comment_link_limit',
-            'type' => 0,
-            'value' => 3,
-        );
-        $adapter->insert($table, $data);
-        $table = $post_data['db_prefix'] . 'posts';
-        $data = array(
-            'slug' => 'my-first-post',
-            'content_type' => 1,
-            'title' => 'My first post!',
-            'content' => "Welcome to {$post_data['blog_title']}. Look forward to new blog posts soon!",
-            'user_id' => 1,
-            'status' => 1,
-            'pubdate' => time(),
-            'modified' => time(),
-        );
-        $adapter->insert($table, $data);
-        $table = $post_data['db_prefix'] . 'comments';
-        $data = array(
-            'post_id' => 1,
-            'name' => 'Foresmo',
-            'email' => 'foresmo@foresmo.com',
-            'url' => 'http://foresmo.com',
-            'ip' => sprintf("%u", ip2long('192.168.0.1')),
-            'content' => 'Congratulations!',
-            'status' => 1,
-            'date' => time(),
-            'type' => 0,
-        );
-        $adapter->insert($table, $data);
-        $table = $post_data['db_prefix'] . 'tags';
-        $data = array(
-            'tag' => 'Foresmo',
-            'tag_slug' => 'foresmo',
-        );
-        $adapter->insert($table, $data);
-        $table = $post_data['db_prefix'] . 'posts_tags';
-        $data = array(
-            'post_id' => 1,
-            'tag_id' => 1,
-        );
-        $adapter->insert($table, $data);
-        $table = $post_data['db_prefix'] . 'modules';
-        $data = array(
-            'name' => 'Calendar',
-            'class_suffix' => 'Calendar',
-            'status' => 1,
-            'description' => 'A Calendar that marks days for which posts have been made.',
-            'position' => 1,
-        );
-        $adapter->insert($table, $data);
-        $data = array(
-            'name' => 'Tags',
-            'class_suffix' => 'Tags',
-            'status' => 1,
-            'description' => 'Listing of available tags and their post count.',
-            'position' => 2,
-        );
-        $adapter->insert($table, $data);
-
-        $table = $post_data['db_prefix'] . 'module_info';
-        $data = array(
-            'module_id' => 1,
-            'name' => 'start_of_week',
-            'type' => 0,
-            'value' => 0,
-        );
-        $adapter->insert($table, $data);
-
-        return 'Foresmo installed! Click <a href="/">here</a> to check it out! Also, don\'t forget to change the permissions of the config back to read only.';
-    }
-
-    /**
-     * _getConfigContent
-     * Get Solar.config.php content to write.
-     *
-     * @param $post_data
-     * @access private
-     * @return string
-     */
-    private function _getConfigContent($post_data)
-    {
-        return "<?php
-/**
- * all config values go in this array, which will be returned at the end of
- * this script
- */
-\$config = array();
-
-
-/**
- * system and autoload-include directories
- */
-\$system = dirname(dirname(__FILE__));
-\$config['Solar']['system']  = \$system;
-
-
-/**
- * ini_set values
- */
-\$config['Solar']['ini_set'] = array(
-    'error_reporting'   => (E_ALL | E_STRICT),
-    'display_errors'    => false,
-    'html_errors'       => true,
-    'session.save_path' => \"\$system/tmp/session/\",
-    'date.timezone'     => 'UTC',
-);
-
-
-/**
- * auto-register some default objects for common use. note that these are
- * lazy-loaded and only get created when called for the first time.
- */
-\$config['Solar']['registry_set'] = array(
-    'sql'           => 'Solar_Sql',
-    'user'          => 'Solar_User',
-    'model_catalog' => 'Solar_Sql_Model_Catalog',
-    'model_cache'   => array(
-        'Solar_Cache',
-        array(
-            'adapter' => 'Solar_Cache_Adapter_File',
-            'path' => \"\$system/tmp/cache\",
-            'hash' => false,
-            'mode' => 0777,
-        )
-    ),
-);
-
-\$config['Solar_Sql_Model'] = array(
-    'cache' => 'model_cache',
-    'auto_cache' => true,
-    'prefix' => '".$post_data['db_prefix']."'
-);
-
-\$config['Solar_Sql_Model_Catalog']['classes'] = array('Foresmo_Model');
-
-/**
- * sql connection
- */
-\$config['Solar_Sql']['adapter'] = 'Solar_Sql_Adapter_".ucfirst($post_data['db_type'])."';
-
-\$config['Solar_Sql_Adapter_Mysql'] = array(
-    'host' => '".$post_data['db_host']."',
-    'user' => '".$post_data['db_username']."',
-    'pass' => '".$post_data['db_password']."',
-    'name' => '".$post_data['db_name']."',
-);
-
-// Foresmo settings
-\$config['Foresmo']['installed'] = true;
-
-// Foresmo Cache
-\$config['Foresmo']['cache'] = array(
-    // which adapter class to use
-    'adapter' => 'Solar_Cache_Adapter_File',
-    // where the cache files will be stored
-    'path' => '/tmp/Solar_Cache/',
-    // the cache entry lifetime in seconds
-    'life' => 1800,
-);
-
-// Authentication source
-\$config['Solar_Auth'] = array(
-    'adapter' => 'Solar_Auth_Adapter_Sql',
-);
-
-/**
- * front controller
- */
-\$config['Solar_Controller_Front'] = array(
-    'classes' => array('Foresmo_App'),
-    'default' => 'index',
-);
-
-/**
- * done!
- */
-return \$config;
-        ";
+        $installer = new Foresmo_App_Install();
+        $installer->_install();
+        $this->error = $installer->error;
+        $this->data = $installer->data;
+        $this->success = $installer->success;
+        $this->message = $installer->message;
     }
 }

@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Locale.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Locale.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  */
 class Solar_Locale extends Solar_Base
@@ -107,6 +107,21 @@ class Solar_Locale extends Solar_Base
     
     /**
      * 
+     * Returns RFC 1766 (XHTML) language code for current locale code.
+     * 
+     * This is the same as the locale code, but using a dash instead of an
+     * underscore as a separator.
+     * 
+     * @return string
+     * 
+     */
+    public function getLanguageCode()
+    {
+        return str_replace('_', '-', $this->_code);
+    }
+    
+    /**
+     * 
      * Returns the translated locale string for a class and key.
      * 
      * Loads translations as needed.
@@ -153,8 +168,6 @@ class Solar_Locale extends Solar_Base
      * @see _trans()
      * 
      * @see Solar_Base::locale()
-     * 
-     * @see Manual::Solar/Using_locales
      * 
      */
     public function fetch($spec, $key, $num = 1, $replace = null)

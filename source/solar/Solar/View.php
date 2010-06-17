@@ -12,13 +12,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_View
+ * @package Solar_View PHP-based TemplateView system.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: View.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: View.php 4405 2010-02-18 04:27:25Z pmjones $
  * 
  */
 class Solar_View extends Solar_Base
@@ -503,10 +503,10 @@ class Solar_View extends Solar_Base
         
         // could we find it?
         if (! $file) {
-            throw $this->_exception(
-                'ERR_TEMPLATE_NOT_FOUND',
-                array('name' => $name, 'path' => $this->_template_path->get())
-            );
+            throw $this->_exception('ERR_TEMPLATE_NOT_FOUND', array(
+                'name' => $name,
+                'path' => $this->_template_path->get()
+            ));
         }
         
         // done!
@@ -541,10 +541,7 @@ class Solar_View extends Solar_Base
             // save the partial name externally
             $this->_partial_file = $this->template($name);
         } catch (Solar_View_Exception_TemplateNotFound $e) {
-            throw $this->_exception(
-                'ERR_PARTIAL_NOT_FOUND',
-                $e->getInfo()
-            );
+            throw $this->_exception('ERR_PARTIAL_NOT_FOUND', $e->getInfo());
         }
         
         // save partial vars externally. special cases for different types.

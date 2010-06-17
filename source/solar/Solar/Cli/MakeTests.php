@@ -3,37 +3,12 @@
  * 
  * Command to make a test class (or set of classes) from a given class.
  * 
- * The class should be in the include_path.
- * 
- * Synopsis
- * ========
- * 
- * `**solar make-tests** [options] CLASS`
- * 
- * Options
- * =======
- * 
- * `--config FILE`
- * : Path to the Solar.config.php file.  Default false.
- * 
- * `--target _arg_`
- * : Directory where the test classes should be written to.  Default is the
- *   current working directory.
- * 
- * `--only`
- * : Make only the test for the given class, do not recurse into subdirectories.
- * 
  * Examples
  * ========
  * 
  * Make test files for a class and its subdirectories.
  * 
- *     $ cd /path/to/tests/
- *     $ solar make-tests Vendor_Example
- * 
- * Make "remotely":
- * 
- *     $ solar make-tests --dir /path/to/tests Vendor_Example
+ *     $ ./script/solar make-tests Vendor_Example
  * 
  * Make only the Vendor_Example test (no subdirectories):
  * 
@@ -47,10 +22,10 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: MakeTests.php 3561 2008-11-01 02:40:57Z pmjones $
+ * @version $Id: MakeTests.php 4436 2010-02-25 21:38:34Z pmjones $
  * 
  */
-class Solar_Cli_MakeTests extends Solar_Cli_Base
+class Solar_Cli_MakeTests extends Solar_Controller_Command
 {
     /**
      * 
@@ -113,7 +88,7 @@ class Solar_Cli_MakeTests extends Solar_Cli_Base
         
         // make sure we have a class to work with
         if (! $class) {
-            throw $this->_exception('ERR_NO_CLASS_SPECIFIED');
+            throw $this->_exception('ERR_NO_CLASS');
         }
         
         // make sure we have a target directory
@@ -133,13 +108,13 @@ class Solar_Cli_MakeTests extends Solar_Cli_Base
         $class_file = $map->fetch($class);
         foreach ($class_file as $class => $file) {
             
-            // tell the user what class we're on
-            $this->_out("$class: "); 
-            
             // if this is an exception class, skip it
             if (strpos($class, '_Exception')) {
-                $this->_outln("skip (exception class)");
+                $this->_outln("$class: skip (exception class)");
                 continue;
+            } else {
+                // tell the user what class we're on
+                $this->_outln("$class"); 
             }
             
             // load the class and get its API reference
@@ -150,17 +125,20 @@ class Solar_Cli_MakeTests extends Solar_Cli_Base
             // set the file name, creating if needed
             $this->_setFile($class, $api);
             
-            // get the code currently in the file
-            $this->_code = file_get_contents($this->_file);
+            // skip adding methods on adapter classes; they should get their
+            // methods from the parent class
+            $pos = strrpos($class, '_Adapter_');
+            if ($pos === false) {
             
-            // add new test methods
-            $this->_addTestMethods($api);
+                // get the code currently in the file
+                $this->_code = file_get_contents($this->_file);
             
-            // write the file back out again
-            file_put_contents($this->_file, $this->_code);
+                // add new test methods
+                $this->_addTestMethods($api);
             
-            // done with this class
-            $this->_outln(' ;');
+                // write the file back out again
+                file_put_contents($this->_file, $this->_code);
+            }
         }
         
         // done with all classes.
@@ -201,20 +179,8 @@ class Solar_Cli_MakeTests extends Solar_Cli_Base
      */
     protected function _setTarget()
     {
-        // look for a test directory, otherwise assume that the tests are
-        // in the same dir
-        $this->_target = $this->_options['target'];
-        if (! $this->_target) {
-            $this->_target = Solar::$system . "/include";
-        }
-        
-        // make sure it matches the OS.
-        $this->_target = Solar_Dir::fix($this->_target);
-        
-        // make sure it exists
-        if (! is_dir($this->_target)) {
-            throw $this->_exception('ERR_TARGET_NOT_EXIST');
-        }
+        $target = Solar::$system . "/include";
+        $this->_target = Solar_Dir::fix($target);
     }
     
     /**
@@ -253,24 +219,26 @@ class Solar_Cli_MakeTests extends Solar_Cli_Base
         // use the right code template
         if ($api['abstract']) {
             $code = $this->_tpl['classAbstract'];
-        } elseif (! empty($api['methods']['solarFactory'])) { 
-            $code = $this->_tpl['classFactory'];
         } elseif (in_array('Solar_Factory', $api['from'])) {
             $code = $this->_tpl['classFactory'];
         } else {
             $code = $this->_tpl['classConcrete'];
         }
         
-        // use the right "extends" for adapter classes.
-        // extends this to helpers and abstracts?
-        // note that this still writes the new methods, when they should
-        // be inherited from the parent test instead.
+        // use the right template for adapter abstract classes
+        if (substr($class, -8) == '_Adapter') {
+            $code = $this->_tpl['classAdapterAbstract'];
+        }
+        
+        // use the right "extends" for adapter concrete classes
         $pos = strrpos($class, '_Adapter_');
-        if ($pos) {
-            $code = $this->_tpl['classAdapter'];
-            $extends = 'Test_' . substr($class, 0, $pos + 8);
-        } else {
+        if ($pos === false) {
+            // normal test extends
             $extends = 'Solar_Test';
+        } else {
+            // adapter extends: Test_Foo_Adapter_Bar extends Test_Foo_Adapter
+            $extends = 'Test_' . substr($class, 0, $pos + 8);
+            $code = $this->_tpl['classAdapterConcrete'];
         }
         
         // do replacements
@@ -283,7 +251,6 @@ class Solar_Cli_MakeTests extends Solar_Cli_Base
         // write the file
         file_put_contents($this->_file, $code);
     }
-    
     
     /**
      * 
@@ -312,23 +279,20 @@ class Solar_Cli_MakeTests extends Solar_Cli_Base
         $this->_code = substr($this->_code, 0, -1);
         
         // ignore these methods
-        $ignore = array('__construct', '__destruct', 'apiVersion', 'dump',
-            'locale');
+        $ignore = array('__construct', '__destruct', 'dump', 'locale');
         
         // look for methods and add them if needed
         foreach ($api['methods'] as $name => $info) {
             
-            $this->_outln($name);
-            
             // is this an ignored method?
             if (in_array($name, $ignore)) {
-                $this->_out('.');
+                $this->_outln("    . $name");
                 continue;
             }
             
             // is this a public method?
             if ($info['access'] != 'public') {
-                $this->_out('.');
+                $this->_outln("    . $name");
                 continue;
             };
             
@@ -336,10 +300,10 @@ class Solar_Cli_MakeTests extends Solar_Cli_Base
             $test_name = 'test' . ucfirst($name);
             
             // does the test-method definition already exist?
-            $def = "public function {$test_name}()";
+            $def = "function {$test_name}()";
             $pos = strpos($this->_code, $def);
             if ($pos) {
-                $this->_out('.');
+                $this->_outln("    . $name");
                 continue;
             }
             
@@ -359,7 +323,7 @@ class Solar_Cli_MakeTests extends Solar_Cli_Base
             
             // append to the test code
             $this->_code .= $test_code;
-            $this->_out('+');
+            $this->_outln("    + $name");
         }
         
         // append the last brace

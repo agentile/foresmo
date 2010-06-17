@@ -5,13 +5,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_Inflect
+ * @package Solar_Inflect Word-inflection tools.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Inflect.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Inflect.php 4380 2010-02-14 16:06:52Z pmjones $
  * 
  */
 class Solar_Inflect extends Solar_Base

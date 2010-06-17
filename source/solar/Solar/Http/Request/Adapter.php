@@ -55,7 +55,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Adapter.php 4139 2009-10-06 20:40:19Z pmjones $
+ * @version $Id: Adapter.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  * @todo Support multipart/form-data and file uploads (must be in conjunction).
  * <http://www.w3.org/TR/html4/interact/forms.html#h-17.13.4.2>  Probably need
@@ -91,8 +91,11 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
      * 
      * @config string ssl_passphrase Passphrase to open the certificate file.
      * 
-     * @config bool ssl_verify_peer Whther or not to verify the peer SSL
+     * @config bool ssl_verify_peer Whether or not to verify the peer SSL
      * certificate.
+     * 
+     * @config bool auto_set_length Whether or not to automatically set the
+     * Content-Length header.
      * 
      * @var array
      * 
@@ -110,8 +113,10 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
         'ssl_local_cert'  => null,
         'ssl_passphrase'  => null,
         'ssl_verify_peer' => null,
+        'auto_set_length' => true,
     );
     
+
     /**
      * 
      * Content to send along with the request.
@@ -365,6 +370,7 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
             'proxy',
             'timeout',
             'uri',
+            'user_agent',
             'version',
             'ssl_cafile',
             'ssl_capath',
@@ -473,18 +479,25 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
      * 
      * Sets a cookie value in $this->_cookies to add to the request.
      * 
-     * @param string $key The name of the cookie.
+     * @param string $name The name of the cookie.
      * 
-     * @param string $val The value of the cookie; will be URL-encoded at
-     * fetch() time.
+     * @param string|array $spec If a string, the value of the cookie; if an
+     * array, uses the 'value' key for the cookie value.  Either way, the 
+     * value will be URL-encoded at fetch() time.
      * 
      * @return Solar_Http_Request_Adapter This adapter object.
      * 
      */
-    public function setCookie($key, $val = '')
+    public function setCookie($name, $spec = null)
     {
-        $key = str_replace(array("\r", "\n"), '', $key);
-        $this->_cookies[$key] = $val;
+        if (is_scalar($spec)) {
+            $value = (string) $spec;
+        } else {
+            $value = $spec['value'];
+        }
+        
+        $name = str_replace(array("\r", "\n"), '', $name);
+        $this->_cookies[$name] = $value;
         return $this;
     }
     
@@ -501,8 +514,8 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
      */
     public function setCookies($cookies)
     {
-        foreach ($cookies as $key => $val) {
-            $this->setCookie($key, $val);
+        foreach ($cookies as $name => $spec) {
+            $this->setCookie($name, $spec);
         }
         return $this;
     }
@@ -550,7 +563,7 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
         // don't allow setting of cookies
         if ($low == 'cookie') {
             throw $this->_exception('ERR_USE_OTHER_METHOD', array(
-                'cookie' => 'setCookie() or setCookies()',
+                'key' => $key,
             ));
         }
         
@@ -594,8 +607,9 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
      * 
      * Sets the HTTP method for the request (GET, POST, etc).
      * 
-     * Recgonized methods are 'OPTIONS', 'GET', 'HEAD', 'POST', 'PUT', 'DELETE',
-     * 'TRACE', and 'CONNECT'.
+     * Recgonized methods are OPTIONS, GET, HEAD, POST, PUT, DELETE,
+     * TRACE, and CONNECT, GET, POST, PUT, DELETE, TRACE, OPTIONS, COPY,
+     * LOCK, MKCOL, MOVE, PROPFIND, PROPPATCH AND UNLOCK.
      * 
      * @param string $method The method to use for the request.
      * 
@@ -604,13 +618,29 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
      */
     public function setMethod($method)
     {
-        $allowed = array('OPTIONS', 'GET', 'HEAD', 'POST', 'PUT', 'DELETE',
-            'TRACE', 'CONNECT');
-            
+        $allowed = array(
+            Solar_Http_Request::METHOD_GET,
+            Solar_Http_Request::METHOD_POST,
+            Solar_Http_Request::METHOD_PUT,
+            Solar_Http_Request::METHOD_DELETE,
+            Solar_Http_Request::METHOD_TRACE,
+            Solar_Http_Request::METHOD_OPTIONS,
+            Solar_Http_Request::METHOD_TRACE,
+            Solar_Http_Request::METHOD_COPY,
+            Solar_Http_Request::METHOD_LOCK,
+            Solar_Http_Request::METHOD_MKCOL,
+            Solar_Http_Request::METHOD_MOVE,
+            Solar_Http_Request::METHOD_PROPFIND,
+            Solar_Http_Request::METHOD_PROPPATCH,
+            Solar_Http_Request::METHOD_UNLOCK
+        );
+        
         $method = strtoupper($method);
         
         if (! in_array($method, $allowed)) {
-            throw $this->_exception('ERR_UNKNOWN_METHOD');
+            throw $this->_exception('ERR_UNKNOWN_METHOD', array(
+                'method' => $method,
+            ));
         }
         
         $this->_method = $method;
@@ -721,7 +751,9 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
     public function setVersion($version)
     {
         if ($version != '1.0' && $version != '1.1') {
-            throw $this->_exception('ERR_UNKNOWN_VERSION');
+            throw $this->_exception('ERR_UNKNOWN_VERSION', array(
+                "version" => $version,
+            ));
         }
         $this->_version = $version;
         return $this;
@@ -972,9 +1004,9 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
         }
         
         // what kind of request is this?
-        $is_get  = ($this->_method == 'GET');
-        $is_post = ($this->_method == 'POST');
-        $is_put  = ($this->_method == 'PUT');
+        $is_get  = ($this->_method == Solar_Http_Request::METHOD_GET);
+        $is_post = ($this->_method == Solar_Http_Request::METHOD_POST);
+        $is_put  = ($this->_method == Solar_Http_Request::METHOD_PUT);
         
         // do we have any body content?
         if (is_array($this->content) && ($is_post || $is_put)) {
@@ -1022,11 +1054,13 @@ abstract class Solar_Http_Request_Adapter extends Solar_Base {
             $list['Content-Type'] = $content_type;
         }
         
-        // force the content-length
-        if ($content) {
-            $list['Content-Length'] = strlen($content);
-        } else {
-            unset($list['Content-Length']);
+        // auto-set the content-length
+        if ($this->_config['auto_set_length']) {
+            if ($content) {
+                $list['Content-Length'] = strlen($content);
+            } else {
+                unset($list['Content-Length']);
+            }
         }
         
         // force the user-agent header if needed

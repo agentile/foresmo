@@ -34,6 +34,7 @@ class Foresmo extends Solar_Base {
         foreach ($results as $result) {
             if ($result['name'] == 'blog_timezone') {
                 $arr['blog_timezone'] = $result['value'];
+                ini_set('date.timezone', $result['value']);
             }
             if ($result['name'] == 'blog_date_format') {
                 $arr['blog_date_format'] = $result['value'];
@@ -76,55 +77,67 @@ class Foresmo extends Solar_Base {
                 self::dateFilter($posts[$k]);
             }
             if ($k === 'date' || $k === 'pubdate' || $k === 'modified') {
-                $fetched_time = (int) $v;
+                $unix_ts = (int) $v;
                 if ($k === 'pubdate') {
-                    $posts['pubdate_ts'] = $fetched_time;
+                    $posts['pubdate_ts'] = $unix_ts;
                 }
-                $timezone = explode(':', self::$timezone);
-                if ($timezone[0][0] == '-') {
-                    $first = substr($timezone[0], 1);
-                    $change = $first * 60 * 60;
-                    if ($timezone[1] == '30') {
-                        $change = $change + 1800;
-                    }
-                    $time = date(self::$date_format, $fetched_time - $change);
-                } else {
-                    $change = $timezone[0] * 60 * 60;
-                    if ($timezone[1] == '30') {
-                        $change = $change + 1800;
-                    }
-                    $time = date(self::$date_format, $fetched_time + $change);
-                }
-                $posts[$k] = $time;
+                $dt = new DateTime("@{$unix_ts}");
+                $dt->setTimezone(new DateTimeZone(self::$timezone));
+                $posts[$k] = $dt->format(self::$date_format);
             }
         }
     }
 
     /**
-    * sanitize
-    * Sanitize text output within arrays
+    * escape
+    * escape text
     *
-    * @param $post
-    * @param $track
+    * @param mixed $data array or string.
     * @return void
     */
-    public static function sanitize(&$posts, $track = array())
+    public static function escape(&$data, $track = array())
     {
-        foreach ($posts as $k => $v) {
+        if (!is_array($data)) {
+            htmlentities($data, ENT_COMPAT, 'UTF-8');
+            return;
+        }
+        foreach ($data as $k => $v) {
             if (is_array($v)) {
                 $track[] = $k;
-                self::sanitize($posts[$k], $track);
+                self::escape($data[$k], $track);
                 array_pop($track);
             } elseif ($k === 'title'
                 || ($k === 'content' && (count($track) > 1))
+                || ($k === 'excerpt' && (count($track) > 1))
                 || $k === 'modified'
                 || $k === 'name'
                 || $k === 'email'
                 || $k === 'tag') {
 
-                $posts[$k] = htmlentities($posts[$k], ENT_QUOTES, 'UTF-8');
+                $data[$k] = htmlentities($data[$k], ENT_COMPAT, 'UTF-8');
             }
         }
+    }
+
+    /**
+     * makeExcerpt
+     * Create excerpt from post
+     * TODO: make this smart to disregard html tags ... and to properly close
+     * opened html tags.
+     *
+     * @param $str
+     * @param $word_count
+     * @param $trailing
+     *
+     * @return string
+     */
+    public static function makeExcerpt($str, $word_count = 60, $trailing = '...')
+    {
+        $words = explode(' ', $str);
+        if (count($words) > $word_count) {
+            $str = implode(' ', array_slice($words, 0, $word_count)) . $trailing;
+        }
+        return $str;
     }
 
     /**
@@ -188,4 +201,42 @@ class Foresmo extends Solar_Base {
 
         return $str;
     }
+
+    /**
+     * Fetch time zones sans city offsets
+     * http://us.php.net/manual/en/function.date-default-timezone-set.php#84459
+     *
+     * @return array
+     */
+    public static function fetchTimeZones()
+    {
+        $timezones = DateTimeZone::listAbbreviations();
+
+        $cities = array();
+        foreach( $timezones as $key => $zones )
+        {
+            foreach( $zones as $id => $zone )
+            {
+                /**
+                 * Only get timezones explicitely not part of "Others".
+                 * @see http://www.php.net/manual/en/timezones.others.php
+                 */
+                if ( preg_match( '/^(America|Antartica|Arctic|Asia|Atlantic|Europe|Indian|Pacific)\//', $zone['timezone_id'] ) )
+                    $cities[$zone['timezone_id']][] = $key;
+            }
+        }
+
+        // For each city, have a comma separated list of all possible timezones for that city.
+        foreach( $cities as $key => $value )
+            $cities[$key] = join(', ', $value);
+
+        // Only keep one city (the first and also most important) for each set of possibilities.
+        $cities = array_unique( $cities );
+
+        // Sort by area/city name.
+        ksort( $cities );
+
+        return $cities;
+    }
+
 }

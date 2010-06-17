@@ -24,6 +24,20 @@ class Foresmo_Model_ModuleInfo extends Solar_Sql_Model {
         $this->_table_cols = Solar_File::load($dir . 'table_cols.php');
     }
 
+    /**
+     * insertModuleEntry
+     * Insert description here
+     *
+     * @param $id
+     * @param $data
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
     public function insertModuleEntry($id, $data)
     {
         if (!isset($data['name']) || !isset($data['value'])) {
@@ -42,5 +56,44 @@ class Foresmo_Model_ModuleInfo extends Solar_Sql_Model {
             'value'     => $data['value'],
         );
         $this->insert($arr);
+    }
+
+    /**
+     * updateModuleEntryById
+     * Insert description here
+     *
+     * @param $id
+     * @param $module_id
+     * @param $data
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
+    public function updateModuleEntryById($id, $module_id, $data)
+    {
+        if (!isset($data['name']) || !isset($data['value'])) {
+            return false;
+        }
+
+        if (isset($data['type'])) {
+            $type = $data['type'];
+        } else {
+            $type = 0;
+        }
+        $arr = array(
+            'name'      => $data['name'],
+            'type'      => $type,
+            'value'     => $data['value'],
+        );
+
+        $where = array(
+            'module_id = ?' => (int) $module_id,
+            'id = ?' => (int) $id
+        );
+        $this->update($arr, $where);
     }
 }

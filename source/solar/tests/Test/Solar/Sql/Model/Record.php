@@ -24,11 +24,13 @@ class Test_Solar_Sql_Model_Record extends Solar_Test {
     
     protected $_catalog_config = array(
         'classes' => array(
-            'Solar_Example_Model',
+            'Mock_Solar_Model',
         ),
     );
     
     protected $_catalog = null;
+    
+    protected $_fixture = null;
     
     // -----------------------------------------------------------------
     // 
@@ -38,36 +40,12 @@ class Test_Solar_Sql_Model_Record extends Solar_Test {
     
     /**
      * 
-     * Constructor.
-     * 
-     * @param array $config User-defined configuration parameters.
-     * 
-     */
-    public function __construct($config = null)
-    {
-        parent::__construct($config);
-    }
-    
-    /**
-     * 
-     * Destructor; runs after all methods are complete.
-     * 
-     * @param array $config User-defined configuration parameters.
-     * 
-     */
-    public function __destruct()
-    {
-        parent::__destruct();
-    }
-    
-    /**
-     * 
      * Setup; runs before each test method.
      * 
      */
-    public function setup()
+    public function preTest()
     {
-        parent::setup();
+        parent::preTest();
         
         // set up an SQL connection
         $this->_sql = Solar::factory(
@@ -86,137 +64,8 @@ class Test_Solar_Sql_Model_Record extends Solar_Test {
         Solar_Registry::set('sql', $this->_sql);
         Solar_Registry::set('model_catalog', $this->_catalog);
         
-        // populate everything
-        $this->_populateAll();
-    }
-    
-    /**
-     * 
-     * Setup; runs after each test method.
-     * 
-     */
-    public function teardown()
-    {
-        parent::teardown();
-    }
-    
-    protected function _populateAll()
-    {
-        $this->_populateUsers();
-        $this->_populateAreas();
-        $this->_populateNodes();
-        $this->_populateMetas();
-        $this->_populateTags();
-        $this->_populateTaggings();
-    }
-    
-    protected function _populateUsers()
-    {
-        $users = $this->_catalog->getModel('users');
-        $handles = array('zim', 'dib', 'gir');
-        foreach ($handles as $key => $val) {
-            $user = $users->fetchNew();
-            $user->handle = $val;
-            $user->save();
-        }
-    }
-    
-    protected function _populateAreas()
-    {
-        $areas = $this->_catalog->getModel('areas');
-        $names = array('Irk', 'Earth');
-        foreach ($names as $key => $val) {
-            $area = $areas->fetchNew();
-            $area->user_id = $key + 1;
-            $area->name = $val;
-            $area->save();
-        }   
-    }
-    
-    protected function _populateNodes()
-    {
-        // create some nodes, some for area 1 and some for 2,
-        // and some for user 1 and some for user 2.
-        // five nodes for each area.
-        $nodes = $this->_catalog->getModel('nodes');
-        for ($i = 1; $i <= 10; $i++) {
-            $node = $nodes->fetchNew();
-            $node->subj = "Subject Line $i: " . substr(md5($i), 0, 5);
-            $node->body = "Body for $i ... " . md5($i);
-            $node->area_id = $i % 2 + 1; // sometimes 1, sometimes 2
-            $node->user_id = ($i + 1) % 2 + 1; // sometimes 2, sometimes 1
-            $node->save();
-        }
-    }
-    
-    protected function _populateMetas()
-    {
-        // one meta for each node
-        $nodes = $this->_catalog->getModel('nodes');
-        $metas = $this->_catalog->getModel('metas');
-        $collection = $nodes->fetchAll();
-        foreach ($collection as $node) {
-            $meta = $metas->fetchNew();
-            $meta->node_id = $node->id;
-            $meta->save();
-        }
-    }
-    
-    protected function _populateTags()
-    {
-        // some generic tags
-        $list = array('foo', 'bar', 'baz', 'zab', 'rab', 'oof');
-        
-        // save them
-        $tags = $this->_catalog->getModel('tags');
-        foreach ($list as $name) {
-            $tag = $tags->fetchNew();
-            $tag->name = $name;
-            $tag->save();
-        }
-    }
-    
-    protected function _populateTaggings()
-    {
-        $tags = $this->_catalog->getModel('tags');
-        $nodes = $this->_catalog->getModel('nodes');
-        $taggings = $this->_catalog->getModel('taggings');
-        
-        $tag_coll = $tags->fetchAll();
-        $tag_last = count($tag_coll) - 1;
-        
-        $node_coll = $nodes->fetchAll();
-        
-        // add some tags on each node through taggings
-        foreach ($node_coll as $node) {
-            
-            // add 2-5 tags on this node
-            $tags_to_add = rand(2,5);
-            
-            // which tags have we used already?
-            $tags_used = array();
-            
-            // add each of the tags
-            for ($i = 0; $i < $tags_to_add; $i ++) {
-                
-                // pick a random tag that has not been used yet
-                do {
-                    $tagno = rand(0, $tag_last);
-                } while (in_array($tagno, $tags_used));
-                
-                // mark it as used
-                $tags_used[] = $tagno;
-                
-                // get the tag from the collection
-                $tag = $tag_coll[$tagno];
-                
-                // match the node to the tag with a tagging
-                $tagging = $taggings->fetchNew();
-                $tagging->node_id = $node->id;
-                $tagging->tag_id = $tag->id;
-                $tagging->save();
-            }
-        }
+        // fixture to populate tables
+        $this->_fixture = Solar::factory('Fixture_Solar_Sql_Model');
     }
     
     // -----------------------------------------------------------------
@@ -253,6 +102,8 @@ class Test_Solar_Sql_Model_Record extends Solar_Test {
     
     public function test__get_related_eagerHasMany()
     {
+        $this->_fixture->setup();
+        
         // the "before" count includes creating the tables and inserting
         // all the records.
         $before = count($this->_sql->getProfile());
@@ -282,6 +133,8 @@ class Test_Solar_Sql_Model_Record extends Solar_Test {
     
     public function test__get_related_eagerHasManyThrough()
     {
+        $this->_fixture->setup();
+        
         // the "before" count includes creating the tables and inserting
         // all the records.
         $before = count($this->_sql->getProfile());
@@ -316,6 +169,8 @@ class Test_Solar_Sql_Model_Record extends Solar_Test {
     
     public function test__get_related_eagerHasMany_empty()
     {
+        $this->_fixture->setup();
+        
         // get rid of all the nodes
         $nodes = $this->_catalog->getModel('nodes');
         $nodes->delete('id > 0');
@@ -336,7 +191,7 @@ class Test_Solar_Sql_Model_Record extends Solar_Test {
         $this->diag("expect: $expect");
         
         foreach ($list as $k => $area) {
-            $this->diag($area->nodes);
+            $this->diag($area->nodes->toArray());
             foreach ($area->nodes as $node) {
                 $this->diag("{$node->id}: {$node->subj}");
                 $this->assertTrue($node->subj != '');
@@ -799,5 +654,135 @@ class Test_Solar_Sql_Model_Record extends Solar_Test {
         $this->assertEquals($record->id, 2);
         $this->assertEquals($record->seq_foo, 2);
         $this->assertEquals($record->seq_bar, 3);
+    }
+    
+    /**
+     * 
+     * Test -- Returns a string representation of the object.
+     * 
+     */
+    public function test__toString()
+    {
+        $this->todo('stub');
+    }
+    
+    /**
+     * 
+     * Test -- Frees memory used by this struct.
+     * 
+     */
+    public function testFree()
+    {
+        $this->todo('stub');
+    }
+    
+    /**
+     * 
+     * Test -- Returns the SQL status of this record at the database.
+     * 
+     */
+    public function testGetSqlStatus()
+    {
+        $this->todo('stub');
+    }
+    
+    /**
+     * 
+     * Test -- Initialize the record object.
+     * 
+     */
+    public function testInit()
+    {
+        $this->todo('stub');
+    }
+    
+    /**
+     * 
+     * Test -- Initialize the record object as a "new" record; as with init(), this is effectively a "first load" method.
+     * 
+     */
+    public function testInitNew()
+    {
+        $this->todo('stub');
+    }
+    
+    /**
+     * 
+     * Test -- Has this record been deleted?
+     * 
+     */
+    public function testIsDeleted()
+    {
+        $this->todo('stub');
+    }
+    
+    /**
+     * 
+     * Test -- Is the struct dirty?
+     * 
+     */
+    public function testIsDirty()
+    {
+        $this->todo('stub');
+    }
+    
+    /**
+     * 
+     * Test -- Is the record or one of its relateds invalid?
+     * 
+     */
+    public function testIsInvalid()
+    {
+        $this->todo('stub');
+    }
+    
+    /**
+     * 
+     * Test -- Is the record new?
+     * 
+     */
+    public function testIsNew()
+    {
+        $this->todo('stub');
+    }
+    
+    /**
+     * 
+     * Test -- Returns a new filter object with the filters from the record model.
+     * 
+     */
+    public function testNewFilter()
+    {
+        $this->todo('stub');
+    }
+    
+    /**
+     * 
+     * Test -- Returns a new Solar_Form object pre-populated with column properties, values, and filters ready for processing (all based on the model for this record).
+     * 
+     */
+    public function testNewForm()
+    {
+        $this->todo('stub');
+    }
+    
+    /**
+     * 
+     * Test -- Create a new record related to this one.
+     * 
+     */
+    public function testNewRelated()
+    {
+        $this->todo('stub');
+    }
+    
+    /**
+     * 
+     * Test -- Returns a string representation of the struct.
+     * 
+     */
+    public function testToString()
+    {
+        $this->todo('stub');
     }
 }

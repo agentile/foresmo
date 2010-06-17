@@ -16,7 +16,7 @@
  * 
  * @category Solar
  * 
- * @package Solar_Json
+ * @package Solar_Json JSON data formatting and checking.
  * 
  * @author Michal Migurski <mike-json@teczno.com>
  * 
@@ -28,7 +28,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Json.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Json.php 4380 2010-02-14 16:06:52Z pmjones $
  * 
  */
 class Solar_Json extends Solar_Base

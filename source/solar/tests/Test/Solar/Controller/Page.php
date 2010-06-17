@@ -18,7 +18,7 @@ class Test_Solar_Controller_Page extends Solar_Test {
     
     protected $_page;
     
-    protected $_page_class = 'Solar_Example_Controller_Page';
+    protected $_page_class = 'Mock_Solar_Controller_Page';
     
     // -----------------------------------------------------------------
     // 
@@ -28,47 +28,13 @@ class Test_Solar_Controller_Page extends Solar_Test {
     
     /**
      * 
-     * Constructor.
-     * 
-     * @param array $config User-defined configuration parameters.
-     * 
-     */
-    public function __construct($config = null)
-    {
-        parent::__construct($config);
-    }
-    
-    /**
-     * 
-     * Destructor; runs after all methods are complete.
-     * 
-     * @param array $config User-defined configuration parameters.
-     * 
-     */
-    public function __destruct()
-    {
-        parent::__destruct();
-    }
-    
-    /**
-     * 
      * Setup; runs before each test method.
      * 
      */
-    public function setup()
+    public function preTest()
     {
-        parent::setup();
+        parent::preTest();
         $this->_page = Solar::factory($this->_page_class);
-    }
-    
-    /**
-     * 
-     * Setup; runs after each test method.
-     * 
-     */
-    public function teardown()
-    {
-        parent::teardown();
     }
     
     // -----------------------------------------------------------------
@@ -100,7 +66,7 @@ class Test_Solar_Controller_Page extends Solar_Test {
         try {
             $actual = $this->_page->noSuchVar;
             $this->fail('should have thrown exception on no-existing var');
-        } catch (Solar_Controller_Page_Exception_PropertyNotDefined $e) {
+        } catch (Solar_Exception_NoSuchProperty $e) {
             // we expect this, do nothing
         }
     }
@@ -122,7 +88,7 @@ class Test_Solar_Controller_Page extends Solar_Test {
         try {
             $this->_page->zim = 'dib';
             $this->fail('should have thrown exception on non-existing var');
-        } catch (Solar_Controller_Page_Exception_PropertyNotDefined $e) {
+        } catch (Solar_Exception_NoSuchProperty $e) {
             // we expect this, do nothing
         }
         

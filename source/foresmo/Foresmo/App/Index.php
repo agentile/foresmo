@@ -18,51 +18,65 @@ class Foresmo_App_Index extends Foresmo_App_Base {
     public $msg;
     public $posts = array();
     public $comments_disabled = false;
+    public $query_string = '?';
 
+    /**
+     * _preRender
+     * Insert description here
+     * @return
+     */
     protected function _preRender()
     {
         parent::_preRender();
+        // build page tree
+        $this->buildPageTree();
     }
 
+    /**
+     * _postRender
+     * Insert description here
+     *
+     * @return
+     */
     protected function _postRender()
     {
         parent::_postRender();
     }
 
+    /**
+     * _postAction
+     * Insert description here
+     *
+     * @return
+     */
     protected function _postAction()
     {
         parent::_postAction();
     }
 
+    /**
+     * _preRun
+     * Insert description here
+     *
+     * @return
+     */
     protected function _preRun()
     {
         parent::_preRun();
     }
 
+    /**
+     * _postRun
+     * Insert description here
+     * @return
+     */
     protected function _postRun()
     {
         parent::_postRun();
-
-        if (isset($this->_registered_hooks['_postRun'][$this->_controller][$this->_action])) {
-            $hooks = $this->_registered_hooks['_postRun'][$this->_controller][$this->_action];
-
-            foreach ($hooks as $module => $module_call) {
-                $module_obj = Solar::factory("Foresmo_Modules_{$module}", $this->_model);
-                if (method_exists($module_obj, $module_call)) {
-                    $module_obj->$module_call();
-                }
-            }
-        }
-
-        $this->session->setFlash('redirect', array(
-            'controller' => $this->_controller,
-            'action' => $this->_action,
-            'params' => $this->_info,
-        ));
     }
 
     /**
-     * actionIndex
+     * actionMain
      * Default action/page
      *
      * @return void
@@ -77,15 +91,14 @@ class Foresmo_App_Index extends Foresmo_App_Base {
 
         // Is this a post?
         if (!empty($this->_info)) {
-            $posts = $this->_model->posts->fetchPublishedPostBySlug($this->_info[0]);
+            $posts = $this->_model->posts->fetchViewablePostBySlug($this->_info[0]);
         }
         if (!empty($posts)) {
+            $posts = Foresmo_Modules::hook('post', $posts);
             $this->_view = 'post';
-            $posts = $posts[0];
             $this->_setPostCommentForm($posts['id']);
             if ($this->form_success) {
-                $posts = $this->_model->posts->fetchPublishedPostBySlug($this->_info[0]);
-                $posts = $posts[0];
+                $posts = $this->_model->posts->fetchViewablePostBySlug($this->_info[0]);
             }
             $this->page_title .= ' | ' . $posts['title'];
             $is_post = true;
@@ -93,25 +106,26 @@ class Foresmo_App_Index extends Foresmo_App_Base {
 
         // Is it a page?
         if (empty($posts) && !$is_post && !empty($this->_info)) {
-            $posts = $this->_model->posts->fetchPublishedPageBySlug($this->_info[0]);
+            $posts = $this->_model->posts->fetchViewablePageBySlug($this->_info);
         }
 
         if (!empty($posts) && !$is_post) {
+            $posts = Foresmo_Modules::hook('page', $posts);
             $this->_view = 'page';
-            $posts = $posts[0];
             $this->_setPostCommentForm($posts['id']);
             if ($this->form_success) {
-                $posts = $this->_model->posts->fetchPublishedPageBySlug($this->_info[0]);
-                $posts = $posts[0];
+                $posts = $this->_model->posts->fetchViewablePageBySlug($this->_info[0]);
             }
             $this->page_title .= ' | ' . $posts['title'];
         }
 
         if (empty($posts) && !empty($this->_info)) {
+            $this->_response->setStatusCode(404);
             $this->_view = 'notfound';
             $this->msg = 'The page/post you are looking for cannot be found.';
         } elseif (empty($posts) && empty($this->_info)) {
             $posts = $this->_model->posts->fetchPublishedPosts();
+            $posts = Foresmo_Modules::hook('main', $posts);
         }
 
         $this->posts = $posts;
@@ -134,6 +148,7 @@ class Foresmo_App_Index extends Foresmo_App_Base {
 
         $this->posts = $this->_model->posts->fetchPublishedPostsByPage($page);
         if (empty($this->posts)) {
+            $this->_response->setStatusCode(404);
             $this->_view = 'notfound';
             $this->msg = 'This page number does not contain any posts/pages.';
         } else {
@@ -152,17 +167,33 @@ class Foresmo_App_Index extends Foresmo_App_Base {
      */
     public function actionTag()
     {
+        $page = (int) $this->_request->get('page');
+        if ($page <= 0) {
+            $page = 1;
+        }
+
+        $op = strtoupper($this->_request->get('op'));
+        if ($op !== 'OR') {
+            $op = 'AND';
+        } else {
+            $this->query_string .= 'op=OR&';
+        }
+
         $tags = func_get_args();
         if (empty($tags)) {
             $this->_redirect('/');
         }
 
-        $this->posts = $this->_model->posts->fetchPostsByTag($tags);
+        $this->posts = $this->_model->posts->fetchContentByTag($tags, $op, $page);
+
         if (empty($this->posts)) {
             $this->_view = 'notfound';
+            $this->_response->setStatusCode(404);
             $this->msg = 'There are no associated posts/pages for the given tag(s)';
         } else {
-            $this->_view = 'main';
+            $count = $this->_model->posts->fetchContentByTagCount($tags);
+            $this->_setPagesCount($this->_model->posts->posts_per_page, $count);
+            $this->_view = 'tag';
         }
     }
 
@@ -180,6 +211,11 @@ class Foresmo_App_Index extends Foresmo_App_Base {
      */
     public function actionSort()
     {
+        $page = (int) $this->_request->get('page');
+        if ($page <= 0) {
+            $page = 1;
+        }
+
         $params = func_get_args();
         if (empty($params)) {
             $this->_redirect('/');
@@ -187,19 +223,86 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         $month = (isset($params[0])) ? $params[0] : null;
         $year = (isset($params[1])) ? $params[1] : null;
         $day = null;
+
+        // is this y format
+        if ($year == null && strlen($month) == 4) {
+            $year = $month;
+            $month = null;
+        }
         // is this m/d/y format?
-        if (strlen($year) == 2) {
+        if (strlen($year) <= 2) {
             $day = $year;
             $year = (isset($params[2])) ? $params[2] : null;
         }
 
-        $this->posts = $this->_model->posts->fetchPublishedPostsByDate($year, $month, $day);
+
+
+        $this->posts = $this->_model->posts->fetchPublishedPostsByDate($year, $month, $day, $page);
         if (empty($this->posts)) {
             $this->_view = 'notfound';
+            $this->_response->setStatusCode(404);
             $this->msg = 'There are no associated posts/pages for the given date';
         } else {
+            $count = $this->_model->posts->fetchPublishedPostsByDateCount($year, $month, $day);
+            $this->_setPagesCount($this->_model->posts->posts_per_page, $count);
             $this->_view = 'main';
         }
+    }
+
+    /**
+     * actionFeed
+     * RSS Feed
+     *
+     * @return void
+     *
+     * @access public
+     * @since  0.05
+     */
+    public function actionFeed()
+    {
+        $this->_layout = null;
+        $this->_view = null;
+        $this->_format = 'atom';
+        $uri = Solar::factory('Solar_Uri');
+        $url = $uri->get(true);
+
+        if (empty($this->_info)) {
+            $posts = $this->_model->posts->fetchPublishedPosts();
+            $title = $this->blog_title;
+        } else {
+            $op = strtoupper($this->_request->get('op'));
+            if ($op !== 'OR') {
+                $op = 'AND';
+            }
+
+            $title = $this->blog_title . ' | ' . implode(', ', $this->_info);
+            $posts = $this->_model->posts->fetchPostsByTag($this->_info, $op, 1);
+        }
+
+        $rss = Solar::factory('Foresmo_Rss', array(
+            'title' => $title,
+            'link_self' => $url,
+            'id' => $this->blog_uid,
+            )
+        );
+
+        foreach ($posts as $k => $post) {
+            $tags = array();
+            foreach ($post['tags'] as $tag) {
+                $tags[] = $tag['tag'];
+            }
+            $rss->addEntry(array(
+                'title' => $post['title'],
+                'link' => array('rel' => 'alternate', 'href' => '/' . $post['slug']),
+                'author' => array('name' => $post['users']['username'], 'uri' => $url),
+                'updated' => date('c', strtotime($post['modified'])),
+                'published' => date('c', strtotime($post['pubdate'])),
+                'category' => $tags,
+                'content' => array('type' => 'html', 'content' => $post['content']),
+            ));
+        }
+
+        $this->_response->content = $rss->getFeed();
     }
 
     /**
@@ -213,6 +316,11 @@ class Foresmo_App_Index extends Foresmo_App_Base {
      */
     public function actionLogin()
     {
+        if ($this->session->get('Foresmo_username', false) !== false
+            && $this->session->get('Foresmo_username')) {
+            $this->_redirect('/admin');
+        }
+
         $form = Solar::factory('Solar_Form');
 
         $form->setElement('username', array(
@@ -221,12 +329,29 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             'label' => 'Username'
 
         ));
+
         $form->setElement('password', array(
             'name'  => 'password',
             'type'  => 'password',
             'label' => 'Password'
-
         ));
+
+        if ($this->session->get('captcha_required', false)) {
+            $captcha = Solar::factory('Foresmo_Captcha_Word');
+            $captcha_info = $captcha->generate();
+
+            $form->setElement('captcha_key', array(
+                'name'  => 'captcha_key',
+                'type'  => 'hidden',
+                'value' => $captcha_info['key']
+            ));
+
+            $form->setElement('captcha', array(
+                'name'  => 'captcha',
+                'type'  => 'text',
+                'label' => 'Captcha - Please type in the following word: ' . $captcha_info['word']
+            ));
+        }
 
         $form->setElement('process', array(
             'type'  => 'submit',
@@ -239,22 +364,50 @@ class Foresmo_App_Index extends Foresmo_App_Base {
         if ($process == 'Login') {
             $form->populate();
             $values = $form->getValues();
-            $result = $this->_model->users->isValidUser($values);
-            if ($result === true) {
-                $user = $this->_model->users->fetchUserByUsername($values['username']);
-                $this->session->set('Foresmo_user_id', $user['id']);
-                $this->session->set('Foresmo_groups', $user['groups']);
-                $this->session->set('Foresmo_username', $user['username']);
-                $this->session->set('Foresmo_permissions', $user['permissions']);
-                $this->session->set('Foresmo_user_info', $user['userinfo']);
-                $this->_redirect('/admin');
-            } else {
-                $this->msg = 'Login Failed';
+
+            // do rate limiting checks
+            $this->_clientFloodCheck();
+            $this->_injectDelay($this->response_delay);
+
+            if ($this->session->get('captcha_required', false)) {
+                $captcha = Solar::factory('Foresmo_Captcha_Word');
+                $info = array('key' => $values['captcha_key'], 'word' => $values['captcha']);
+                if ($captcha->isValid($info)) {
+                    $valid_captcha = true;
+                } else {
+                    $valid_captcha = false;
+                    // increment flood checks
+                    $this->_incrementAccountLoginAttempts($values['username']);
+                    $this->_incrementClientLoginAttempts();
+                    $this->msg = $captcha->getErrorMessage();
+                }
+                $form->setValue('captcha_key', $captcha_info['key']);
+            }
+
+            $this->_accountFloodCheck($values['username']);
+
+            if (!$this->session->get('captcha_required', false) || ($this->session->get('captcha_required', false) && $valid_captcha)) {
+                $result = $this->_model->users->isValidUser($values);
+                if ($result === true) {
+                    $this->session->set('captcha_required', false);
+                    $user = $this->_model->users->fetchUserByUsername($values['username']);
+                    $this->session->set('Foresmo_user_id', $user['id']);
+                    $this->session->set('Foresmo_groups', $user['groups']);
+                    $this->session->set('Foresmo_username', $user['username']);
+                    $this->session->set('Foresmo_permissions', $user['groups']['permissions']);
+                    $this->session->set('Foresmo_user_info', $user['userinfo']);
+                    $this->_redirect('/admin');
+                } else {
+                    // increment flood checks
+                    $this->_incrementAccountLoginAttempts($values['username']);
+                    $this->_incrementClientLoginAttempts();
+
+                    $this->msg = 'Login Failed';
+                }
             }
         }
 
-        $view = Solar::factory('Solar_View');
-        $this->form = $view->form($form);
+        $this->form = $form;
         $this->_layout = 'login';
     }
 
@@ -374,7 +527,11 @@ class Foresmo_App_Index extends Foresmo_App_Base {
                         $form->feedback = 'This comment has been flagged as spam and has been sent to blog admin for review.';
                         $this->_model->comments->insertComment($values, true);
                     } else {
-                        $form->feedback = 'Comment posted!';
+                        if ($this->_model->comments->default_status == 3) {
+                            $form->feedback = 'Comment posted, pending admin approval!';
+                        } else {
+                            $form->feedback = 'Comment posted!';
+                        }
                         $this->_model->comments->insertComment($values);
                         $this->form_success = true;
                     }
@@ -384,7 +541,28 @@ class Foresmo_App_Index extends Foresmo_App_Base {
             }
         }
 
-        $view = Solar::factory('Solar_View');
-        $this->form = $view->form($form);
+        $this->form = $form;
+    }
+
+    // TODO: Use router for this
+    /**
+     * _notFound
+     * Insert description here
+     *
+     * @param $action
+     * @param $params
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
+    protected function _notFound($action, $params = null)
+    {
+        $this->_info = $params;
+        array_unshift($this->_info, $action);
+        $this->actionMain();
     }
 }

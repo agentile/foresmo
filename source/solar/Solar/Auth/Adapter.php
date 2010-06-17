@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Adapter.php 3990 2009-09-08 00:53:36Z pmjones $
+ * @version $Id: Adapter.php 4582 2010-06-02 21:25:46Z pmjones $
  * 
  */
 abstract class Solar_Auth_Adapter extends Solar_Base {
@@ -21,12 +21,14 @@ abstract class Solar_Auth_Adapter extends Solar_Base {
      * Default configuration values.
      * 
      * @config int expire Authentication lifetime in seconds; zero is
-     *   forever.  Default is 10800 (3 hours). If this value is greater than
-     *   the PHP ini setting for `session.cache_expire`, it will throw an
-     *   exception; note that the ini setting is in *minutes*.
+     *   forever.  Default is 14400 (4 hours). If this value is greater than
+     *   the non-zero PHP ini setting for `session.cookie_lifetime`, it will
+     *   throw an exception.
      * 
      * @config int idle Maximum allowed idle time in seconds; zero is
-     *   forever.  Default is 1800 (30 minutes).
+     *   forever.  Default is 1440 (24 minutes). If this value is greater than
+     *   the the PHP ini setting for `session.gc_maxlifetime`, it will throw
+     *   an exception.
      * 
      * @config bool allow Whether or not to allow automatic login/logout at start()
      *   time. Default true.
@@ -57,18 +59,17 @@ abstract class Solar_Auth_Adapter extends Solar_Base {
      * @config string process_logout The source_process element value indicating a logout request;
      *   default is the 'PROCESS_LOGOUT' locale key value.
      * 
-     * @config callback login_callback A callback to execute after successful login, but before
-     *   the source postLogin() method is called.
+     * @config callback login_callback A callback to execute as part of the login process,
+     * whether or not login was successful.
      * 
-     * @config callback logout_callback A callback to execute after successful logout, but before
-     *   the source postLogout() method is called.
+     * @config callback logout_callback A callback to execute as part of the logout process.
      * 
      * @var array
      * 
      */
     protected $_Solar_Auth_Adapter = array(
-        'expire'         => 10800,
-        'idle'           => 1800,
+        'expire'         => 14400,
+        'idle'           => 1440,
         'allow'          => true,
         'cache' => array(
             'adapter' => 'Solar_Cache_Adapter_Session',
@@ -154,12 +155,7 @@ abstract class Solar_Auth_Adapter extends Solar_Base {
      * 
      * The available magic properties are ...
      * 
-     * - status:  (string)  The Unix time at which the authenticated handle was last 
-     *   valid.
-     * 
-     * - initial:  (int)  The Unix time at which the handle was initially authenticated.
-     * 
-     * - active:  (int)  The status code of the current user authentication. The string
+     * - status:  (int)  The status code of the current user authentication. The string
      *   codes are ...
      *   
      *     - Solar_Auth::ANON (or empty): The user is anonymous/unauthenticated (no attempt to authenticate)
@@ -172,6 +168,11 @@ abstract class Solar_Auth_Adapter extends Solar_Base {
      *     
      *     - Solar_Auth::WRONG: The user attempted authentication but failed
      *   
+     * - initial:  (int)  The Unix time at which the handle was initially authenticated.
+     * 
+     * - active:  (string)  The Unix time at which the authenticated handle was last 
+     *   valid.
+     * 
      * - handle:  (string) The currently authenticated user handle.
      * 
      * - email:  (string) The email address of the currently authenticated user. May 
@@ -215,13 +216,22 @@ abstract class Solar_Auth_Adapter extends Solar_Base {
     {
         parent::_postConfig();
         
-        // error if the configured expiry or idle times are longer than the
-        // PHP session.cache_expire value (convert minutes to seconds).
-        $php_expire = ini_get('session.cache_expire') * 60;
-        if ($this->_config['expire'] > $php_expire) {
-            throw $this->_exception('ERR_PHP_SESSION_CACHE_EXPIRE', array(
-                'session.cache_expire' => $php_expire,
-                'solar_auth_expire' => $this->_config['expire'],
+        // check max life before garbage collection on server vs. idle time
+        $gc_maxlife = ini_get('session.gc_maxlifetime');
+        if ($gc_maxlife < $this->_config['idle']) {
+            throw $this->_exception('ERR_PHP_SESSION_IDLE', array(
+                'session.gc_maxlifetime' => $gc_maxlife,
+                'solar_auth_idle'      => $this->_config['idle'],
+            ));
+        }
+        
+        // check life at client vs. exipire time;
+        // if life at client is zero, cookie never expires.
+        $cookie_life = ini_get('session.cookie_lifetime');
+        if ($cookie_life > 0 && $cookie_life < $this->_config['expire']) {
+            throw $this->_exception('ERR_PHP_SESSION_EXPIRE', array(
+                'session.cookie_lifetime' => $cookie_life,
+                'solar_auth_expire'       => $this->_config['expire'],
             ));
         }
         
@@ -237,7 +247,7 @@ abstract class Solar_Auth_Adapter extends Solar_Base {
         // make sure the source is either 'get' or 'post'.
         $is_get_or_post = $this->_config['source'] == 'get' 
                        || $this->_config['source'] == 'post';
-                       
+        
         if (! $is_get_or_post) {
             // default to post
             $this->_config['source'] = 'post';
@@ -270,7 +280,7 @@ abstract class Solar_Auth_Adapter extends Solar_Base {
     
     /**
      * 
-     * Magic get for pseudo-public properties as defined by [[$_magic]].
+     * Magic get for pseudo-public properties as defined by [[Solar_Auth_Adapter::$_magic]].
      * 
      * @param string $key The name of the property to get.
      * 
@@ -283,7 +293,8 @@ abstract class Solar_Auth_Adapter extends Solar_Base {
     {
         if (! in_array($key, $this->_magic)) {
             throw $this->_exception('ERR_NO_SUCH_PROPERTY', array(
-                'key' => $key,
+                'class'    => get_class($this),
+                'property' => $key,
             ));
         }
         
@@ -299,7 +310,7 @@ abstract class Solar_Auth_Adapter extends Solar_Base {
     
     /**
      * 
-     * Magic set for pseudo-public properties as defined by [[$_magic]].
+     * Magic set for pseudo-public properties as defined by [[Solar_Auth_Adapter::$_magic]].
      * 
      * @param string $key The name of the property to set.
      * 
@@ -314,7 +325,8 @@ abstract class Solar_Auth_Adapter extends Solar_Base {
     {
         if (! in_array($key, $this->_magic)) {
             throw $this->_exception('ERR_NO_SUCH_PROPERTY', array(
-                'key' => $key,
+                'class'    => get_class($this),
+                'property' => $key,
             ));
         }
         
@@ -532,7 +544,8 @@ abstract class Solar_Auth_Adapter extends Solar_Base {
     {
         $method = strtolower($this->_config['source']);
         $process = $this->_request->$method($this->_config['source_process']);
-        return $process == $this->_config['process_login'];
+        return ! $this->_request->isCsrf()
+             && $process == $this->_config['process_login'];
     }
     
     /**
@@ -547,7 +560,8 @@ abstract class Solar_Auth_Adapter extends Solar_Base {
     {
         $method = strtolower($this->_config['source']);
         $process = $this->_request->$method($this->_config['source_process']);
-        return $process == $this->_config['process_logout'];
+        return ! $this->_request->isCsrf()
+            && $process == $this->_config['process_logout'];
     }
     
     /**
@@ -647,9 +661,9 @@ abstract class Solar_Auth_Adapter extends Solar_Base {
         $this->reset($code);
         
         // callback?
-        if ($this->_config['login_callback']) {
+        if ($this->_config['logout_callback']) {
             call_user_func(
-                $this->_config['login_callback'],
+                $this->_config['logout_callback'],
                 $this
             );
         }

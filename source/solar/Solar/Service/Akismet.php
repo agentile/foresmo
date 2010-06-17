@@ -28,7 +28,7 @@
  * 
  * @category Solar
  * 
- * @package Solar_Service
+ * @package Solar_Service Web-service interfaces.
  * 
  * @subpackage Solar_Service_Akismet
  * 
@@ -36,7 +36,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Akismet.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Akismet.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  */
 class Solar_Service_Akismet extends Solar_Base
@@ -155,7 +155,8 @@ class Solar_Service_Akismet extends Solar_Base
      * 
      * Checks the comment data with Akismet to see if it is spam.
      * 
-     * See the [[_prepareData()]] method for the list of data keys.
+     * See the [[Solar_Service_Akismet::_prepareData() | ]] method for the 
+     * list of data keys.
      * 
      * @param array $data The comment data to be checked for spam.
      * 
@@ -179,7 +180,7 @@ class Solar_Service_Akismet extends Solar_Base
         } elseif ($response->content == 'false') {
             return false;
         } else {
-            throw $this->_exception('ERR_STRANGE_RESPONSE', array(
+            throw $this->_exception('ERR_UNKNOWN_RESPONSE', array(
                 'response' => $response,
                 'data'     => $data,
             ));
@@ -190,7 +191,8 @@ class Solar_Service_Akismet extends Solar_Base
      * 
      * Submits data to Akismet to establish it as ham (i.e., not spam).
      * 
-     * See the [[_prepareData()]] method for the list of data keys.
+     * See the [[Solar_Service_Akismet::_prepareData() | ]] method for the 
+     * list of data keys.
      * 
      * @param array $data The comment data to be established as ham.
      * 
@@ -215,7 +217,8 @@ class Solar_Service_Akismet extends Solar_Base
      * 
      * Submits data to Akismet to establish it as spam.
      * 
-     * See the [[_prepareData()]] method for the list of data keys.
+     * See the [[Solar_Service_Akismet::_prepareData() | ]] method for the 
+     * list of data keys.
      * 
      * @param array $data The comment data to be established as spam.
      * 

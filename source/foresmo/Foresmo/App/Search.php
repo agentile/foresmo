@@ -23,6 +23,18 @@ class Foresmo_App_Search extends Foresmo_App_Base {
     public $search_adapter = 'Default';
     public $search_adapter_settings = array();
 
+    /**
+     * _preRun
+     * Insert description here
+     *
+     *
+     * @return
+     *
+     * @access
+     * @static
+     * @see
+     * @since
+     */
     protected function _preRun()
     {
         parent::_preRun();

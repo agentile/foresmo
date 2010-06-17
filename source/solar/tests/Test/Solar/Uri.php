@@ -24,36 +24,12 @@ class Test_Solar_Uri extends Solar_Test {
     
     /**
      * 
-     * Constructor.
-     * 
-     * @param array $config User-defined configuration parameters.
-     * 
-     */
-    public function __construct($config = null)
-    {
-        parent::__construct($config);
-    }
-    
-    /**
-     * 
-     * Destructor; runs after all methods are complete.
-     * 
-     * @param array $config User-defined configuration parameters.
-     * 
-     */
-    public function __destruct()
-    {
-        parent::__destruct();
-    }
-    
-    /**
-     * 
      * Setup; runs before each test method.
      * 
      */
-    public function setup()
+    public function preTest()
     {
-        parent::setup();
+        parent::preTest();
         
         // when running from the command line, these elements are empty.
         // fake them so that web-like testing can occur.
@@ -65,16 +41,6 @@ class Test_Solar_Uri extends Solar_Test {
                                  . $_SERVER['PATH_INFO']
                                  . '?'
                                  . $_SERVER['QUERY_STRING'];
-    }
-    
-    /**
-     * 
-     * Setup; runs after each test method.
-     * 
-     */
-    public function teardown()
-    {
-        parent::teardown();
     }
     
     /**
@@ -130,6 +96,32 @@ class Test_Solar_Uri extends Solar_Test {
         $actual = $uri->get();
         $expect = "/foo/bar/baz.0#0";
         $this->assertSame($actual, $expect);
+    }
+    
+    public function test_secureHttps()
+    {
+        $_SERVER['HTTPS'] = 'on';
+        $uri = $this->_newUri();
+        $this->assertSame($uri->scheme, 'https');
+        $this->assertSame($uri->host, 'example.com');
+        $this->assertSame($uri->port, null);
+        $this->assertSame($uri->user, null);
+        $this->assertSame($uri->pass, null);
+        $this->assertSame($uri->path, array('path', 'to', 'index.php', 'appname', 'action'));
+        $this->assertSame($uri->query, array('foo'=>'bar', 'baz'=>'dib'));
+    }
+    
+    public function test_secureServerPort()
+    {
+        $_SERVER['SERVER_PORT'] = '443';
+        $uri = $this->_newUri();
+        $this->assertSame($uri->scheme, 'https');
+        $this->assertSame($uri->host, 'example.com');
+        $this->assertSame($uri->port, null);
+        $this->assertSame($uri->user, null);
+        $this->assertSame($uri->pass, null);
+        $this->assertSame($uri->path, array('path', 'to', 'index.php', 'appname', 'action'));
+        $this->assertSame($uri->query, array('foo'=>'bar', 'baz'=>'dib'));
     }
     
     /**

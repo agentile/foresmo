@@ -5,7 +5,7 @@
  * 
  * @category Solar
  * 
- * @package Solar_View
+ * @package Solar_View_Helper
  * 
  * @author Clay Loveless <clay@killersoft.com>
  * 
@@ -13,7 +13,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Head.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Head.php 4569 2010-05-15 19:20:31Z pmjones $
  * 
  */
 class Solar_View_Helper_Head extends Solar_View_Helper
@@ -35,6 +35,15 @@ class Solar_View_Helper_Head extends Solar_View_Helper
      * 
      */
     protected $_title = null;
+    
+    /**
+     * 
+     * Whether or not the title should be output raw.
+     * 
+     * @var string
+     * 
+     */
+    protected $_title_raw = false;
     
     /**
      * 
@@ -195,11 +204,40 @@ class Solar_View_Helper_Head extends Solar_View_Helper
     
     /**
      * 
+     * Turn off/on escaping for the title.
+     * 
+     * @param bool $flag True to turn off escaping; default false.
+     * 
+     * @return Solar_View_Helper_Head
+     * 
+     */
+    public function setTitleRaw($flag)
+    {
+        $this->_title_raw = (bool) $flag;
+        return $this;
+    }
+    
+    /**
+     * 
      * Adds a <meta> tag.
      * 
+     * {{code: php
+     *     // inside a view:
+     *     $this->head()->addMeta(array(
+     *         'foo' => 'bar',
+     *         'baz' => 'dib',
+     *     ));
+     *     
+     *     // when $this->head()->fetch() is called, that will output a meta tag:
+     *     // <meta name="foo" bar="baz dib" />
+     * }}
      * @param array $attribs Attributes for the tag.
      * 
      * @return Solar_View_Helper_Head
+     * 
+     * @see addMetaName()
+     * 
+     * @see addMetaHttp()
      * 
      */
     public function addMeta($attribs)
@@ -210,7 +248,7 @@ class Solar_View_Helper_Head extends Solar_View_Helper
     
     /**
      * 
-     * Adds a <meta> HTTP-Equivalent tag.
+     * Adds a `<meta http-equiv="" content="">` tag.
      * 
      * @param string $http_equiv The equivalent HTTP header label.
      * 
@@ -230,11 +268,11 @@ class Solar_View_Helper_Head extends Solar_View_Helper
     
     /**
      * 
-     * Adds a <meta> name tag.
+     * Adds a `<meta name="" content="">` tag.
      * 
-     * @param string $name The meta "name" label.
+     * @param string $name The meta "name" value.
      * 
-     * @param string $content The meta "name" value.
+     * @param string $content The meta "content" value.
      * 
      * @return Solar_View_Helper_Head
      * 
@@ -280,7 +318,7 @@ class Solar_View_Helper_Head extends Solar_View_Helper
     
     /**
      * 
-     * Adds a <style> tag as part of the "baseline" (foundation) styles.
+     * Adds a <link> tag as part of the "baseline" (foundation) styles.
      * Generally used by layouts, not views.
      * 
      * @param string $href The file HREF for the style source.
@@ -300,7 +338,7 @@ class Solar_View_Helper_Head extends Solar_View_Helper
     
     /**
      * 
-     * Adds a <style> tag as part of the "additional" (override) styles.
+     * Adds a <link> tag as part of the "additional" (override) styles.
      * Generally used by views, not layouts.  If the file has already been
      * added, it does not get added again.
      * 
@@ -390,7 +428,7 @@ class Solar_View_Helper_Head extends Solar_View_Helper
         
         // title
         if (! empty($this->_title)) {
-            $html[] = $this->_view->title($this->_title);
+            $html[] = $this->_view->title($this->_title, $this->_title_raw);
         }
         
         // metas
@@ -410,12 +448,12 @@ class Solar_View_Helper_Head extends Solar_View_Helper
         
         // baseline styles
         foreach ((array) $this->_style_base as $val) {
-            $html[] = $this->_view->style($val[0], $val[1]);
+            $html[] = $this->_view->linkStylesheet($val[0], $val[1]);
         }
         
         // additional styles
         foreach ((array) $this->_style as $val) {
-            $html[] = $this->_view->style($val[0], $val[1]);
+            $html[] = $this->_view->linkStylesheet($val[0], $val[1]);
         }
         
         // baseline scripts

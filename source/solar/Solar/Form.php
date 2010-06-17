@@ -5,7 +5,8 @@
  * 
  * @category Solar
  * 
- * @package Solar_Form
+ * @package Solar_Form Form processor with automated loading and presentation
+ * hinting.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
@@ -13,7 +14,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Form.php 4069 2009-09-20 21:25:53Z pmjones $
+ * @version $Id: Form.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  */
 class Solar_Form extends Solar_Base
@@ -79,10 +80,7 @@ class Solar_Form extends Solar_Base
      */
     protected $_default_attribs = array(
         'action'  => null,
-        'class'   => null,
-        'id'      => null,
         'method'  => 'post',
-        'name'    => null,
         'enctype' => 'multipart/form-data',
     );
     
@@ -138,18 +136,9 @@ class Solar_Form extends Solar_Base
     
     /**
      * 
-     * The array of filters for the form elements.
-     * 
-     * @var array 
-     * 
-     */
-    protected $_filters = array();
-    
-    /**
-     * 
      * Array of submitted values.
      * 
-     * Populated on the first call to [[_populate()]], which itself uses
+     * Populated on the first call to [[Solar_Form::_populate() | ]], which itself uses
      * [[Solar_Request::get()]] or [[Solar_Request::post()]], depending on
      * the value of $this->attribs['method'].
      * 
@@ -243,6 +232,15 @@ class Solar_Form extends Solar_Base
     
     /**
      * 
+     * Cross-site request forgery detector.
+     * 
+     * @var Solar_Csrf
+     * 
+     */
+    protected $_csrf;
+    
+    /**
+     * 
      * Sets the default success and failure messages.
      * 
      * @return void
@@ -278,15 +276,12 @@ class Solar_Form extends Solar_Base
             $this->_config['filter']
         );
         
+        // csrf object
+        $this->_csrf = Solar::factory('Solar_Csrf');
+        
         // set the default action attribute
         $action = $this->_request->server('REQUEST_URI');
         $this->_default_attribs['action'] = $action;
-        
-        // now merge attribute configs to defaults
-        $this->_default_attribs = array_merge(
-            $this->_config['attribs'],
-            $this->_default_attribs
-        );
         
         // reset everything
         $this->reset();
@@ -388,10 +383,10 @@ class Solar_Form extends Solar_Base
             }
         }
         
-        // return all elements of a specific array-name?
+        // return all elements of a specific prefix?
         if (is_string($spec)) {
             foreach($this->elements as $name => $info) {
-                if (strpos($name, $spec . '[') === 0) {
+                if (strpos($name, $spec) === 0) {
                     $list[$name] = $info;
                 }
             }
@@ -571,6 +566,10 @@ class Solar_Form extends Solar_Base
         // prepare the name as an array key
         $name = $this->_prepareName($name, $array);
         
+        // mark the status of the form as a whole; do this first so that
+        // the very first non-element invalid feedback does not get dropped.
+        $this->setStatus(false);
+        
         // does the element exist?
         if (empty($this->elements[$name])) {
             
@@ -590,9 +589,6 @@ class Solar_Form extends Solar_Base
             $this->elements[$name]['status'] = false;
             
         }
-        
-        // mark the status of the form as a whole
-        $this->setStatus(false);
     }
     
     /**
@@ -625,9 +621,9 @@ class Solar_Form extends Solar_Base
      * 
      * Manually set the value of one element.
      * 
-     * Note that this is subtly different from [[populate()]].  This method
-     * takes full name of the element, whereas populate() takes a "natural"
-     * hierarchical array like $_POST.
+     * Note that this is subtly different from [[Solar_Form::populate() | ]].
+     * This method takes full name of the element, whereas populate() takes a 
+     * "natural" hierarchical array like $_POST.
      * 
      * @param string $name The element name.
      * 
@@ -652,9 +648,10 @@ class Solar_Form extends Solar_Base
      * 
      * Manually set the value of several elements.
      * 
-     * Note that this is subtly different from [[populate()]].  This method
-     * takes a flat array or struct where the full name of the element is the
-     * key, as vs populate() takes a "natural" hierarchical array like $_POST.
+     * Note that this is subtly different from [[Solar_Form::populate() | ]]. 
+     * This method takes a flat array or struct where the full name of the 
+     * element is the key, as vs populate() which takes a "natural" 
+     * hierarchical array like $_POST.
      * 
      * @param array|Solar_Struct $spec The data source to set values from.
      * 
@@ -737,7 +734,7 @@ class Solar_Form extends Solar_Base
      * 
      * Applies the filter chain to the form element values; in particular,
      * checks validation and updates the 'invalid' keys for each element that
-     * fails.
+     * fails, and checks for CSRF attempts automatically.
      * 
      * This method cycles through each element in the form, where it ...
      * 
@@ -788,6 +785,13 @@ class Solar_Form extends Solar_Base
         $invalid = $this->_filter->getChainInvalid();
         foreach ((array) $invalid as $key => $val) {
             $this->addInvalid($key, $val);
+        }
+        
+        // check for csrf attempts
+        if ($this->_csrf->isForgery()) {
+            // looks like a forgery: validation failure
+            $this->feedback[] = 'ERR_CSRF_ATTEMPT';
+            $this->setStatus(false);
         }
         
         // done!
@@ -845,7 +849,8 @@ class Solar_Form extends Solar_Base
     
     /**
      * 
-     * Resets the form object to its originally-configured state.
+     * Resets the form object to its originally-configured state, and adds
+     * an anti-CSRF element with the current value of the session token.
      * 
      * This clears out all elements, filters, validations, and feedback,
      * as well as all submitted values.  Use this method to "start over
@@ -856,11 +861,24 @@ class Solar_Form extends Solar_Base
      */
     public function reset()
     {
-        $this->attribs    = $this->_default_attribs;
+        // attribs should be the default set, plus config overrides
+        $this->attribs = array_merge(
+            $this->_default_attribs,
+            $this->_config['attribs']
+        );
+        
         $this->elements   = array();
         $this->feedback   = array();
-        $this->_filters   = array();
         $this->_submitted = null;
+        
+        // add the csrf token value if present
+        if ($this->_csrf->hasToken()) {
+            $name = $this->_csrf->getKey();
+            $this->setElement($name, array(
+                'type'  => 'hidden',
+                'value' => $this->_csrf->getToken(),
+            ));
+        }
     }
     
     /**
@@ -887,7 +905,7 @@ class Solar_Form extends Solar_Base
         
         if (! in_array($status, $allowed)) {
             throw $this->_exception('ERR_STATUS_NOT_ALLOWED', array(
-                'status' => $status,
+                'status' => (string) $status,
             ));
         }
         
@@ -987,12 +1005,10 @@ class Solar_Form extends Solar_Base
         
         // if we *still* don't have an object, or if there's no
         // fetch() method, there's a problem.
-        if (! is_object($obj) ||
-            ! is_callable(array($obj, 'fetch'))) {
-            throw $this->_exception(
-                'ERR_METHOD_NOT_CALLABLE',
-                array('method' => 'fetch')
-            );
+        if (! is_object($obj) || ! is_callable(array($obj, 'fetch'))) {
+            throw $this->_exception('ERR_METHOD_NOT_CALLABLE', array(
+                'method' => 'fetch',
+            ));
         }
         
         // get any additional arguments to pass to the fetch

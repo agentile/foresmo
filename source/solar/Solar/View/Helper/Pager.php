@@ -5,13 +5,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_View
+ * @package Solar_View_Helper
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Pager.php 3858 2009-06-25 22:57:34Z pmjones $
+ * @version $Id: Pager.php 4575 2010-05-15 21:46:16Z pmjones $
  * 
  */
 class Solar_View_Helper_Pager extends Solar_View_Helper
@@ -32,7 +32,7 @@ class Solar_View_Helper_Pager extends Solar_View_Helper
      *   'PAGER_PREV'.
      * 
      * @config string next The locale key for the "next" link text.  Default is
-     *   'PAGER_PREV'.
+     *   'PAGER_NEXT'.
      * 
      * @config string prev_class The CSS class for the previous-page <a> tag. Default is
      *   'prev'.
@@ -43,7 +43,7 @@ class Solar_View_Helper_Pager extends Solar_View_Helper
      * @config string next_class The CSS class for the next-page <a> tag. Default is 'next'.
      * 
      * @config string style_href An HREF to the pager stylesheet to load. Default is
-     *   'Solar/styles/pager.css'.
+     *   'Solar/View/Helper/Pager/style.css'.
      * 
      * @var array
      * 
@@ -57,7 +57,7 @@ class Solar_View_Helper_Pager extends Solar_View_Helper
         'prev_class' => 'prev',
         'curr_class' => 'curr',
         'next_class' => 'next',
-        'style_href' => 'Solar/styles/pager.css',
+        'style_href' => 'Solar/View/Helper/Pager/style.css',
     );
     
     /**
@@ -124,10 +124,10 @@ class Solar_View_Helper_Pager extends Solar_View_Helper
         $html[] = "    <li>";
         if ($page > 1) {
             $href = str_replace('__PAGE__', $page - 1, $base);
-            $html[] = $this->_view->action($href, 'PAGER_PREV',
+            $html[] = $this->_view->action($href, $config['prev'],
                 array('class' => $config['prev_class']));
         } else {
-            $html[] = $this->_view->getText('PAGER_PREV');
+            $html[] = $this->_view->getText($config['prev']);
         }
         $html[] = "</li>";
         
@@ -156,10 +156,10 @@ class Solar_View_Helper_Pager extends Solar_View_Helper
         $html[] = "    <li>";
         if ($page < $pages) {
             $href = str_replace('__PAGE__', $page + 1, $base);
-            $html[] = $this->_view->action($href, 'PAGER_NEXT',
+            $html[] = $this->_view->action($href, $config['next'],
                 array('class' => $config['next_class']));
         } else {
-            $html[] = $this->_view->getText('PAGER_NEXT');
+            $html[] = $this->_view->getText($config['next']);
         }
         $html[] = "</li>";
         

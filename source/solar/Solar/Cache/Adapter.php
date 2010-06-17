@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Adapter.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Adapter.php 4552 2010-05-04 21:47:55Z pmjones $
  * 
  */
 abstract class Solar_Cache_Adapter extends Solar_Base {
@@ -168,10 +168,13 @@ abstract class Solar_Cache_Adapter extends Solar_Base {
      * 
      * @param string $data The data to store.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return bool True on success, false on failure.
      * 
      */
-    abstract public function save($key, $data);
+    abstract public function save($key, $data, $life = null);
     
     /**
      * 
@@ -207,10 +210,13 @@ abstract class Solar_Cache_Adapter extends Solar_Base {
      * 
      * @param string $data The data to store.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return bool True on success, false on failure.
      * 
      */
-    abstract public function add($key, $data);
+    abstract public function add($key, $data, $life = null);
     
     /**
      * 
@@ -280,14 +286,17 @@ abstract class Solar_Cache_Adapter extends Solar_Base {
      * 
      * @param array $args Arguments to the callback, if any.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return mixed The fetched or created data.
      * 
      * @see save()
      * 
      */
-    public function fetchOrSave($key, $callback, $args = array())
+    public function fetchOrSave($key, $callback, $args = array(), $life = null)
     {
-        $this->_fetchOrInsert('save', $key, $callback, $args);
+        $this->_fetchOrInsert('save', $key, $callback, $args, $life);
     }
     
     /**
@@ -320,14 +329,17 @@ abstract class Solar_Cache_Adapter extends Solar_Base {
      * 
      * @param array $args Arguments to the callback, if any.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return mixed The fetched or created data.
      * 
      * @see add()
      * 
      */
-    public function fetchOrAdd($key, $callback, $args = array())
+    public function fetchOrAdd($key, $callback, $args = array(), $life = null)
     {
-        $this->_fetchOrInsert('add', $key, $callback, $args);
+        $this->_fetchOrInsert('add', $key, $callback, $args, $life);
     }
     
     /**
@@ -420,7 +432,7 @@ abstract class Solar_Cache_Adapter extends Solar_Base {
     
     /**
      * 
-     * Support method for [[fetchOrSave()]] and [[fetchOrAdd()]].
+     * Support method for `fetchOrSave()` and `fetchOrAdd()`.
      * 
      * @param string $method The method to use for inserting created data,
      * typically 'add' or 'save'.
@@ -432,6 +444,9 @@ abstract class Solar_Cache_Adapter extends Solar_Base {
      * 
      * @param array $args Arguments to the callback, if any.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return mixed The fetched or created data.
      * 
      * @see fetchOrSave()
@@ -439,7 +454,7 @@ abstract class Solar_Cache_Adapter extends Solar_Base {
      * @see fetchOrAdd()
      * 
      */
-    protected function _fetchOrInsert($method, $key, $callback, $args = null)
+    protected function _fetchOrInsert($method, $key, $callback, $args = null, $life = null)
     {
         // only attempt a fetch if the cache is active
         if ($this->active) {
@@ -453,7 +468,7 @@ abstract class Solar_Cache_Adapter extends Solar_Base {
         
         // cache not active, or fetch failed. create the data and insert it.
         $data   = call_user_func_array($callback, (array) $args);
-        $result = $this->$method($key, $data);
+        $result = $this->$method($key, $data, $life);
         if ($result) {
             // done!
             return $data;

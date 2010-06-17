@@ -18,7 +18,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Action.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Action.php 4379 2010-02-12 14:06:42Z pmjones $
  * 
  */
 class Solar_Uri_Action extends Solar_Uri
@@ -60,5 +60,21 @@ class Solar_Uri_Action extends Solar_Uri
             'SOLAR_URI_ACTION_PATH',
             '/index.php'
         );
+    }
+    
+    /**
+     * 
+     * Returns a path suitable for the front controller to parse (i.e., 
+     * without the prefix for subdirectory-based installations).
+     * 
+     * @return string
+     * 
+     */
+    public function getFrontPath()
+    {
+        // we use trim() instead of empty() on string elements
+        // to allow for string-zero values.
+        return (empty($this->path)         ? '' : $this->_pathEncode($this->path))
+             . (trim($this->format) === '' ? '' : '.' . urlencode($this->format));
     }
 }

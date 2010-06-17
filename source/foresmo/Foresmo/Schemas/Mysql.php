@@ -52,11 +52,13 @@ CREATE TABLE [prefix]groups_permissions (
 
 CREATE TABLE [prefix]posts (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  parent_id INT UNSIGNED NULL,
   user_id MEDIUMINT UNSIGNED NOT NULL,
   slug VARCHAR(255) NOT NULL,
   content_type SMALLINT UNSIGNED NOT NULL,
   title VARCHAR(255) NOT NULL,
   content LONGTEXT NOT NULL,
+  excerpt TEXT NULL,
   status SMALLINT UNSIGNED NOT NULL,
   pubdate INT UNSIGNED NOT NULL,
   modified INT UNSIGNED NOT NULL,
@@ -107,6 +109,8 @@ CREATE TABLE [prefix]posts_tags  (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   post_id INT UNSIGNED NOT NULL,
   tag_id INT UNSIGNED NOT NULL,
+  type SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  value TEXT,
   PRIMARY KEY (id),
   KEY post_id(post_id),
   KEY tag_id(tag_id)

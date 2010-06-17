@@ -13,7 +13,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Collection.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Collection.php 4405 2010-02-18 04:27:25Z pmjones $
  * 
  * @todo Implement an internal unit-of-work status registry so that we can 
  * handle mass insert/delete without hitting the database unnecessarily.
@@ -156,17 +156,10 @@ class Solar_Sql_Model_Collection extends Solar_Struct
      */
     public function getColVals($col)
     {
-        // the list of values
         $list = array();
-        
-        // iterate over $_data, not $this, so we don't screw up any external
-        // iterations.
-        foreach ($this->_data as $key => $val) {
-            $record = $this->__get($key);
+        foreach ($this as $key => $record) {
             $list[$key] = $record->$col;
         }
-        
-        // done
         return $list;
     }
     
@@ -281,8 +274,7 @@ class Solar_Sql_Model_Collection extends Solar_Struct
     public function toArray()
     {
         $data = array();
-        $clone = clone($this);
-        foreach ($clone as $key => $record) {
+        foreach ($this as $key => $record) {
             $data[$key] = $record->toArray();
         }
         return $data;
@@ -345,6 +337,18 @@ class Solar_Sql_Model_Collection extends Solar_Struct
      */
     protected function _postSave()
     {
+    }
+    
+    /**
+     * 
+     * Are there any records in the collection?
+     * 
+     * @return bool True if empty, false if not.
+     * 
+     */
+    public function isEmpty()
+    {
+        return empty($this->_data);
     }
     
     /**
@@ -471,10 +475,8 @@ class Solar_Sql_Model_Collection extends Solar_Struct
         if ($spec instanceof Solar_Sql_Model_Record) {
             $key = $this->getRecordOffset($spec);
             if ($key === false) {
-                throw $this->_exception(
-                    'ERR_NOT_IN_COLLECTION',
-                    $spec->toArray()
-                );
+                $info = $spec->toArray();
+                throw $this->_exception('ERR_NOT_IN_COLLECTION', $info);
             }
         } else {
             $key = $spec;
@@ -523,10 +525,8 @@ class Solar_Sql_Model_Collection extends Solar_Struct
         if ($spec instanceof Solar_Sql_Model_Record) {
             $key = $this->getRecordOffset($spec);
             if ($key === false) {
-                throw $this->_exception(
-                    'ERR_NOT_IN_COLLECTION',
-                    $spec->toArray()
-                );
+                $info = $spec->toArray();
+                throw $this->_exception('ERR_NOT_IN_COLLECTION', $info);
             }
         } else {
             $key = $spec;
@@ -583,12 +583,6 @@ class Solar_Sql_Model_Collection extends Solar_Struct
         }
     }
     
-    // -----------------------------------------------------------------
-    //
-    // ArrayAccess
-    //
-    // -----------------------------------------------------------------
-    
     /**
      * 
      * ArrayAccess: set a key value; appends to the array when using []
@@ -611,5 +605,25 @@ class Solar_Sql_Model_Collection extends Solar_Struct
         }
         
         return $this->__set($key, $val);
+    }
+    
+    /**
+     * 
+     * Overrides normal locale() to use the **model** locale strings.
+     * 
+     * @param string $key The key to get a locale string for.
+     * 
+     * @param string $num If 1, returns a singular string; otherwise, returns
+     * a plural string (if one exists).
+     * 
+     * @param array $replace An array of replacement values for the string.
+     * 
+     * @return string The locale string, or the original $key if no
+     * string found.
+     * 
+     */
+    public function locale($key, $num = 1, $replace = null)
+    {
+        return $this->_model->locale($key, $num, $replace);
     }
 }

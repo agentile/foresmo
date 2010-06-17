@@ -30,7 +30,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Base.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Base.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  */
 abstract class Solar_Base
@@ -109,21 +109,6 @@ abstract class Solar_Base
     
     /**
      * 
-     * Reports the API version for this class.
-     * 
-     * If you don't override this method, your classes will use the same
-     * API version string as the Solar package itself.
-     * 
-     * @return string A PHP-standard version number.
-     * 
-     */
-    public function apiVersion()
-    {
-        return '@package_version@';
-    }
-    
-    /**
-     * 
      * Convenience method for getting a dump the whole object, or one of its
      * properties, or an external variable.
      * 
@@ -196,10 +181,6 @@ abstract class Solar_Base
      * 
      * @return string The locale string, or the original $key if no
      * string found.
-     * 
-     * @see Manual::Solar/Using_locales
-     * 
-     * @see Class::Solar_Locale
      * 
      */
     public function locale($key, $num = 1, $replace = null)

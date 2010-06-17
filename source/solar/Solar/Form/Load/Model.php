@@ -13,11 +13,33 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Model.php 4011 2009-09-11 20:24:05Z pmjones $
+ * @version $Id: Model.php 4287 2009-12-31 16:47:54Z pmjones $
  * 
  */
 class Solar_Form_Load_Model extends Solar_Base
 {
+    /**
+     * 
+     * Default configuration values.
+     * 
+     * @config int default_text_size The default 'size' attribute for text
+     * elements.
+     * 
+     * @config int default_textarea_rows The default 'rows' attribute for
+     * textarea elements.
+     * 
+     * @config int default_textarea_cols The default 'cols' attribute for
+     * textarea elements.
+     * 
+     * @var array
+     * 
+     */
+    protected $_Solar_Form_Load_Model = array(
+        'default_text_size'     => 60,
+        'default_textarea_rows' => 18,
+        'default_textarea_cols' => 60,
+    );
+    
     /**
      * 
      * The model we use for getting information about columns for elements.
@@ -78,8 +100,8 @@ class Solar_Form_Load_Model extends Solar_Base
      * 
      * @param Solar_Sql_Model $model Load form elements from this model object.
      * 
-     * @param array $load Which model columns to load as form elements, 
-     * default '*' for all columns.
+     * @param array $load Which model columns to load as form elements. If
+     * empty or '*', uses all fetch and calculate columns.
      * 
      * @param string $array_name Load the model columns as elements of this
      * array-name within the form.
@@ -87,8 +109,12 @@ class Solar_Form_Load_Model extends Solar_Base
      * @return array An array of form attributes and elements.
      * 
      */
-    public function fetch($model, $load = '*', $array_name = null)
+    public function fetch($model, $load = null, $array_name = null)
     {
+        if (! $load) {
+            $load = '*';
+        }
+        
         $this->_setModel($model);
         $this->_setLoad($load);
         $this->_setArrayName($array_name);
@@ -163,7 +189,7 @@ class Solar_Form_Load_Model extends Solar_Base
     {
         // if not specified, set the array_name to the model name
         if (empty($array_name)) {
-            $this->_array_name = $this->_model->model_name;
+            $this->_array_name = $this->_model->array_name;
         } else {
             $this->_array_name = $array_name;
         }
@@ -683,6 +709,30 @@ class Solar_Form_Load_Model extends Solar_Base
         if ($fix_maxlength) {
             /** @todo Add +1 or +2 to 'size' for numeric types? */
             $elem['attribs']['maxlength'] = $col['size'];
+        }
+        
+        // for text elements, set size
+        $fix_size = $elem['type'] == 'text'
+                 && empty($elem['attribs']['size']);
+        
+        if ($fix_size) {
+            $elem['attribs']['size'] = $this->_config['default_text_size'];
+        }
+        
+        // for textarea elements, fix rows
+        $fix_rows = $elem['type'] == 'textarea'
+                 && empty($elem['attribs']['rows']);
+        
+        if ($fix_rows) {
+            $elem['attribs']['rows'] = $this->_config['default_textarea_rows'];
+        }
+        
+        // for textarea elements, fix cols
+        $fix_cols = $elem['type'] == 'textarea'
+                 && empty($elem['attribs']['cols']);
+        
+        if ($fix_cols) {
+            $elem['attribs']['cols'] = $this->_config['default_textarea_cols'];
         }
     }
     

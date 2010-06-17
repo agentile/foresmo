@@ -17,7 +17,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Xml.php 3995 2009-09-08 18:49:24Z pmjones $
+ * @version $Id: Xml.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
 class Solar_Struct_Xml extends Solar_Struct
@@ -153,7 +153,7 @@ class Solar_Struct_Xml extends Solar_Struct
         } elseif ($spec instanceof DOMNode) {
             $this->_loadDomNode($spec);
         } else {
-            throw $this->_exception('ERR_UNKNOWN_TYPE');
+            throw $this->_exception('ERR_CANNOT_LOAD');
         }
     }
     

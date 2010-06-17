@@ -12,7 +12,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Eager.php 4097 2009-09-25 02:13:15Z pmjones $
+ * @version $Id: Eager.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
 class Solar_Sql_Model_Params_Eager extends Solar_Sql_Model_Params {
@@ -33,7 +33,7 @@ class Solar_Sql_Model_Params_Eager extends Solar_Sql_Model_Params {
         'wherein_max'          => null,
         'cols_prefix'          => null,
         'join_type'            => null,
-        'join_cond'            => array(),
+        'conditions'           => array(),
         'join_flag'            => null,
         'join_only'            => null,
     );
@@ -57,7 +57,7 @@ class Solar_Sql_Model_Params_Eager extends Solar_Sql_Model_Params {
         } else {
             throw $this->_exception('ERR_UNKNOWN_MERGE', array(
                 'merge' => $val,
-                'known' => 'client, server',
+                'known' => '"client" or "server"',
             ));
         }
         return $this;
@@ -102,7 +102,7 @@ class Solar_Sql_Model_Params_Eager extends Solar_Sql_Model_Params {
         } else {
             throw $this->_exception('ERR_UNKNOWN_JOIN_TYPE', array(
                 'join_type' => $val,
-                'known' => "null, 'left', 'inner'",
+                'known' => 'null, "left", or "inner"',
             ));
         }
         return $this;
@@ -121,7 +121,7 @@ class Solar_Sql_Model_Params_Eager extends Solar_Sql_Model_Params {
      * @return Solar_Sql_Model_Params_Eager
      * 
      */
-    public function joinCond($cond, $val = Solar_Sql_Select::IGNORE)
+    public function addCondition($cond, $val = Solar_Sql_Select::IGNORE)
     {
         // BC-helping logic
         if (is_int($cond) && is_string($val)) {
@@ -131,9 +131,9 @@ class Solar_Sql_Model_Params_Eager extends Solar_Sql_Model_Params {
         
         // now the real logic. use triple-equals so that empties are honored.
         if ($val === Solar_Sql_Select::IGNORE) {
-            $this->_data['join_cond'][] = $cond;
+            $this->_data['conditions'][] = $cond;
         } else {
-            $this->_data['join_cond'][$cond] = $val;
+            $this->_data['conditions'][$cond] = $val;
         }
         return $this;
     }
@@ -192,7 +192,7 @@ class Solar_Sql_Model_Params_Eager extends Solar_Sql_Model_Params {
         } else {
             throw $this->_exception('ERR_UNKNOWN_NATIVE_BY', array(
                 'native_by' => $val,
-                'known' => 'wherein, select',
+                'known' => '"wherein" or "select"',
             ));
         }
         return $this;
@@ -244,7 +244,7 @@ class Solar_Sql_Model_Params_Eager extends Solar_Sql_Model_Params {
         ));
 
         $this->_loadTwo($data, array(
-            'join_cond'   => 'joinCond',
+            'conditions'   => 'addCondition',
         ));
     }
 }

@@ -29,7 +29,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Uri.php 3732 2009-04-29 17:27:56Z pmjones $
+ * @version $Id: Uri.php 4574 2010-05-15 21:36:33Z pmjones $
  * 
  */
 class Solar_Markdown_Plugin_Uri extends Solar_Markdown_Plugin
@@ -157,7 +157,8 @@ class Solar_Markdown_Plugin_Uri extends Solar_Markdown_Plugin
         // strip the mailto: from the visible part
         $addr = preg_replace('/">.+?:/', '">', $addr);
         
-        return $addr;
+        // done
+        return $this->_toHtmlToken($addr);
     }
     
     /**

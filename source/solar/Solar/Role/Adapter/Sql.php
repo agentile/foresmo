@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Sql.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Sql.php 4412 2010-02-22 20:08:22Z pmjones $
  * 
  */
 class Solar_Role_Adapter_Sql extends Solar_Role_Adapter
@@ -62,9 +62,15 @@ class Solar_Role_Adapter_Sql extends Solar_Role_Adapter
             array('sql' => $sql)
         );
         
+        // make sure the handle col is dotted so it gets quoted properly
+        $handle_col = $this->_config['handle_col'];
+        if (strpos($handle_col, '.') === false) {
+            $handle_col = "{$this->_config['table']}.{$handle_col}";
+        }
+
         // build the select
         $select->from($this->_config['table'], $this->_config['role_col'])
-               ->where("{$this->_config['handle_col']} = ?", $handle)
+               ->where("$handle_col = ?", $handle)
                ->multiWhere($this->_config['where']);
         
         // get the results (a column of rows)

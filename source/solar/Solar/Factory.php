@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Factory.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Factory.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
 abstract class Solar_Factory extends Solar_Base
@@ -43,7 +43,7 @@ abstract class Solar_Factory extends Solar_Base
      */
     final public function __call($method, $params)
     {
-        throw $this->_exception('ERR_NOT_ADAPTER_INSTANCE', array(
+        throw $this->_exception('ERR_METHOD_NOT_IMPLEMENTED', array(
             'method' => $method,
             'params' => $params,
         ));

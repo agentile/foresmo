@@ -11,10 +11,10 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Dir.php 3993 2009-09-08 14:26:29Z pmjones $
+ * @version $Id: Dir.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
-class Solar_Dir extends Solar_Base
+class Solar_Dir
 {
     /**
      * 
@@ -220,12 +220,11 @@ class Solar_Dir extends Solar_Base
     {
         $result = @mkdir($path, $mode, $recursive);
         if (! $result) {
-            $self = Solar::factory(__CLASS__);
             $info = error_get_last();
-            $info['mkdir_path'] = $path;
-            $info['mkdir_mode'] = $mode;
-            $info['mkdir_recursive'] = $recursive;
-            throw $self->_exception('ERR_MKDIR_FAILED', $info);
+            $info['dir'] = $path;
+            $info['mode'] = $mode;
+            $info['recursive'] = $recursive;
+            throw Solar_Dir::_exception('ERR_MKDIR_FAILED', $info);
         } else {
             return true;
         }
@@ -247,12 +246,34 @@ class Solar_Dir extends Solar_Base
     {
         $result = @rmdir($path);
         if (! $result) {
-            $self = Solar::factory(__CLASS__);
             $info = error_get_last();
-            $info['rmdir_path'] = $path;
-            throw $self->_exception('ERR_RMDIR_FAILED', $info);
+            $info['dir'] = $path;
+            throw Solar_Dir::_exception('ERR_RMDIR_FAILED', $info);
         } else {
             return true;
         }
+    }
+    
+    /**
+     * 
+     * Returns a localized exception object.
+     * 
+     * @param string $code The error code.
+     * 
+     * @param array $info Additional error information.
+     * 
+     * @return Solar_Exception
+     * 
+     */
+    protected static function _exception($code, $info = null)
+    {
+        $class  = 'Solar_Dir';
+        $locale = Solar_Registry::get('locale');
+        return Solar::exception(
+            $class,
+            $code,
+            $locale->fetch($class, $code, 1, $info),
+            (array) $info
+        );
     }
 }

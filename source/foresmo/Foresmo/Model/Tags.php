@@ -28,9 +28,12 @@ class Foresmo_Model_Tags extends Solar_Sql_Model {
             'foreign_key' => 'tag_id',
         ));
         $this->_hasMany('posts', array(
-             'foreign_class' => 'Foresmo_Model_Posts',
-             'through'       => 'posts_tags',
-             'through_key'   => 'post_id',
+            'foreign_class' => 'Foresmo_Model_Posts',
+            'through'       => 'posts_tags',
+            'through_key'   => 'post_id',
+            'through_native_col' => 'tag_id',
+            'through_foreign_col' => 'post_id',
+            'conditions' => array('status = ?' => array(1)),
         ));
     }
 
@@ -43,23 +46,27 @@ class Foresmo_Model_Tags extends Solar_Sql_Model {
      */
     public function fetchTagsForPublishedPosts()
     {
+        //SELECT t.id as id, t.tag as tag, t.tag_slug as tag_slug, count(*) as count 
+        //FROM `foresmo_tags` as t 
+        //INNER JOIN `foresmo_posts_tags` as pt ON pt.tag_id = t.id 
+        //INNER JOIN `foresmo_posts` as p ON pt.post_id = p.id 
+        //WHERE p.status = 1 group by t.tag_slug");
+
         $results = $this->fetchAllAsArray(
             array(
-                'cols' => array('id', 'tag', 'tag_slug', "COUNT({$this->_config['prefix']}tags.id) AS count"),
+                'cols' => array('id', 'tag', 'tag_slug', "COUNT(*) AS count"),
                 'order'  => array (
                     'tag ASC'
                 ),
-                'group' => array($this->_config['prefix'] . 'tags.id'),
+                'group' => array('tag_slug'),
                 'eager'  => array(
                     'posts' => array(
-                        'join_only' => true,
-                        'join_cond' => array(
-                            'posts.status = ?' => 1,
-                        ),
+                        'join_type' => 'inner',
                     ),
                 ),
             )
         );
+
         return $results;
     }
 

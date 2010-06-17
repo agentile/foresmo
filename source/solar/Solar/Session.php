@@ -21,7 +21,8 @@
  * 
  * @category Solar
  * 
- * @package Solar_Session
+ * @package Solar_Session Session containers with support for named segments,
+ * read-once flash values, and lazy-started sessions.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
@@ -29,7 +30,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Session.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Session.php 4495 2010-03-04 18:44:30Z pmjones $
  * 
  */
 class Solar_Session extends Solar_Base
@@ -258,12 +259,8 @@ class Solar_Session extends Solar_Base
         // set the class
         $this->setClass($this->_class);
         
-        // lazy start: find the cookie name and look for the session cookie
-        $name = session_name();
-        if (self::$_request->cookie($name)) {
-            // a previous session exists, start it
-            $this->start();
-        }
+        // lazy-start any existing session
+        $this->lazyStart();
     }
     
     /**
@@ -322,6 +319,30 @@ class Solar_Session extends Solar_Base
         
         // load the session segment
         $this->load();
+    }
+    
+    /**
+     * 
+     * Lazy-start the session (i.e., only if a session cookie from the client
+     * already exists).
+     * 
+     * @return void
+     * 
+     */
+    public function lazyStart()
+    {
+        // don't start more than once.
+        if ($this->isStarted()) {
+            // be sure the segment is loaded, though
+            $this->load();
+            return;
+        }
+        
+        $name = session_name();
+        if (self::$_request->cookie($name)) {
+            // a previous session exists, start it
+            $this->start();
+        }
     }
     
     /**
@@ -435,7 +456,7 @@ class Solar_Session extends Solar_Base
     
     /**
      * 
-     * Sets a normal value by key.
+     * Sets a normal value by key; this will start the session if needed.
      * 
      * @param string $key The data key.
      * 
@@ -453,7 +474,7 @@ class Solar_Session extends Solar_Base
     
     /**
      * 
-     * Appends a normal value to a key.
+     * Appends a normal value to a key; this will start the session if needed.
      * 
      * @param string $key The data key.
      * 
@@ -513,7 +534,8 @@ class Solar_Session extends Solar_Base
      */
     public function delete($key)
     {
-        $this->start();
+        // don't start a new session to remove something that isn't there
+        $this->lazyStart();
         unset($this->_store[$key]);
     }
     
@@ -526,7 +548,8 @@ class Solar_Session extends Solar_Base
      */
     public function reset()
     {
-        $this->start();
+        // don't start a new session to remove something that isn't there
+        $this->lazyStart();
         $this->_store = array();
     }
     
@@ -549,7 +572,7 @@ class Solar_Session extends Solar_Base
     
     /**
      * 
-     * Sets a flash value by key.
+     * Sets a flash value by key; this will start the session if needed.
      * 
      * @param string $key The flash key.
      * 
@@ -567,7 +590,7 @@ class Solar_Session extends Solar_Base
     
     /**
      * 
-     * Appends a flash value to a key.
+     * Appends a flash value to a key; this will start the session if needed.
      * 
      * @param string $key The flash key.
      * 
@@ -640,7 +663,8 @@ class Solar_Session extends Solar_Base
      */
     public function deleteFlash($key)
     {
-        $this->start();
+        // don't start a new session to remove something that isn't there
+        $this->lazyStart();
         unset($this->_flash[$key]);
     }
     
@@ -653,7 +677,8 @@ class Solar_Session extends Solar_Base
      */
     public function resetFlash()
     {
-        $this->start();
+        // don't start a new session to remove something that isn't there
+        $this->lazyStart();
         $this->_flash = array();
     }
     
@@ -666,14 +691,13 @@ class Solar_Session extends Solar_Base
      */
     public function resetAll()
     {
-        $this->start();
         $this->reset();
         $this->resetFlash();
     }
     
     /**
      * 
-     * Regenerates the session ID and deletes the previous session store.
+     * Regenerates the session ID.
      * 
      * Use this every time there is a privilege change.
      * 

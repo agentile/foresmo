@@ -13,7 +13,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Part.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: Part.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
 class Solar_Mail_Message_Part extends Solar_Base
@@ -335,7 +335,9 @@ class Solar_Mail_Message_Part extends Solar_Base
         $list = array('content-type', 'content-transfer-encoding',
             'content-disposition');
         if (in_array(strtolower($label), $list)) {
-            throw $this->_exception('ERR_ADD_STANDARD_HEADER');
+            throw $this->_exception('ERR_USE_OTHER_METHOD', array(
+                'key' => $label,
+            ));
         }
         
         // save the label and value

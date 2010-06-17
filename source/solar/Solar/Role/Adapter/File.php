@@ -17,7 +17,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: File.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: File.php 4405 2010-02-18 04:27:25Z pmjones $
  * 
  * @todo rename to Unix, add Ini file handler as well
  * 
@@ -53,10 +53,9 @@ class Solar_Role_Adapter_File extends Solar_Role_Adapter
         
         // does the file exist?
         if (! Solar_File::exists($file)) {
-            throw $this->_exception(
-                'ERR_FILE_NOT_READABLE',
-                array('file' => $file)
-            );
+            throw $this->_exception('ERR_FILE_NOT_READABLE', array(
+                'file' => $file,
+            ));
         }
         
         // load the file as an array of lines

@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Session.php 3995 2009-09-08 18:49:24Z pmjones $
+ * @version $Id: Session.php 4442 2010-02-26 16:33:06Z pmjones $
  * 
  */
 class Solar_Cache_Adapter_Session extends Solar_Cache_Adapter
@@ -71,10 +71,13 @@ class Solar_Cache_Adapter_Session extends Solar_Cache_Adapter
      * 
      * @param mixed $data The data to write into the entry.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return bool True on success, false on failure.
      * 
      */
-    public function save($key, $data)
+    public function save($key, $data, $life = null)
     {
         if (! $this->_active) {
             return;
@@ -83,9 +86,14 @@ class Solar_Cache_Adapter_Session extends Solar_Cache_Adapter
         // modify the key to add the prefix
         $key = $this->entry($key);
         
+        // life value
+        if ($life === null) {
+            $life = $this->_life;
+        }
+        
         // save entry and expiry in session
         $this->_entries->set($key, $data);
-        $this->_expires->set($key, time() + $this->_life);
+        $this->_expires->set($key, time() + $life);
         return true;
     }
     
@@ -97,10 +105,13 @@ class Solar_Cache_Adapter_Session extends Solar_Cache_Adapter
      * 
      * @param mixed $data The data to write into the entry.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return bool True on success, false on failure.
      * 
      */
-    public function add($key, $data)
+    public function add($key, $data, $life = null)
     {
         if (! $this->_active) {
             return;
@@ -111,7 +122,7 @@ class Solar_Cache_Adapter_Session extends Solar_Cache_Adapter
         
         // add entry to session if not already there
         if (! $this->_entries->has($key)) {
-            return $this->save($key, $data);
+            return $this->save($key, $data, $life);
         } else {
             return false;
         }

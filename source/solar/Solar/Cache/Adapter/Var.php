@@ -15,7 +15,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Var.php 3685 2009-04-15 15:54:14Z pmjones $
+ * @version $Id: Var.php 4442 2010-02-26 16:33:06Z pmjones $
  * 
  */
 class Solar_Cache_Adapter_Var extends Solar_Cache_Adapter
@@ -46,10 +46,13 @@ class Solar_Cache_Adapter_Var extends Solar_Cache_Adapter
      * 
      * @param mixed $data The data to write into the entry.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return bool True on success, false on failure.
      * 
      */
-    public function save($key, $data)
+    public function save($key, $data, $life = null)
     {
         if (! $this->_active) {
             return;
@@ -58,9 +61,14 @@ class Solar_Cache_Adapter_Var extends Solar_Cache_Adapter
         // modify the key to add the prefix
         $key = $this->entry($key);
         
+        // life value
+        if ($life === null) {
+            $life = $this->_life;
+        }
+        
         // save entry and expiry
         $this->_entries[$key] = $data;
-        $this->_expires[$key] = time() + $this->_life;
+        $this->_expires[$key] = time() + $life;
         return true;
     }
     
@@ -72,10 +80,13 @@ class Solar_Cache_Adapter_Var extends Solar_Cache_Adapter
      * 
      * @param mixed $data The data to write into the entry.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return bool True on success, false on failure.
      * 
      */
-    public function add($key, $data)
+    public function add($key, $data, $life = null)
     {
         if (! $this->_active) {
             return;
@@ -86,7 +97,7 @@ class Solar_Cache_Adapter_Var extends Solar_Cache_Adapter
         
         // save entry, but only if it doesn't already exist
         if (empty($this->_entries[$key])) {
-            return $this->save($key, $data);
+            return $this->save($key, $data, $life);
         } else {
             return false;
         }

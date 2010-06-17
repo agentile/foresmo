@@ -22,7 +22,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Front.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Front.php 4502 2010-03-08 16:20:08Z pmjones $
  * 
  */
 class Solar_Controller_Front extends Solar_Base
@@ -39,16 +39,27 @@ class Solar_Controller_Front extends Solar_Base
      * @config string default The default page-name.
      * 
      * @config array routing Key-value pairs explicitly mapping a page-name to
-     * a controller class.
+     * a controller class (static mapping).
+     * 
+     * @config array rewrite Rewrite URIs according to these rules (dynamic
+     * mapping).
+     * 
+     * @config array replace Replacement strings for rewrite rules.
+     * 
+     * @config bool explain Dump an explanation of the routing path when a
+     * page is not found.
      * 
      * @var array
      * 
      */
     protected $_Solar_Controller_Front = array(
         'classes' => array('Solar_App'),
-        'disable' => array('base'),
-        'default' => 'hello',
+        'disable' => array(),
+        'default' => null,
         'routing' => array(),
+        'rewrite' => array(),
+        'replace' => array(),
+        'explain' => false,
     );
     
     /**
@@ -68,16 +79,27 @@ class Solar_Controller_Front extends Solar_Base
      * @var array
      * 
      */
-    protected $_disable = array('base');
+    protected $_disable = array();
     
     /**
      * 
-     * Explicit page-name to class-name mappings.
+     * The registered Solar_Uri_Rewrite object.
+     * 
+     * @var Solar_Uri_Rewrite
+     * 
+     * @see _rewrite()
+     * 
+     */
+    protected $_rewrite = array();
+    
+    /**
+     * 
+     * Explicit page-name to controller class mappings.
      * 
      * @var array
      * 
      */
-    protected $_routing;
+    protected $_routing = array();
     
     /**
      * 
@@ -101,6 +123,15 @@ class Solar_Controller_Front extends Solar_Base
     
     /**
      * 
+     * An array of explanations of the front-controller processing track.
+     * 
+     * @var array
+     * 
+     */
+    protected $_explain;
+    
+    /**
+     * 
      * Post-construction tasks to complete object construction.
      * 
      * @return void
@@ -110,14 +141,39 @@ class Solar_Controller_Front extends Solar_Base
     {
         parent::_postConstruct();
         
-        // set convenience vars from config
-        $this->_default = (string) $this->_config['default'];
-        $this->_disable = (array)  $this->_config['disable'];
-        $this->_routing = (array)  $this->_config['routing'];
+        // set string var from config
+        if ($this->_config['default']) {
+            $this->_default = (string) $this->_config['default'];
+        }
+        
+        // merge array vars from config
+        $vars = array('disable', 'routing');
+        foreach ($vars as $key) {
+            if ($this->_config[$key]) {
+                $var = "_$key";
+                $this->$var = array_merge(
+                    $this->$var,
+                    (array) $this->_config[$key]
+                );
+            }
+        }
         
         // set up a class stack for finding apps
         $this->_stack = Solar::factory('Solar_Class_Stack');
         $this->_stack->add($this->_config['classes']);
+        
+        // retain the registered rewriter
+        $this->_rewrite = Solar_Registry::get('rewrite');
+        
+        // merge our rewrite rules
+        if ($this->_config['rewrite']) {
+            $this->_rewrite->mergeRules($this->_config['rewrite']);
+        }
+        
+        // merge our rewrite replacement tokens
+        if ($this->_config['replace']) {
+            $this->_rewrite->mergeReplacements($this->_config['replace']);
+        }
         
         // extended setup
         $this->_setup();
@@ -157,30 +213,13 @@ class Solar_Controller_Front extends Solar_Base
             ));
         }
         
-        // first path-element is the page-name.
-        $page = strtolower(reset($uri->path));
-        if (empty($page)) {
-            // page-name is blank. get the default class.
-            // remove the empty element from the path.
-            $class = $this->_getPageClass($this->_default);
-            array_shift($uri->path);
-        } elseif (in_array($page, $this->_disable)) {
-            // page-name is disabled. get the default class.
-            // leave existing elements in the path.
-            $class = $this->_getPageClass($this->_default);
-        } else {
-            // look for a controller for the requested page.
-            $class = $this->_getPageClass($page);
-            if (! $class) {
-                // no class for the page-name. get the default class.
-                // leave existing elements in the path.
-                $class = $this->_getPageClass($this->_default);
-            } else {
-                // found a class. don't need the page-name any more, so
-                // remove it from the path.
-                array_shift($uri->path);
-            }
-        }
+        $this->_explain['fetch_uri'] = $uri->getFrontPath();
+        
+        // rewrite the uri path
+        $this->_rewrite($uri);
+        
+        // get the page and class routing
+        list($page, $class) = $this->_routing($uri);
         
         // do we have a page-controller class?
         if (! $class) {
@@ -214,6 +253,74 @@ class Solar_Controller_Front extends Solar_Base
     public function display($spec = null)
     {
         echo $this->fetch($spec);
+    }
+    
+    /**
+     * 
+     * Rewrite the URI path according to a dynamic ruleset.
+     * 
+     * @param Solar_Uri $uri The URI to rewrite in place.
+     * 
+     * @return void
+     * 
+     */
+    protected function _rewrite($uri)
+    {
+        // does it match a rewrite rule?
+        $newpath = $this->_rewrite->match($uri);
+        if ($newpath) {
+            $uri->setPath($newpath);
+            $this->_explain['rewrite_rule'] = $this->_rewrite->explain();
+            $this->_explain['rewrite_uri'] = $uri->getFrontPath();
+        } else {
+            $this->_explain['rewrite_rule'] = $this->_rewrite->explain();
+        }
+    }
+    
+    /**
+     * 
+     * Checks the URI to see what page name and controller class we should
+     * route to.
+     * 
+     * @param Solar_Uri $uri The URI to route on.
+     * 
+     * @return void
+     * 
+     */
+    protected function _routing($uri)
+    {
+        // first path-element is the page-name.
+        $page = strtolower(reset($uri->path));
+        if (empty($page)) {
+            // page-name is blank. get the default class.
+            // remove the empty element from the path.
+            $class = $this->_getPageClass($this->_default);
+            array_shift($uri->path);
+            $this->_explain['routing_page']  = "empty, using default page '{$this->_default}'";
+        } elseif (in_array($page, $this->_disable)) {
+            // page-name is disabled. get the default class.
+            // leave existing elements in the path.
+            $class = $this->_getPageClass($this->_default);
+            $this->_explain['routing_page'] = "'$page' disabled, using default page '{$this->_default}'";
+        } else {
+            // look for a controller for the requested page.
+            $class = $this->_getPageClass($page);
+            if (! $class) {
+                // no class for the page-name. get the default class.
+                // leave existing elements in the path.
+                $class = $this->_getPageClass($this->_default);
+                $this->_explain['routing_page'] = "no class for page '$page', using default page '{$this->_default}'";
+            } else {
+                // found a class. don't need the page-name any more, so
+                // remove it from the path.
+                array_shift($uri->path);
+                $this->_explain['routing_page'] = $page;
+            }
+        }
+        
+        $this->_explain['routing_class'] = $class;
+        $this->_explain['routing_uri']   = $uri->getFrontPath();
+        return array($page, $class);
     }
     
     /**
@@ -259,14 +366,36 @@ class Solar_Controller_Front extends Solar_Base
      */
     protected function _notFound($page)
     {
-        $content = "<html><head><title>Not Found</title>"
-                 . "<body><h1>404 Not Found</h1><p>"
-                 . htmlspecialchars("Page controller for '$page' not found.")
-                 . "</p></body></html>";
+        $content[] = "<html><head><title>Not Found</title></head><body>";
+        $content[] = "<h1>404 Not Found</h1>";
+        $content[] = "<p>"
+                   . htmlspecialchars("Page controller class for '$page' not found.")
+                   . "</p>";
+        
+        if ($this->_config['explain']) {
+            $content[] = "<h2>Track</h2>";
+            $content[] = "<dl>";
+            foreach ($this->_explain as $code => $text) {
+                $content[] = "<dt><code>{$code}:</code></dt>";
+                $content[] = "<dd><code>"
+                           . ($text ? htmlspecialchars($text) : "<em>empty</em>")
+                           . "</code></dd>";
+            }
+            $content[] = "</dl>";
+            
+            $content[] = "<h2>Page Class Prefixes</h2>";
+            $content[] = '<ol>';
+            foreach ($this->_stack->get() as $class) {
+                $content[] = "<li>$class*</li>";
+            }
+            $content[] = '</ol>';
+        }
+        
+        $content[] = "</body></html>";
         
         $response = Solar_Registry::get('response');
         $response->setStatusCode(404);
-        $response->content = $content;
+        $response->content = implode("\n", $content);
         
         return $response;
     }

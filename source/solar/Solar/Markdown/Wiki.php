@@ -10,13 +10,14 @@
  * 
  * @category Solar
  * 
- * @package Solar_Markdown_Wiki
+ * @package Solar_Markdown_Wiki Plugin-based system to implement a 
+ * Solar-specific wiki form of the Markdown syntax.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Wiki.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Wiki.php 4380 2010-02-14 16:06:52Z pmjones $
  * 
  * @todo Implement the markdown-in-html portion of Markdown-Extra.
  * 

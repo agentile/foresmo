@@ -20,7 +20,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Oracle.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Oracle.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
 class Solar_Sql_Adapter_Oracle extends Solar_Sql_Adapter
@@ -132,10 +132,13 @@ class Solar_Sql_Adapter_Oracle extends Solar_Sql_Adapter
      * 
      * Returns a list of all tables in the database.
      * 
+     * @param string $schema Fetch tbe list of tables in this schema; 
+     * when empty, uses the default schema.
+     * 
      * @return array All table names in the database.
      * 
      */
-    protected function _fetchTableList() 
+    protected function _fetchTableList($schema) 
     {
          return $this->fetchCol('SELECT LOWER(TABLE_NAME) FROM USER_TABLES');
     }
@@ -146,10 +149,12 @@ class Solar_Sql_Adapter_Oracle extends Solar_Sql_Adapter
      * 
      * @param string $table The table name to fetch columns for.
      * 
+     * @param string $schema The schema in which the table resides.
+     * 
      * @return array An array of table column information.
      * 
      */
-    protected function _fetchTableCols($table)
+    protected function _fetchTableCols($table, $schema)
     {
         // strip non-word characters to try and prevent SQL injections
         $table = preg_replace('/[^\w]/', '', $table);
@@ -170,7 +175,10 @@ class Solar_Sql_Adapter_Oracle extends Solar_Sql_Adapter
         // get the column descriptions
         $cols = $this->fetchAll($stmt, $data);
         if (! $cols) {
-            throw $this->_exception('ERR_QUERY_FAILED');
+            throw $this->_exception('ERR_NO_COLS_FOUND', array(
+                'table' => $table,
+                'schema' => $schema,
+            ));
         }
         
         // loop through the result rows; each describes a column.
@@ -287,12 +295,16 @@ class Solar_Sql_Adapter_Oracle extends Solar_Sql_Adapter
      * 
      * @param string $table The table name to fetch indexes for.
      * 
+     * @param string $schema The schema in which the table resides.
+     * 
      * @return array An array of table indexes.
      * 
      */
-    protected function _fetchIndexInfo($table)
+    protected function _fetchIndexInfo($table, $schema)
     {
-        throw $this->_exception('ERR_METHOD_NOT_IMPLEMENTED');
+        throw $this->_exception('ERR_METHOD_NOT_IMPLEMENTED', array(
+            'method' => __FUNCTION__,
+        ));
     }
     
     /**

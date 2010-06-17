@@ -14,7 +14,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Catalog.php 3995 2009-09-08 18:49:24Z pmjones $
+ * @version $Id: Catalog.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
 class Solar_Sql_Model_Catalog extends Solar_Base
@@ -191,7 +191,7 @@ class Solar_Sql_Model_Catalog extends Solar_Base
     public function setModel($name, $spec)
     {
         if (! empty($this->_name_class[$name])) {
-            throw $this->_exception('ERR_MODEL_NAME_EXISTS', array(
+            throw $this->_exception('ERR_NAME_EXISTS', array(
                 'name' => $name,
             ));
         }

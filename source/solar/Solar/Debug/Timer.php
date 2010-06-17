@@ -49,13 +49,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_Debug
+ * @package Solar_Debug Debugging tools.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Timer.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Timer.php 4380 2010-02-14 16:06:52Z pmjones $
  * 
  */
 class Solar_Debug_Timer extends Solar_Base

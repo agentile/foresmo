@@ -7,13 +7,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_Mail
+ * @package Solar_Mail Email-sending tools.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Message.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Message.php 4555 2010-05-05 21:44:55Z pmjones $
  * 
  */
 class Solar_Mail_Message extends Solar_Base
@@ -440,6 +440,23 @@ class Solar_Mail_Message extends Solar_Base
     
     /**
      * 
+     * Sets the "To:" address recipient, removing previous "To:" recipients.
+     * 
+     * @param string $addr The email address of the recipient.
+     * 
+     * @param string $name The display-name for the recipient, if any.
+     * 
+     * @return Solar_Mail_Message This object.
+     * 
+     */
+    public function setTo($addr, $name = null)
+    {
+        $this->_rcpt['To'] = array($addr => $name);
+        return $this;
+    }
+    
+    /**
+     * 
      * Adds a "Cc:" address recipient.
      * 
      * @param string $addr The email address of the recipient.
@@ -457,6 +474,23 @@ class Solar_Mail_Message extends Solar_Base
     
     /**
      * 
+     * Sets the "Cc:" address recipient, removing previous "Cc:" recipients.
+     * 
+     * @param string $addr The email address of the recipient.
+     * 
+     * @param string $name The display-name for the recipient, if any.
+     * 
+     * @return Solar_Mail_Message This object.
+     * 
+     */
+    public function setCc($addr, $name = null)
+    {
+        $this->_rcpt['Cc'] = array($addr => $name);
+        return $this;
+    }
+    
+    /**
+     * 
      * Adds a "Bcc:" address recipient.
      * 
      * @param string $addr The email address of the recipient.
@@ -469,6 +503,23 @@ class Solar_Mail_Message extends Solar_Base
     public function addBcc($addr, $name = null)
     {
         $this->_rcpt['Bcc'][$addr] = $name;
+        return $this;
+    }
+    
+    /**
+     * 
+     * Sets the "Bcc:" address recipient, removing previous "Bcc:" recipients.
+     * 
+     * @param string $addr The email address of the recipient.
+     * 
+     * @param string $name The display-name for the recipient, if any.
+     * 
+     * @return Solar_Mail_Message This object.
+     * 
+     */
+    public function setBcc($addr, $name = null)
+    {
+        $this->_rcpt['Bcc'] = array($addr => $name);
         return $this;
     }
     
@@ -500,6 +551,18 @@ class Solar_Mail_Message extends Solar_Base
             // not a recognized type, so no addresses
             return array();
         }
+    }
+
+    /**
+     * Resets all recipients in To, Cc and Bcc.
+     * 
+     * @return void
+     */
+    public function resetRcpt()
+    {
+        $this->_rcpt['To'] = array();
+        $this->_rcpt['Cc'] = array();
+        $this->_rcpt['Bcc'] = array();
     }
     
     /**
@@ -679,7 +742,9 @@ class Solar_Mail_Message extends Solar_Base
         $list = array('to', 'cc', 'bcc', 'from', 'subject', 'return-path',
             'content-type', 'mime-version', 'content-transfer-encoding');
         if (in_array(strtolower($label), $list)) {
-            throw $this->_exception('ERR_ADD_STANDARD_HEADER');
+            throw $this->_exception('ERR_USE_OTHER_METHOD', array(
+                'key' => $label,
+            ));
         }
         
         // if replacing, or not already set, reset to a blank array
@@ -716,6 +781,9 @@ class Solar_Mail_Message extends Solar_Base
             $headers[] = array('Return-Path', "<{$this->_from[0]}>");
         }
         
+        // Date:
+        $headers[] = array('Date', date('r'));
+
         // From:
         $value = "<{$this->_from[0]}>";
         if ($this->_from[1]) {

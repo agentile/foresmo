@@ -12,7 +12,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Console.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Console.php 4370 2010-02-11 15:41:19Z pmjones $
  * 
  */
 class Solar_Controller_Console extends Solar_Base
@@ -35,8 +35,8 @@ class Solar_Controller_Console extends Solar_Base
     protected $_Solar_Controller_Console = array(
         'classes' => array('Solar_Cli'),
         'routing' => array(),
-        'disable' => 'base',
-        'default' => '',
+        'disable' => array(),
+        'default' => 'help',
     );
     
     /**
@@ -46,7 +46,7 @@ class Solar_Controller_Console extends Solar_Base
      * @var array
      * 
      */
-    protected $_disable = array('base');
+    protected $_disable = array();
     
     /**
      * 

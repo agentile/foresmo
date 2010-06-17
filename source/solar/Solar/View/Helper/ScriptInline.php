@@ -5,13 +5,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_View
+ * @package Solar_View_Helper
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: ScriptInline.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: ScriptInline.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  */
 class Solar_View_Helper_ScriptInline extends Solar_View_Helper
@@ -27,7 +27,7 @@ class Solar_View_Helper_ScriptInline extends Solar_View_Helper
      * 
      * @return string The <script></script> tag with the inline script.
      * 
-     * @see http://developer.mozilla.org/en/docs/Properly_Using_CSS_and_JavaScript_in_XHTML_Documents
+     * @see <http://developer.mozilla.org/en/docs/Properly_Using_CSS_and_JavaScript_in_XHTML_Documents>
      * 
      */
     public function scriptInline($code, $attribs = null)

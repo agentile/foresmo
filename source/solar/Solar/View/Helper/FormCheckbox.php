@@ -11,11 +11,26 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: FormCheckbox.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: FormCheckbox.php 4442 2010-02-26 16:33:06Z pmjones $
  * 
  */
 class Solar_View_Helper_FormCheckbox extends Solar_View_Helper_FormElement
 {
+    
+    /**
+     * 
+     * Default configuration values.
+     * 
+     * @config string label_class A CSS class to use for the label tag to 
+     * identify it as a label for a checkbox.
+     * 
+     * @var array
+     * 
+     */
+    protected $_Solar_View_Helper_FormCheckbox = array(
+        'label_class' => 'checkbox',
+    );
+    
     /**
      * 
      * Generates a 'checkbox' element.
@@ -55,7 +70,16 @@ class Solar_View_Helper_FormCheckbox extends Solar_View_Helper_FormElement
                
         // wrap in a label?
         if ($this->_label) {
-            $xhtml = '<label>' . $xhtml . $this->_view->escape($this->_label) . '</label>';
+            if ($this->_config['label_class']) {
+                $attribs = $this->_view->attribs(array(
+                    'class' => $this->_config['label_class'],
+                ));
+            } else {
+                $attribs = null;
+            }
+            
+            $label = $this->_view->getText($this->_label);
+            $xhtml = "<label{$attribs}>{$xhtml} {$label}</label>";
         }
         
         // prefix with unchecked value

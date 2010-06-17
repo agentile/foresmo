@@ -20,7 +20,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Ini.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Ini.php 4405 2010-02-18 04:27:25Z pmjones $
  * 
  */
 class Solar_Auth_Adapter_Ini extends Solar_Auth_Adapter
@@ -54,10 +54,9 @@ class Solar_Auth_Adapter_Ini extends Solar_Auth_Adapter
         
         // does the file exist?
         if (! file_exists($file) || ! is_readable($file)) {
-            throw $this->_exception(
-                'ERR_FILE_NOT_READABLE',
-                array('file' => $file)
-            );
+            throw $this->_exception('ERR_FILE_NOT_READABLE', array(
+                'file' => $file,
+            ));
         }
         
         // parse the file into an array

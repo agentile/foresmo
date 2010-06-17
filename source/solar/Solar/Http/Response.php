@@ -22,7 +22,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Response.php 4143 2009-10-07 21:26:28Z pmjones $
+ * @version $Id: Response.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  * @todo Add charset param so that headers get sent with right encoding?
  * 
@@ -91,6 +91,28 @@ class Solar_Http_Response extends Solar_Base
      * 
      */
     protected $_version = '1.1';
+    
+    /**
+     * 
+     * Should the response disable browser caching?
+     * 
+     * When true, the response will send these headers:
+     * 
+     * {{code:
+     *     Pragma: no-cache
+     *     Cache-Control: no-store, no-cache, must-revalidate
+     *     Cache-Control: post-check=0, pre-check=0
+     *     Expires: 1
+     * }}
+     * 
+     * @var bool
+     * 
+     * @see setNoCache()
+     * 
+     * @see redirectNoCache()
+     * 
+     */
+    protected $_no_cache = false;
     
     /**
      * 
@@ -245,7 +267,8 @@ class Solar_Http_Response extends Solar_Base
      * display() time.
      * 
      * This method will not set 'HTTP' headers for response status codes; use
-     * the [[setStatusCode()]] and [[setStatusText()]] methods instead.
+     * the [[Solar_Http_Response::setStatusCode() | ]] and 
+     * [[Solar_Http_Response::setStatusText() | ]] methods instead.
      * 
      * @param string $key The header label, such as "Content-Type".
      * 
@@ -269,7 +292,7 @@ class Solar_Http_Response extends Solar_Base
         $lower = strtolower($key);
         if ($lower == 'http') {
             throw $this->_exception('ERR_USE_OTHER_METHOD', array(
-                'HTTP'          => 'setVersion()',
+                'name' => $key,
             ));
         }
         
@@ -304,8 +327,9 @@ class Solar_Http_Response extends Solar_Base
         $key = Solar_Mime::headerLabel($key);
         
         // get the value
-        if (array_key_exists($key, $this->_headers)) {
-            return $this->_headers[$key];
+        $headers = $this->getHeaders();
+        if (array_key_exists($key, $headers)) {
+            return $headers[$key];
         }
     }
     
@@ -318,7 +342,18 @@ class Solar_Http_Response extends Solar_Base
      */
     public function getHeaders()
     {
-        return $this->_headers;
+        $headers = $this->_headers;
+        
+        if ($this->_no_cache) {
+            $headers['Pragma'] = 'no-cache';
+            $headers['Cache-Control'] = array(
+                'no-store, no-cache, must-revalidate',
+                'post-check=0, pre-check=0',
+            );
+            $headers['Expires'] = '1';
+        }
+        
+        return $headers;
     }
     
     /**
@@ -430,6 +465,33 @@ class Solar_Http_Response extends Solar_Base
     
     /**
      * 
+     * Should the response disable HTTP caching?
+     * 
+     * When true, the response will send these headers:
+     * 
+     * {{code:
+     *     Pragma: no-cache
+     *     Cache-Control: no-store, no-cache, must-revalidate
+     *     Cache-Control: post-check=0, pre-check=0
+     *     Expires: 1
+     * }}
+     * 
+     * @param bool $flag When true, disable browser caching.
+     * 
+     * @see setNoCache()
+     * 
+     * @see redirectNoCache()
+     * 
+     * @return void
+     * 
+     */
+    public function setNoCache($flag = true)
+    {
+        $this->_no_cache = (bool) $flag;
+    }
+    
+    /**
+     * 
      * Sends all headers and cookies, then prints the response content.
      * 
      * @return void
@@ -472,9 +534,7 @@ class Solar_Http_Response extends Solar_Base
         // make sure there's actually an href
         $href = trim($href);
         if (! $href) {
-            throw $this->_exception('ERR_REDIRECT_FAILED', array(
-                'href' => $href,
-            ));
+            throw $this->_exception('ERR_REDIRECT_NO_URI');
         }
         
         // set the status code
@@ -519,14 +579,8 @@ class Solar_Http_Response extends Solar_Base
      * In those cases, use redirectNoCache() to turn off HTTP caching, so
      * that the re-POST warning does not occur.
      * 
-     * This method sends the following headers before setting Location:
-     * 
-     * {{code: php
-     *     header("Pragma: no-cache");
-     *     header("Cache-Control: no-store, no-cache, must-revalidate");
-     *     header("Cache-Control: post-check=0, pre-check=0", false);
-     *     header("Expires: 1");
-     * }}
+     * This method calls [[Solar_Http_Response::setNoCache() | ]] to disable
+     * caching.
      * 
      * @param Solar_Uri_Action|string $spec The URI to redirect to.
      * 
@@ -537,29 +591,12 @@ class Solar_Http_Response extends Solar_Base
      * 
      * @see <http://www.theserverside.com/tt/articles/article.tss?l=RedirectAfterPost>
      * 
+     * @see setNoCache()
+     * 
      */
     public function redirectNoCache($spec, $code = '303')
     {
-        // reset pragma header
-        $this->setHeader('Pragma', 'no-cache');
-        
-        // reset cache-control
-        $this->setHeader(
-            'Cache-Control',
-            'no-store, no-cache, must-revalidate'
-        );
-        
-        // append cache-control
-        $this->setHeader(
-            'Cache-Control',
-            'post-check=0, pre-check=0',
-            false
-        );
-        
-        // force immediate expiration
-        $this->setHeader('Expires', 1);
-        
-        // continue with redirection
+        $this->setNoCache();
         return $this->redirect($spec, $code);
     }
     
@@ -586,7 +623,7 @@ class Solar_Http_Response extends Solar_Base
         header($status, true, $this->_status_code);
         
         // send each of the remaining headers
-        foreach ($this->_headers as $key => $list) {
+        foreach ($this->getHeaders() as $key => $list) {
             
             // sanitize and skip empty keys
             $key = Solar_Mime::headerLabel($key);

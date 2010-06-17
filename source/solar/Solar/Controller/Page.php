@@ -7,45 +7,42 @@
  * 
  *     Vendor/              # your vendor namespace
  *       App/               # subdirectory for page-controllers
- *         Base/
- *           Helper/        # shared helper classes
- *           Layout/        # shared layout files
- *           Locale/        # shared locale files
- *           Model/         # shared model classes
- *           View/          # shared view scripts
  *         Example.php      # an example app
  *         Example/
- *           Helper/        # helper classes specific to the app
- *             ...
  *           Layout/        # layout files to override shared layouts
  *             ...
  *           Locale/        # locale files
  *             en_US.php
  *             pt_BR.php
+ *           Public/        # public assets
+ *             style.css    
+ *             script.js    
+ *             image.jpg    
  *           View/          # view scripts
  *             _item.php    # partial template
  *             list.php     # full template
  *             edit.php     # another full template
  * 
- * 
- * When you call [[fetch()]], these intercept methods are run in the
+ * When you call [[Solar_Controller_Front::fetch() | fetch()]], these intercept methods are run in the
  * following order ...
  * 
- * 1. [[_load()]] to load class properties from the fetch() URI specification
+ * 1. [[Solar_Controller_Page::_load() | ]] to load class properties from the fetch() URI specification
  * 
- * 2. [[_preRun()]] before the first action
+ * 2. [[Solar_Controller_Page::_preRun() | ]] before the first action
  * 
- * 3. [[_preAction()]] before each action (including _forward()-ed actions)
+ * 3. [[Solar_Controller_Page::_preAction() | ]] before each action (including _forward()-ed actions)
  * 
  * 4. ... The action method itself runs here ...
  * 
- * 5. [[_postAction()]] after each action
+ * 5. [[Solar_Controller_Page::_postAction() | ]] after each action
  * 
- * 6. [[_postRun()]] after the last action, and before rendering
+ * 6. [[Solar_Controller_Page::_postRun() | ]] after the last action, and before rendering
  * 
- * 7. [[_render()]] to render the view and layout; this in its turn calls
- *    [[_setViewObject()]] and [[_renderView()]] for the view, then
- *    [[_setLayoutTemplates()]] and [[_renderLayout()]] for the layout.
+ * 7. [[Solar_Controller_Page::_render() | ]] to render the view and layout;
+ *    this in its turn calls [[Solar_Controller_Page::_setViewObject() | ]] 
+ *    and [[Solar_Controller_Page::_renderView() | ]] for the view, then
+ *    [[Solar_Controller_Page::_setLayoutTemplates() | ]] and 
+ *    [[Solar_Controller_Page::_renderLayout() | ]] for the layout.
  * 
  * @category Solar
  * 
@@ -55,11 +52,11 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Page.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Page.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  */
-abstract class Solar_Controller_Page extends Solar_Base {
-    
+abstract class Solar_Controller_Page extends Solar_Base
+{
     /**
      * 
      * The action being requested of (performed by) the controller.
@@ -272,6 +269,15 @@ abstract class Solar_Controller_Page extends Solar_Base {
     
     /**
      * 
+     * The rewrite rules object.
+     * 
+     * @var Solar_Uri_Rewrite
+     * 
+     */
+    protected $_rewrite;
+    
+    /**
+     * 
      * The class used for view objects.
      * 
      * @var string
@@ -382,6 +388,9 @@ abstract class Solar_Controller_Page extends Solar_Base {
         // get the current request environment
         $this->_request = Solar_Registry::get('request');
         
+        // get the registered rewrite object
+        $this->_rewrite = Solar_Registry::get('rewrite');
+        
         // extended setup
         $this->_setup();
     }
@@ -399,10 +408,10 @@ abstract class Solar_Controller_Page extends Solar_Base {
      */
     public function __set($key, $val)
     {
-        throw $this->_exception(
-            'ERR_PROPERTY_NOT_DEFINED',
-            array('property' => "\$$key")
-        );
+        throw $this->_exception('ERR_NO_SUCH_PROPERTY', array(
+            'class' => get_class($this),
+            'property' => $key,
+        ));
     }
     
     /**
@@ -416,10 +425,10 @@ abstract class Solar_Controller_Page extends Solar_Base {
      */
     public function __get($key)
     {
-        throw $this->_exception(
-            'ERR_PROPERTY_NOT_DEFINED',
-            array('property' => "\$$key")
-        );
+        throw $this->_exception('ERR_NO_SUCH_PROPERTY', array(
+            'class' => get_class($this),
+            'property' => $key,
+        ));
     }
     
     /**
@@ -476,17 +485,20 @@ abstract class Solar_Controller_Page extends Solar_Base {
             // prerun hook
             $this->_preRun();
             
-            // action chain, with pre- and post-action hooks
-            $this->_forward($this->_action, $this->_info);
+            // is this a csrf attempt?
+            if ($this->_request->isCsrf()) {
+                // looks like a forgery
+                $this->_csrfAttempt();
+            } else {
+                // action chain, with pre- and post-action hooks
+                $this->_forward($this->_action, $this->_info);
+            }
             
             // postrun hook
             $this->_postRun();
             
             // render the view and layout, with pre- and post-render hooks
             $this->_render();
-            
-            // set the Content-Type based on the format
-            $this->_setContentType();
             
             // done, return the response headers, cookies, and body
             return $this->_response;
@@ -538,6 +550,7 @@ abstract class Solar_Controller_Page extends Solar_Base {
     {
         // if no view and no layout, there's nothing to render
         if (! $this->_view && ! $this->_layout) {
+            $this->_setContentType();
             return;
         }
         
@@ -553,6 +566,8 @@ abstract class Solar_Controller_Page extends Solar_Base {
             $this->_setLayoutTemplates();
             $this->_renderLayout();
         }
+        
+        $this->_setContentType();
         
         $this->_postRender();
     }
@@ -570,6 +585,29 @@ abstract class Solar_Controller_Page extends Solar_Base {
         $this->_view_object = Solar::factory($this->_view_class);
         $this->_addViewTemplates();
         $this->_addViewHelpers();
+        $this->_fixViewObject();
+    }
+    
+    /**
+     * 
+     * Sets the locale class for the getText helper, and adds special
+     * convenience variables, in $this->_view_object for rendering.
+     * 
+     * @return void
+     * 
+     */
+    protected function _fixViewObject()
+    {
+        // set the locale class for the getText helper
+        $class = get_class($this);
+        $this->_view_object->getHelper('getTextRaw')->setClass($class);
+        
+        // inject special vars into the view
+        $this->_view_object->controller_class = get_class($this);
+        $this->_view_object->controller       = $this->_controller;
+        $this->_view_object->action           = $this->_action;
+        $this->_view_object->layout           = $this->_layout;
+        $this->_view_object->errors           = $this->_errors;
     }
     
     /**
@@ -625,13 +663,18 @@ abstract class Solar_Controller_Page extends Solar_Base {
     
     /**
      * 
-     * Sets a Content-Type header in the response based on $this->_format.
+     * Sets a Content-Type header in the response based on $this->_format,
+     * but only if the response does not already have a Content-Type set.
      * 
      * @return void
      * 
      */
     protected function _setContentType()
     {
+        if ($this->_response->getHeader('Content-Type')) {
+            return;
+        }
+        
         // get the current format (the _fixFormat() method will have set the
         // default already, if needed)
         $format = $this->_format;
@@ -659,13 +702,9 @@ abstract class Solar_Controller_Page extends Solar_Base {
      * Automatically sets up a helper-class stack for you, searching
      * for helper classes in this order ...
      * 
-     * 1. Vendor_App_Example_Helper_
+     * 1. Vendor_View_Helper_
      * 
-     * 2. Vendor_App_Base_Helper_
-     * 
-     * 3. Vendor_View_Helper_
-     * 
-     * 4. Solar_View_Helper_
+     * 2. Solar_View_Helper_
      * 
      * @return void
      * 
@@ -694,11 +733,13 @@ abstract class Solar_Controller_Page extends Solar_Base {
      * Adds template paths to $this->_view_object.
      * 
      * The search-path will be in this order, for a Vendor_App_Example class
-     * extended from Vender_App_Base ...
+     * extended from Vender_Controller_Page ...
      * 
      * 1. Vendor/App/Example/View/
      * 
-     * 2. Vendor/App/Base/View/
+     * 2. Vendor/Controller/Page/View/
+     * 
+     * 3. Solar/Controller/Page/View/
      * 
      * @return void
      * 
@@ -730,13 +771,13 @@ abstract class Solar_Controller_Page extends Solar_Base {
      * the layout with zero effort.
      * 
      * Automatically sets up a template-path stack for you, searching
-     * for layout files in this order ...
+     * for layout files (e.g.) in this order ...
      * 
      * 1. Vendor/App/Example/Layout/
      * 
-     * 2. Vendor/App/Layout/
+     * 2. Vendor/Controller/Page/Layout/
      * 
-     * 3. Solar/App/Layout/
+     * 3. Solar/Controller/Page/Layout/
      * 
      * @return void
      * 
@@ -1089,6 +1130,9 @@ abstract class Solar_Controller_Page extends Solar_Base {
         // set the current action on entry
         $this->_action = $action;
         
+        // make sure params is an array
+        settype($params, 'array');
+        
         // run this before every action, may change the requested action.
         $this->_preAction();
         
@@ -1261,7 +1305,6 @@ abstract class Solar_Controller_Page extends Solar_Base {
         return $view;
     }
     
-    
     // -----------------------------------------------------------------
     //
     // Behavior hooks.
@@ -1338,22 +1381,13 @@ abstract class Solar_Controller_Page extends Solar_Base {
      */
     protected function _preRender()
     {
-        // set the locale class for the getText helper
-        $class = get_class($this);
-        $this->_view_object->getHelper('getTextRaw')->setClass($class);
-        
-        // inject special vars into the view
-        $this->_view_object->controller = $this->_controller;
-        $this->_view_object->action     = $this->_action;
-        $this->_view_object->layout     = $this->_layout;
-        $this->_view_object->errors     = $this->_errors;
     }
     
     /**
      * 
      * Executes after rendering the controller view and layout.
      * 
-     * Use this to do a final filter or maniuplation of $this->_response
+     * Use this to do a final filter or manipulation of $this->_response
      * from the view and layout scripts.  By default, it leaves the
      * response alone.
      * 
@@ -1379,6 +1413,25 @@ abstract class Solar_Controller_Page extends Solar_Base {
     {
         $this->_errors[] = $this->locale($key, 1, $replace);
         $this->_response->setStatusCode(500);
+        return $this->_forward('error');
+    }
+    
+    /**
+     * 
+     * Indicates this is a cross-site request forgery attempt.
+     * 
+     * @return void
+     * 
+     */
+    protected function _csrfAttempt()
+    {
+        $this->_errors[] = 'ERR_CSRF_ATTEMPT';
+        $vars = $this->_request->post();
+        foreach ((array) $vars as $key => $val) {
+            $this->_errors[] = "$key: $val";
+        }
+        
+        $this->_response->setStatusCode(403);
         return $this->_forward('error');
     }
     

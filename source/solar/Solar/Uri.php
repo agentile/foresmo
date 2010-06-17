@@ -9,8 +9,8 @@
  * them as a single URI string. This helps when building complex links,
  * such as in a paged navigation system.
  * 
- * > Note: For controller action URIs, use [[Class::Solar_Uri_Action | ]].
- * > Likewise, for public resource URIs, use [[Class::Solar_Uri_Public | ]].
+ * > Note: For controller action URIs, use [[Solar_Uri_Action]].
+ * > Likewise, for public resource URIs, use [[Solar_Uri_Public]].
  * 
  * The following is a simple example. Say that the page address is currently
  * `http://anonymous::guest@example.com/path/to/index.php/foo/bar?baz=dib#anchor`.
@@ -110,13 +110,14 @@
  * 
  * @category Solar
  * 
- * @package Solar_Uri
+ * @package Solar_Uri Representation and manipulation of URIs (generic, 
+ * action, and public).
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Uri.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Uri.php 4590 2010-06-11 13:39:03Z pmjones $
  * 
  */
 class Solar_Uri extends Solar_Base
@@ -331,6 +332,18 @@ class Solar_Uri extends Solar_Base
         // set properties
         $this->set($this->_config['uri']);
     }
+
+    /** 
+     * 
+     * Converts the URI object to a string and returns it. 
+     * 
+     * @return string The full URI this object represents.
+     *  
+     */ 
+    public function __toString() 
+    { 
+        return $this->get(true); 
+    }
     
     /**
      * 
@@ -383,8 +396,7 @@ class Solar_Uri extends Solar_Base
     public function set($uri = null)
     {
         // build a default scheme (with '://' in it)
-        $ssl = $this->_request->server('HTTPS', 'off');
-        $scheme = (($ssl == 'on') ? 'https' : 'http') . '://';
+        $scheme = $this->_request->isSsl() ? 'https://' : 'http://';
         
         // get the current host, using a dummy host name if needed.
         // we need a host name so that parse_url() works properly.
@@ -530,10 +542,7 @@ class Solar_Uri extends Solar_Base
         
         // add the rest of the URI. we use trim() instead of empty() on string
         // elements to allow for string-zero values.
-        return $uri
-             . $this->_config['path']
-             . (empty($this->path)           ? '' : $this->_pathEncode($this->path))
-             . (trim($this->format) === ''   ? '' : '.' . urlencode($this->format))
+        return $uri . $this->getPath()
              . (empty($query)                ? '' : '?' . $query)
              . (trim($this->fragment) === '' ? '' : '#' . urlencode($this->fragment));
     }
@@ -582,9 +591,9 @@ class Solar_Uri extends Solar_Base
     
     /**
      * 
-     * Returns the query portion as a string.  When [[$_query]] is non-null,
-     * uses [[php::http_build_query() | ]] on it; otherwise, returns the
-     * [[$_query_str]] property.
+     * Returns the query portion as a string.  When [[Solar_Uri::$_query | ]]
+     * is non-null, uses [[php::http_build_query() | ]] on it; otherwise, 
+     * returns the [[Solar_Uri::$_query_str]] property.
      * 
      * @return string The query string; e.g., `foo=bar&baz=dib`.
      * 
@@ -628,6 +637,22 @@ class Solar_Uri extends Solar_Base
         }
         
         $this->_setFormatFromPath();
+    }
+    
+    /**
+     * 
+     * Returns the path array as a string, including the format.
+     * 
+     * @return string The path string.
+     * 
+     */
+    public function getPath()
+    {
+        // we use trim() instead of empty() on string elements
+        // to allow for string-zero values.
+        return $this->_config['path']
+             . (empty($this->path)         ? '' : $this->_pathEncode($this->path))
+             . (trim($this->format) === '' ? '' : '.' . urlencode($this->format));
     }
     
     /**

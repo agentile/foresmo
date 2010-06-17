@@ -13,7 +13,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Record.php 4087 2009-09-23 16:48:23Z pmjones $
+ * @version $Id: Record.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
 class Solar_Sql_Model_Record extends Solar_Struct
@@ -519,7 +519,9 @@ class Solar_Sql_Model_Record extends Solar_Struct
     public function save($data = null)
     {
         if ($this->isDeleted()) {
-            throw $this->_exception('ERR_DELETED');
+            throw $this->_exception('ERR_DELETED', array(
+                'class' => get_class($this),
+            ));
         }
         
         $this->_save_exception = null;
@@ -999,11 +1001,15 @@ class Solar_Sql_Model_Record extends Solar_Struct
     public function delete()
     {
         if ($this->isNew()) {
-            throw $this->_exception('ERR_CANNOT_DELETE_NEW_RECORD');
+            throw $this->_exception('ERR_CANNOT_DELETE_NEW_RECORD', array(
+                'class' => get_class($this),
+            ));
         }
         
         if ($this->isDeleted()) {
-            throw $this->_exception('ERR_DELETED');
+            throw $this->_exception('ERR_DELETED', array(
+                'class' => get_class($this),
+            ));
         }
         
         $this->_preDelete();
@@ -1054,16 +1060,22 @@ class Solar_Sql_Model_Record extends Solar_Struct
     public function refresh()
     {
         if ($this->isNew()) {
-            throw $this->_exception('ERR_CANNOT_REFRESH_NEW_RECORD');
+            throw $this->_exception('ERR_CANNOT_REFRESH_NEW_RECORD', array(
+                'class' => get_class($this),
+            ));
         }
 
         if ($this->isDeleted()) {
-            throw $this->_exception('ERR_DELETED');
+            throw $this->_exception('ERR_DELETED', array(
+                'class' => get_class($this),
+            ));
         }
         
         $id = $this->getPrimaryVal();
         if (! $id) {
-            throw $this->_exception('ERR_CANNOT_REFRESH_BLANK_ID');
+            throw $this->_exception('ERR_CANNOT_REFRESH_BLANK_ID', array(
+                'class' => get_class($this),
+            ));
         }
         
         $result = $this->_model->fetch($id);
@@ -1112,16 +1124,21 @@ class Solar_Sql_Model_Record extends Solar_Struct
     public function increment($col, $amt = 1)
     {
         if ($this->isNew()) {
-            throw $this->_exception('ERR_CANNOT_INCREMENT_NEW_RECORD');
+            throw $this->_exception('ERR_CANNOT_INCREMENT_NEW_RECORD', array(
+                'class' => get_class($this),
+            ));
         }
 
         if ($this->isDeleted()) {
-            throw $this->_exception('ERR_DELETED');
+            throw $this->_exception('ERR_DELETED', array(
+                'class' => get_class($this),
+            ));
         }
         
         // make sure the column exists
         if (! array_key_exists($col, $this->_model->table_cols)) {
             throw $this->_exception('ERR_NO_SUCH_COLUMN', array(
+                'class' => get_class($this),
                 'name' => $col,
             ));
         }
@@ -1635,16 +1652,8 @@ class Solar_Sql_Model_Record extends Solar_Struct
      */
     public function newForm($cols = null)
     {
-        // use all columns?
-        if (empty($cols)) {
-            $cols = array_merge(
-                $this->_model->fetch_cols,
-                array_keys($this->_model->calculate_cols)
-            );
-        }
-        
         // put into this array in the form
-        $array_name = $this->_model->model_name;
+        $array_name = $this->_model->array_name;
         
         // build the form
         $form = Solar::factory('Solar_Form');
@@ -1714,7 +1723,9 @@ class Solar_Sql_Model_Record extends Solar_Struct
     public function init(Solar_Sql_Model $model, $spec)
     {
         if ($this->_model) {
-            throw $this->_exception('ERR_CANNOT_RE_INIT');
+            throw $this->_exception('ERR_CANNOT_REINIT', array(
+                'class' => get_class($this),
+            ));
         }
         
         // inject the model
@@ -1839,13 +1850,13 @@ class Solar_Sql_Model_Record extends Solar_Struct
     
     /**
      * 
-     * Create a new record related to this one.
+     * Create a new record/collection related to this one and returns it.
      * 
      * @param string $name The relation name.
      * 
-     * @param array $data Initial data
+     * @param array $data Initial data.
      * 
-     * @return Solar_Sql_Model_Record
+     * @return Solar_Sql_Model_Record|Solar_Sql_Model_Collection
      * 
      */
     public function newRelated($name, $data = null)
@@ -1853,5 +1864,53 @@ class Solar_Sql_Model_Record extends Solar_Struct
         $related = $this->_model->getRelated($name);
         $new = $related->fetchNew($data);
         return $new;
+    }
+    
+    /**
+     * 
+     * Sets the related to be a new record/collection, but only if the
+     * related is empty.
+     * 
+     * @param string $name The relation name.
+     * 
+     * @param array $data Initial data.
+     * 
+     * @return Solar_Sql_Model_Record|Solar_Sql_Model_Collection
+     * 
+     */
+    public function setNewRelated($name, $data = null)
+    {
+        if ($this->$name) {
+            throw $this->_exception('ERR_RELATED_ALREADY_SET', array(
+                'class' => get_class($this),
+                'name'  => $name,
+            ));
+        }
+        $this->$name = $this->newRelated($name, $data);
+        return $this->$name;
+    }
+    
+    /**
+     * 
+     * Convenience method for getting a dump of the record, or one of its
+     * properties, or an external variable.
+     * 
+     * @param mixed $var If null, dump $this; if a string, dump $this->$var;
+     * otherwise, dump $var.
+     * 
+     * @param string $label Label the dump output with this string.
+     * 
+     * @return void
+     * 
+     */
+    public function dump($var = null, $label = null)
+    {
+        if ($var) {
+            return parent::dump($var, $label);
+        }
+        
+        $clone = clone($this);
+        unset($clone->_model);
+        parent::dump($clone, $label);
     }
 }

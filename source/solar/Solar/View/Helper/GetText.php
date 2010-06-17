@@ -5,13 +5,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_View
+ * @package Solar_View_Helper
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: GetText.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: GetText.php 4285 2009-12-31 02:18:15Z pmjones $
  * 
  */
 class Solar_View_Helper_GetText extends Solar_View_Helper

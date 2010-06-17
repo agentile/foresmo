@@ -1,7 +1,7 @@
 <?php
 /**
  * 
- * Staic support methods for config information.
+ * Static support methods for config information.
  * 
  * @category Solar
  * 
@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Config.php 3898 2009-07-22 15:33:45Z pmjones $
+ * @version $Id: Config.php 4498 2010-03-05 17:28:00Z pmjones $
  * 
  */
 class Solar_Config

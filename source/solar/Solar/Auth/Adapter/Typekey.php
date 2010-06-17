@@ -28,7 +28,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Typekey.php 3989 2009-09-07 19:51:04Z pmjones $
+ * @version $Id: Typekey.php 4405 2010-02-18 04:27:25Z pmjones $
  * 
  */
 class Solar_Auth_Adapter_Typekey extends Solar_Auth_Adapter
@@ -130,10 +130,9 @@ class Solar_Auth_Adapter_Typekey extends Solar_Auth_Adapter
         } elseif (extension_loaded('bcmath')) {
             $this->_ext = 'bc';
         } else {
-            throw $this->_exception(
-                'ERR_EXTENSION_NOT_LOADED',
-                array('extension' => '(bcmath || gmp)')
-            );
+            throw $this->_exception('ERR_EXTENSION_NOT_LOADED', array(
+                'extension' => '(bcmath || gmp)'
+            ));
         }
     }
     

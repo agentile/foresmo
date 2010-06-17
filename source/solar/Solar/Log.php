@@ -20,13 +20,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_Log
+ * @package Solar_Log Logging mechanisms.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Log.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Log.php 4380 2010-02-14 16:06:52Z pmjones $
  * 
  */
 class Solar_Log extends Solar_Factory

@@ -21,7 +21,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Stream.php 3336 2008-08-08 16:33:20Z pmjones $
+ * @version $Id: Stream.php 4488 2010-03-02 15:16:57Z pmjones $
  * 
  */
 class Solar_Http_Request_Adapter_Stream extends Solar_Http_Request_Adapter
@@ -57,10 +57,8 @@ class Solar_Http_Request_Adapter_Stream extends Solar_Http_Request_Adapter
                 return array($http_response_header, null);
             } else {
                 // no server response, must be some other error
-                throw $this->_exception(
-                    'ERR_CONNECTION_FAILED',
-                    error_get_last()
-                );
+                $info = error_get_last();
+                throw $this->_exception('ERR_CONNECTION_FAILED', $info);
             }
         }
         
@@ -78,8 +76,20 @@ class Solar_Http_Request_Adapter_Stream extends Solar_Http_Request_Adapter
             ));
         }
         
-        // return headers and content
-        return array($meta['wrapper_data'], $content);
+        // if php was compiled with --with-curlwrappers, then the field
+        // 'wrapper_data' contains two arrays, one with headers and another
+        // with readbuf.  cf. <http://darkain.livejournal.com/492112.html>
+        $with_curlwrappers = isset($meta['wrapper_type'])
+                          && strtolower($meta['wrapper_type']) == 'curl';
+                         
+        // return headers and content.
+        if ($with_curlwrappers) {
+            // compiled --with-curlwrappers
+            return array($meta['wrapper_data']['headers'], $content);
+        } else {
+            // the "normal" case
+            return array($meta['wrapper_data'], $content);
+        }
     }
     
     /**
@@ -106,7 +116,7 @@ class Solar_Http_Request_Adapter_Stream extends Solar_Http_Request_Adapter
         $http = array();
         
         // method
-        if ($this->_method != 'GET') {
+        if ($this->_method != Solar_Http_Request::METHOD_GET) {
             $http['method'] = $this->_method;
         }
         

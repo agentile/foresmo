@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Mail.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Mail.php 4405 2010-02-18 04:27:25Z pmjones $
  * 
  */
 class Solar_Auth_Adapter_Mail extends Solar_Auth_Adapter
@@ -41,10 +41,9 @@ class Solar_Auth_Adapter_Mail extends Solar_Auth_Adapter
     {
         parent::_preConfig();
         if (! extension_loaded('imap')) {
-            throw $this->_exception(
-                'ERR_EXTENSION_NOT_LOADED',
-                array('extension' => 'imap')
-            );
+            throw $this->_exception('ERR_EXTENSION_NOT_LOADED', array(
+                'extension' => 'imap',
+            ));
         }
     }
     

@@ -15,7 +15,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Request.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Request.php 4589 2010-06-11 13:33:01Z pmjones $
  * 
  */
 class Solar_Request extends Solar_Base
@@ -106,6 +106,15 @@ class Solar_Request extends Solar_Base
     
     /**
      * 
+     * Cross-site request forgery detector.
+     * 
+     * @var Solar_Csrf
+     * 
+     */
+    protected $_csrf;
+    
+    /**
+     * 
      * Post-construction tasks to complete object construction.
      * 
      * @return void
@@ -119,7 +128,7 @@ class Solar_Request extends Solar_Base
     
     /**
      * 
-     * Retrieves an **unfiltered** value by key from the [[$get]] property,
+     * Retrieves an **unfiltered** value by key from the [[Solar_Request::$get | ]] property,
      * or an alternate default value if that key does not exist.
      * 
      * @param string $key The $get key to retrieve the value of.
@@ -137,7 +146,7 @@ class Solar_Request extends Solar_Base
     
     /**
      * 
-     * Retrieves an **unfiltered** value by key from the [[$post]] property,
+     * Retrieves an **unfiltered** value by key from the [[Solar_Request::$post | ]] property,
      * or an alternate default value if that key does not exist.
      * 
      * @param string $key The $post key to retrieve the value of.
@@ -155,7 +164,7 @@ class Solar_Request extends Solar_Base
     
     /**
      * 
-     * Retrieves an **unfiltered** value by key from the [[$cookie]] property,
+     * Retrieves an **unfiltered** value by key from the [[Solar_Request::$cookie | ]] property,
      * or an alternate default value if that key does not exist.
      * 
      * @param string $key The $cookie key to retrieve the value of.
@@ -173,7 +182,7 @@ class Solar_Request extends Solar_Base
     
     /**
      * 
-     * Retrieves an **unfiltered** value by key from the [[$env]] property,
+     * Retrieves an **unfiltered** value by key from the [[Solar_Request::$env | ]] property,
      * or an alternate default value if that key does not exist.
      * 
      * @param string $key The $env key to retrieve the value of.
@@ -191,7 +200,7 @@ class Solar_Request extends Solar_Base
     
     /**
      * 
-     * Retrieves an **unfiltered** value by key from the [[$server]] property,
+     * Retrieves an **unfiltered** value by key from the [[Solar_Request::$server | ]] property,
      * or an alternate default value if that key does not exist.
      * 
      * @param string $key The $server key to retrieve the value of.
@@ -209,7 +218,7 @@ class Solar_Request extends Solar_Base
     
     /**
      * 
-     * Retrieves an **unfiltered** value by key from the [[$files]] property,
+     * Retrieves an **unfiltered** value by key from the [[Solar_Request::$files | ]] property,
      * or an alternate default value if that key does not exist.
      * 
      * @param string $key The $files key to retrieve the value of.
@@ -227,7 +236,7 @@ class Solar_Request extends Solar_Base
     
     /**
      * 
-     * Retrieves an **unfiltered** value by key from the [[$argv]] property,
+     * Retrieves an **unfiltered** value by key from the [[Solar_Request::$argv | ]] property,
      * or an alternate default value if that key does not exist.
      * 
      * @param string $key The $argv key to retrieve the value of.
@@ -245,7 +254,7 @@ class Solar_Request extends Solar_Base
     
     /**
      * 
-     * Retrieves an **unfiltered** value by key from the [[$http]] property,
+     * Retrieves an **unfiltered** value by key from the [[Solar_Request::$http | ]] property,
      * or an alternate default value if that key does not exist.
      * 
      * @param string $key The $http key to retrieve the value of.
@@ -266,8 +275,8 @@ class Solar_Request extends Solar_Base
     
     /**
      * 
-     * Retrieves an **unfiltered** value by key from the [[$post]] *and* 
-     * [[$files]] properties, or an alternate default value if that key does 
+     * Retrieves an **unfiltered** value by key from the [[Solar_Request::$post | ]] *and* 
+     * [[Solar_Request::$files | ]] properties, or an alternate default value if that key does 
      * not exist in either location.  Files takes precedence over post.
      * 
      * @param string $key The $post and $files key to retrieve the value of.
@@ -321,7 +330,22 @@ class Solar_Request extends Solar_Base
         }
         
         // now what?
-        throw $this->_exception('ERR_UNUSUAL');
+        throw $this->_exception('ERR_POST_AND_FILES', array(
+            'key' => $key,
+        ));
+    }
+    
+    /**
+     * 
+     * Is this a secure SSL request?
+     * 
+     * @return bool
+     * 
+     */
+    public function isSsl()
+    {
+        return $this->server('HTTPS') == 'on'
+            || $this->server('SERVER_PORT') == 443;
     }
     
     /**
@@ -334,6 +358,22 @@ class Solar_Request extends Solar_Base
     public function isCli()
     {
         return PHP_SAPI == 'cli';
+    }
+    
+    /**
+     * 
+     * Is the current request a cross-site forgery?
+     * 
+     * @return bool
+     * 
+     */
+    public function isCsrf()
+    {
+        if (! $this->_csrf) {
+            $this->_csrf = Solar::factory('Solar_Csrf');
+        }
+        
+        return $this->_csrf->isForgery();
     }
     
     /**
@@ -421,8 +461,9 @@ class Solar_Request extends Solar_Base
      * Is this an XmlHttpRequest?
      * 
      * Checks if the `X-Requested-With` HTTP header is `XMLHttpRequest`.
-     * Generally used in addition to the [[isPost()]], [[isGet()]], etc. 
-     * methods to identify Ajax-style HTTP requests.
+     * Generally used in addition to the [[Solar_Request::isPost() | ]],
+     * [[Solar_Request::isGet() | ]], etc. methods to identify Ajax-style 
+     * HTTP requests.
      * 
      * @return bool
      * 
@@ -478,7 +519,7 @@ class Solar_Request extends Solar_Base
         foreach ($this->server as $key => $val) {
             
             // only retain HTTP headers
-            if (substr($key, 0, 4) == 'HTTP') {
+            if (substr($key, 0, 5) == 'HTTP_') {
                 
                 // normalize the header key to lower-case
                 $nicekey = strtolower(

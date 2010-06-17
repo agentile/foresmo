@@ -5,7 +5,7 @@
  * 
  * The file format is ...
  * 
- *     0:flag 1:type 2:name 3:class 4:action 5:process
+ *     0:flag 1:type 2:name 3:class 4:action
  * 
  * For example ...
  * 
@@ -22,7 +22,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: File.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: File.php 4405 2010-02-18 04:27:25Z pmjones $
  * 
  */
 class Solar_Access_Adapter_File extends Solar_Access_Adapter
@@ -58,13 +58,10 @@ class Solar_Access_Adapter_File extends Solar_Access_Adapter
         
         // does the file exist?
         if (! Solar_File::exists($file)) {
-            throw $this->_exception(
-                'ERR_FILE_NOT_READABLE',
-                array(
-                    'file' => $this->_config['file'],
-                    'realpath' => $file,
-                )
-            );
+            throw $this->_exception('ERR_FILE_NOT_READABLE', array(
+                'file' => $this->_config['file'],
+                'realpath' => $file,
+            ));
         }
         
         $handle = trim($handle);
@@ -102,6 +99,7 @@ class Solar_Access_Adapter_File extends Solar_Access_Adapter
             if ($info[1] == 'handle' && $info[2] == $handle ||        // direct user handle match
                 $info[1] == 'handle' && $info[2] == '+' && $handle || // any authenticated user
                 $info[1] == 'handle' && $info[2] == '*' ||            // any user (incl anon)
+                $info[1] == 'handle' && $info[2] == '?' && ! $handle || // only anon user
                 $info[1] == 'role'   && in_array($info[2], $roles) || // direct role match
                 $info[1] == 'role'   && $info[2] == '*' ||            // any role (incl anon)
                 $info[1] == 'owner' ) {                               // content owner
@@ -116,21 +114,7 @@ class Solar_Access_Adapter_File extends Solar_Access_Adapter
                 );
             }
         }
+        
         return $list;
-    }
-    
-    /**
-     * 
-     * Checks to see if the current user is the owner of application-specific
-     * content; always returns true, to allow for programmatic owner checks.
-     * 
-     * @param mixed $content The content to check ownership of.
-     * 
-     * @return bool
-     * 
-     */
-    public function isOwner($content)
-    {
-        return true;
     }
 }

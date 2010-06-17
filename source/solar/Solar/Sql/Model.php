@@ -7,7 +7,8 @@
  * 
  * @category Solar
  * 
- * @package Solar_Sql_Model
+ * @package Solar_Sql_Model An SQL-oriented ORM system using TableDataGateway 
+ * and DataMapper patterns.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
@@ -15,7 +16,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Model.php 4031 2009-09-17 13:06:30Z pmjones $
+ * @version $Id: Model.php 4489 2010-03-02 15:34:14Z pmjones $
  * 
  */
 abstract class Solar_Sql_Model extends Solar_Base
@@ -91,8 +92,8 @@ abstract class Solar_Sql_Model extends Solar_Base
     
     /**
      * 
-     * When data values for this model are part of an array, use this name
-     * as the array key for those values.
+     * The model name is the short form of the class name; this is generally
+     * a plural.
      * 
      * When inheritance is enabled, the default is the $_inherit_name value,
      * otherwise, the default is the $_table_name.
@@ -101,6 +102,17 @@ abstract class Solar_Sql_Model extends Solar_Base
      * 
      */
     protected $_model_name;
+    
+    /**
+     * 
+     * When a record from this model is part of an form element array, use
+     * this name as the array key for it; by default, this is the singular
+     * of the model name.
+     * 
+     * @var string
+     * 
+     */
+    protected $_array_name;
     
     // -----------------------------------------------------------------
     //
@@ -263,14 +275,14 @@ abstract class Solar_Sql_Model extends Solar_Base
      * 
      *     // index on a single column:
      *     // CREATE INDEX idx_name ON table_name (col_name)
-     *     $this->_index['idx_name'] = array(
+     *     $this->_index_info['idx_name'] = array(
      *         'type' => $type,
      *         'cols' => 'col_name'
      *     );
      * 
      *     // index on multiple columns:
      *     // CREATE INDEX idx_name ON table_name (col_1, col_2, ... col_N)
-     *     $this->_index['idx_name'] = array(
+     *     $this->_index_info['idx_name'] = array(
      *         'type' => $type,
      *         'cols' => array('col_1', 'col_2', ..., 'col_N')
      *     );
@@ -278,7 +290,7 @@ abstract class Solar_Sql_Model extends Solar_Base
      *     // easy shorthand for an index on a single column,
      *     // giving the index the same name as the column:
      *     // CREATE INDEX col_name ON table_name (col_name)
-     *     $this->_index['col_name'] = $type;
+     *     $this->_index_info['col_name'] = $type;
      * }}
      * 
      * The $type may be 'normal' or 'unique'.
@@ -286,7 +298,7 @@ abstract class Solar_Sql_Model extends Solar_Base
      * @var array
      * 
      */
-    protected $_index = array();
+    protected $_index_info = array();
     
     // -----------------------------------------------------------------
     //
@@ -522,7 +534,7 @@ abstract class Solar_Sql_Model extends Solar_Base
     
     /**
      * 
-     * The default order when fetching rows.
+     * By default, order by this column when fetching rows.
      * 
      * @var array
      * 
@@ -531,7 +543,7 @@ abstract class Solar_Sql_Model extends Solar_Base
     
     /**
      * 
-     * The number of rows per page when selecting.
+     * The default number of rows per page when selecting.
      * 
      * @var int
      * 
@@ -624,10 +636,9 @@ abstract class Solar_Sql_Model extends Solar_Base
         if (property_exists($this, $var)) {
             return $this->$var;
         } else {
-            throw $this->_exception('ERR_PROPERTY_NOT_DEFINED', array(
+            throw $this->_exception('ERR_NO_SUCH_PROPERTY', array(
                 'class' => get_class($this),
-                'key' => $key,
-                'var' => $var,
+                'property' => $key,
             ));
         }
     }
@@ -1222,8 +1233,11 @@ abstract class Solar_Sql_Model extends Solar_Base
             }
         }
         
+        // clone the fetch for only the "keep" joins
+        $clone = $fetch->cloneForKeeps();
+        
         // get the base select
-        $select = $this->newSelect($fetch);
+        $select = $this->newSelect($clone);
         
         // count on the primary column
         $col = "{$this->_model_name}.{$this->_primary_col}";
@@ -1296,7 +1310,7 @@ abstract class Solar_Sql_Model extends Solar_Base
      * @return array The modified WHERE array.
      *
      */   
-    public function getWhereMods($alias = null)
+    public function getConditions($alias = null)
     {
         // default to the model name for the alias
         if (! $alias) {
@@ -1342,7 +1356,7 @@ abstract class Solar_Sql_Model extends Solar_Base
         }
         
         $use_default_order = ! $fetch['order'] && $fetch['order'] !== false;
-        if ($use_default_order) {
+        if ($use_default_order && $this->_order) {
             $fetch->order("{$fetch['alias']}.{$this->_order}");
         };
         
@@ -1360,7 +1374,7 @@ abstract class Solar_Sql_Model extends Solar_Base
             $fetch['cols']
         );
         
-        $select->multiWhere($this->getWhereMods($fetch['alias']));
+        $select->multiWhere($this->getConditions($fetch['alias']));
         
         // all the other pieces
         $select->distinct($fetch['distinct'])
@@ -1528,7 +1542,9 @@ abstract class Solar_Sql_Model extends Solar_Base
     public function insert($data)
     {
         if (! is_array($data)) {
-            throw $this->_exception('ERR_DATA_NOT_ARRAY');
+            throw $this->_exception('ERR_DATA_NOT_ARRAY', array(
+                'method' => 'insert',
+            ));
         }
         
         // reset affected rows
@@ -1594,7 +1610,9 @@ abstract class Solar_Sql_Model extends Solar_Base
     public function update($data, $where)
     {
         if (! is_array($data)) {
-            throw $this->_exception('ERR_DATA_NOT_ARRAY');
+            throw $this->_exception('ERR_DATA_NOT_ARRAY', array(
+                'method' => 'update',
+            ));
         }
         
         // reset affected rows
@@ -1833,6 +1851,27 @@ abstract class Solar_Sql_Model extends Solar_Base
     
     /**
      * 
+     * Adds a named has-one-or-none relationship.
+     * 
+     * @param string $name The relationship name, which will double as a
+     * property when records are fetched from the model.
+     * 
+     * @param array $opts Additional options for the relationship.
+     * 
+     * @return void
+     * 
+     */
+    protected function _hasOneOrNull($name, $opts = null)
+    {
+        settype($opts, 'array');
+        if (empty($opts['class'])) {
+            $opts['class'] = 'Solar_Sql_Model_Related_HasOneOrNull';
+        }
+        $this->_addRelated($name, $opts);
+    }
+    
+    /**
+     * 
      * Adds a named belongs-to relationship.
      * 
      * @param string $name The relationship name, which will double as a
@@ -1930,24 +1969,18 @@ abstract class Solar_Sql_Model extends Solar_Base
     {
         // is the related name already a column name?
         if (array_key_exists($name, $this->_table_cols)) {
-            throw $this->_exception(
-                'ERR_RELATED_NAME_CONFLICT',
-                array(
-                    'name'  => $name,
-                    'class' => $this->_class,
-                )
-            );
+            throw $this->_exception('ERR_RELATED_CONFLICT', array(
+                'name'  => $name,
+                'class' => $this->_class,
+            ));
         }
         
         // is the related name already in use?
         if (array_key_exists($name, $this->_related)) {
-            throw $this->_exception(
-                'ERR_RELATED_NAME_EXISTS',
-                array(
-                    'name'  => $name,
-                    'class' => $this->_class,
-                )
-            );
+            throw $this->_exception('ERR_RELATED_EXISTS', array(
+                'name'  => $name,
+                'class' => $this->_class,
+            ));
         }
         
         // keep it!
@@ -1967,13 +2000,10 @@ abstract class Solar_Sql_Model extends Solar_Base
     public function getRelated($name)
     {
         if (! array_key_exists($name, $this->_related)) {
-            throw $this->_exception(
-                'ERR_RELATED_NAME_NOT_EXISTS',
-                array(
-                    'name'  => $name,
-                    'class' => $this->_class,
-                )
-            );
+            throw $this->_exception('ERR_NO_SUCH_RELATED', array(
+                'name'  => $name,
+                'class' => $this->_class,
+            ));
         }
         
         if (is_array($this->_related[$name])) {
@@ -2025,10 +2055,10 @@ abstract class Solar_Sql_Model extends Solar_Base
         $this->_fixStack();
         $this->_fixTableName();
         $this->_fixModelName();
-        $this->_fixIndex();
+        $this->_fixArrayName();
+        $this->_fixIndexInfo();
         $this->_fixTableCols(); // also creates table if needed
         $this->_fixPrimaryCol();
-        $this->_fixOrder();
         $this->_fixPropertyCols();
         $this->_fixCalculateCols();
         $this->_fixFilterClass();
@@ -2139,12 +2169,12 @@ abstract class Solar_Sql_Model extends Solar_Base
     
     /**
      * 
-     * Fixes $this->_index listings.
+     * Fixes $this->_index_info listings.
      * 
      * @return void
      * 
      */
-    protected function _fixIndex()
+    protected function _fixIndexInfo()
     {
         // baseline index definition
         $baseidx = array(
@@ -2154,7 +2184,7 @@ abstract class Solar_Sql_Model extends Solar_Base
         );
         
         // fix up each index to have a full set of info
-        foreach ($this->_index as $key => $val) {
+        foreach ($this->_index_info as $key => $val) {
             
             if (is_int($key) && is_string($val)) {
                 // array('col')
@@ -2177,7 +2207,7 @@ abstract class Solar_Sql_Model extends Solar_Base
                 settype($info['cols'], 'array');
             }
             
-            $this->_index[$key] = $info;
+            $this->_index_info[$key] = $info;
         }
     }
     
@@ -2205,7 +2235,7 @@ abstract class Solar_Sql_Model extends Solar_Base
                 // get the column descriptions from the database
                 $cols = $this->_sql->fetchTableCols($this->_table_name);
                 
-            } catch (Solar_Sql_Adapter_Exception_QueryFailed $e) {
+            } catch (Solar_Sql_Adapter_Exception $e) {
                 
                 // does the table exist in the database?
                 $list = $this->_sql->fetchTableList();
@@ -2290,7 +2320,7 @@ abstract class Solar_Sql_Model extends Solar_Base
     
     /**
      * 
-     * Fixes the array-name and table-alias for user input to this model.
+     * Fixes the model-name and table-alias for user input to this model.
      * 
      * @return void
      * 
@@ -2300,8 +2330,6 @@ abstract class Solar_Sql_Model extends Solar_Base
         if (! $this->_model_name) {
             if ($this->_inherit_name) {
                 $this->_model_name = $this->_inherit_name;
-            } elseif ($this->_table_name) {
-                $this->_model_name = $this->_table_name;
             } else {
                 // get the part after the last Model_ portion
                 $pos = strpos($this->_class, 'Model_');
@@ -2321,15 +2349,17 @@ abstract class Solar_Sql_Model extends Solar_Base
     
     /**
      * 
-     * Fixes the default order when fetching records from this model.
+     * Fixes the array-name for this model.
      * 
      * @return void
      * 
      */
-    protected function _fixOrder()
+    protected function _fixArrayName()
     {
-        if (! $this->_order) {
-            $this->_order = $this->_primary_col;
+        if (! $this->_array_name) {
+            $this->_array_name = $this->_inflect->toSingular(
+                $this->_model_name
+            );
         }
     }
     
@@ -2339,9 +2369,6 @@ abstract class Solar_Sql_Model extends Solar_Base
      * $_inherit_name value based on the existence of the inheritance column.
      * 
      * @return void
-     * 
-     * @todo How to make foreign_col recognize that it's inherited, and should
-     * use the parent foreign_col value?  Can we just work up the chain?
      * 
      */
     protected function _fixPropertyCols()
@@ -2596,7 +2623,7 @@ abstract class Solar_Sql_Model extends Solar_Base
     /**
      * 
      * Creates the table and indexes in the database using $this->_table_cols
-     * and $this->_index.
+     * and $this->_index_info.
      * 
      * @return void
      * 
@@ -2614,7 +2641,7 @@ abstract class Solar_Sql_Model extends Solar_Base
         /**
          * Create the indexes.
          */
-        foreach ($this->_index as $name => $info) {
+        foreach ($this->_index_info as $name => $info) {
             try {
                 // create this index
                 $this->_sql->createIndex(

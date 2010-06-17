@@ -16,56 +16,6 @@ class Test_Solar_Struct extends Solar_Test {
     protected $_Test_Solar_Struct = array(
     );
     
-    // -----------------------------------------------------------------
-    // 
-    // Support methods.
-    // 
-    // -----------------------------------------------------------------
-    
-    /**
-     * 
-     * Constructor.
-     * 
-     * @param array $config User-defined configuration parameters.
-     * 
-     */
-    public function __construct($config = null)
-    {
-        parent::__construct($config);
-    }
-    
-    /**
-     * 
-     * Destructor; runs after all methods are complete.
-     * 
-     * @param array $config User-defined configuration parameters.
-     * 
-     */
-    public function __destruct()
-    {
-        parent::__destruct();
-    }
-    
-    /**
-     * 
-     * Setup; runs before each test method.
-     * 
-     */
-    public function setup()
-    {
-        parent::setup();
-    }
-    
-    /**
-     * 
-     * Setup; runs after each test method.
-     * 
-     */
-    public function teardown()
-    {
-        parent::teardown();
-    }
-    
     protected function _newStruct()
     {
         $struct = Solar::factory(
@@ -75,6 +25,11 @@ class Test_Solar_Struct extends Solar_Test {
                     'foo' => 'bar',
                     'baz' => 'dib',
                     'zim' => 'gir',
+                    'irk' => array(
+                        'subfoo' => 'subbar',
+                        'subbaz' => 'subdib',
+                        'subzim' => 'subgir',
+                    ),
                 ),
             )
         );
@@ -136,16 +91,16 @@ class Test_Solar_Struct extends Solar_Test {
         $struct = $this->_newStruct();
         try {
             $invalid = $struct->noSuchKey;
-            $this->fail('Should have thrown a NO_SUCH_KEY exception.');
-        } catch (Solar_Struct_Exception_NoSuchKey $e) {
+            $this->fail('Should have thrown a NO_SUCH_PROPERTY exception.');
+        } catch (Solar_Exception_NoSuchProperty $e) {
             // pass
         }
         
         $struct = $this->_newStruct();
         try {
             $invalid = $struct['no_such_key'];
-            $this->fail('Should have thrown a NO_SUCH_KEY exception.');
-        } catch (Solar_Struct_Exception_NoSuchKey $e) {
+            $this->fail('Should have thrown a NO_SUCH_PROPERTY exception.');
+        } catch (Solar_Exception_NoSuchProperty $e) {
             // pass
         }
     }
@@ -194,8 +149,8 @@ class Test_Solar_Struct extends Solar_Test {
         $this->assertFalse(isset($struct->foo));
         try {
             $invalid = $struct->foo;
-            $this->fail('Should have thrown a NO_SUCH_KEY exception.');
-        } catch (Solar_Struct_Exception_NoSuchKey $e) {
+            $this->fail('Should have thrown a NO_SUCH_PROPERTY exception.');
+        } catch (Solar_Exception_NoSuchProperty $e) {
             // pass
         }
         
@@ -204,8 +159,8 @@ class Test_Solar_Struct extends Solar_Test {
         $this->assertFalse(isset($struct['foo']));
         try {
             $invalid = $struct['foo'];
-            $this->fail('Should have thrown a NO_SUCH_KEY exception.');
-        } catch (Solar_Struct_Exception_NoSuchKey $e) {
+            $this->fail('Should have thrown a NO_SUCH_PROPERTY exception.');
+        } catch (Solar_Exception_NoSuchProperty $e) {
             // pass
         }
     }
@@ -219,33 +174,7 @@ class Test_Solar_Struct extends Solar_Test {
     {
         $struct = $this->_newStruct();
         $actual = count($struct);
-        $expect = 3;
-        $this->assertSame($actual, $expect);
-    }
-    
-    /**
-     * 
-     * Test -- Iterator: get the current value for the array pointer.
-     * 
-     */
-    public function testCurrent()
-    {
-        $struct = $this->_newStruct();
-        $actual = $struct->current();
-        $expect = 'bar';
-        $this->assertSame($actual, $expect);
-    }
-    
-    /**
-     * 
-     * Test -- Iterator: get the current key for the array pointer.
-     * 
-     */
-    public function testKey()
-    {
-        $struct = $this->_newStruct();
-        $actual = $struct->key();
-        $expect = 'foo';
+        $expect = 4;
         $this->assertSame($actual, $expect);
     }
     
@@ -261,28 +190,14 @@ class Test_Solar_Struct extends Solar_Test {
             'foo' => 'bar2',
             'baz' => 'dib2',
             'zim' => 'gir2',
+            'irk' => array(
+                'subfoo' => 'subbar2',
+                'subbaz' => 'subdib2',
+                'subzim' => 'subgir2',
+            ),
         );
         $struct->load($expect);
         $actual = $struct->toArray();
-        $this->assertSame($actual, $expect);
-    }
-    
-    /**
-     * 
-     * Test -- Iterator: move to the next position.
-     * 
-     */
-    public function testNext()
-    {
-        $struct = $this->_newStruct();
-        $struct->next();
-        
-        $actual = $struct->key();
-        $expect = 'baz';
-        $this->assertSame($actual, $expect);
-        
-        $actual = $struct->current();
-        $expect = 'dib';
         $this->assertSame($actual, $expect);
     }
     
@@ -313,8 +228,8 @@ class Test_Solar_Struct extends Solar_Test {
         
         try {
             $actual = $struct->offsetGet('noSuchKey');
-            $this->fail('Should have thrown a NO_SUCH_KEY exception.');
-        } catch (Solar_Struct_Exception_NoSuchKey $e) {
+            $this->fail('Should have thrown a NO_SUCH_PROPERTY exception.');
+        } catch (Solar_Exception_NoSuchProperty $e) {
             // pass
         }
     }
@@ -350,39 +265,6 @@ class Test_Solar_Struct extends Solar_Test {
     
     /**
      * 
-     * Test -- Iterator: move to the first position.
-     * 
-     */
-    public function testRewind()
-    {
-        $struct = $this->_newStruct();
-        
-        // next() to the end
-        $struct->next();
-        $struct->next();
-        
-        $actual = $struct->key();
-        $expect = 'zim';
-        $this->assertSame($actual, $expect);
-        
-        $actual = $struct->current();
-        $expect = 'gir';
-        $this->assertSame($actual, $expect);
-        
-        // rewind and check
-        $struct->rewind();
-        
-        $actual = $struct->key();
-        $expect = 'foo';
-        $this->assertSame($actual, $expect);
-        
-        $actual = $struct->current();
-        $expect = 'bar';
-        $this->assertSame($actual, $expect);
-    }
-    
-    /**
-     * 
      * Test -- Returns a copy of the object data as an array.
      * 
      */
@@ -394,32 +276,13 @@ class Test_Solar_Struct extends Solar_Test {
             'foo' => 'bar',
             'baz' => 'dib',
             'zim' => 'gir',
+            'irk' => array(
+                'subfoo' => 'subbar',
+                'subbaz' => 'subdib',
+                'subzim' => 'subgir',
+            ),
         );
         $this->assertSame($actual, $expect);
-    }
-    
-    /**
-     * 
-     * Test -- Iterator: is the current position valid?
-     * 
-     */
-    public function testValid()
-    {
-        // foo
-        $struct = $this->_newStruct();
-        $this->assertTrue($struct->valid());
-        
-        // bar
-        $struct->next();
-        $this->assertTrue($struct->valid());
-        
-        // baz
-        $struct->next();
-        $this->assertTrue($struct->valid());
-        
-        // done!
-        $struct->next();
-        $this->assertFalse($struct->valid());
     }
     
     public function test_iterator()
@@ -429,10 +292,24 @@ class Test_Solar_Struct extends Solar_Test {
             'foo' => 'bar',
             'baz' => 'dib',
             'zim' => 'gir',
+            'irk' => array(
+                'subfoo' => 'subbar',
+                'subbaz' => 'subdib',
+                'subzim' => 'subgir',
+            ),
         );
         foreach ($struct as $key => $val) {
             $this->assertTrue(array_key_exists($key, $expect));
             $this->assertSame($val, $expect[$key]);
         }
+    }
+    
+    public function testToString()
+    {
+        $struct = $this->_newStruct();
+        $expect = 'a:4:{s:3:"foo";s:3:"bar";s:3:"baz";s:3:"dib";s:3:"zim";s:3:"gir";s:3:"irk";a:3:{s:6:"subfoo";s:6:"subbar";s:6:"subbaz";s:6:"subdib";s:6:"subzim";s:6:"subgir";}}';
+        $actual = $struct->toString();
+        echo $actual;
+        $this->assertSame($actual, $expect);
     }
 }

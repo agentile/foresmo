@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Mysql.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Mysql.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
 class Solar_Sql_Adapter_Mysql extends Solar_Sql_Adapter
@@ -160,12 +160,19 @@ class Solar_Sql_Adapter_Mysql extends Solar_Sql_Adapter
      * 
      * Returns a list of all tables in the database.
      * 
+     * @param string $schema Fetch tbe list of tables in this database; 
+     * when empty, uses the current database.
+     * 
      * @return array All table names in the database.
      * 
      */
-    protected function _fetchTableList()
+    protected function _fetchTableList($schema)
     {
-        return $this->fetchCol('SHOW TABLES');
+        $cmd = 'SHOW TABLES';
+        if ($schema) {
+            $cmd .= ' IN ' . $this->_quoteName($schema);
+        }
+        return $this->fetchCol($cmd);
     }
     
     /**
@@ -174,12 +181,14 @@ class Solar_Sql_Adapter_Mysql extends Solar_Sql_Adapter
      * 
      * @param string $table The table name to fetch columns for.
      * 
+     * @param string $schema The database in which the table resides.
+     * 
      * @return array An array of table column information.
      * 
      */
-    protected function _fetchTableCols($table)
+    protected function _fetchTableCols($table, $schema)
     {
-        // mysql> DESCRIBE table_name;
+        // mysql> SHOW COLUMNS FROM table_name;
         // +--------------+--------------+------+-----+---------+-------+
         // | Field        | Type         | Null | Key | Default | Extra |
         // +--------------+--------------+------+-----+---------+-------+
@@ -196,15 +205,25 @@ class Solar_Sql_Adapter_Mysql extends Solar_Sql_Adapter
         // then quote it to avoid reserved-word issues
         $table = preg_replace('/[^\w]/', '', $table);
         $table = $this->quoteName($table);
+        $cmd = "SHOW COLUMNS FROM $table";
+        
+        if ($schema) {
+            $schema = preg_replace('/[^\w]/', '', $schema);
+            $schema = $this->quoteName($schema);
+            $cmd .= " IN $schema";
+        }
+        
+        // get the column descriptions
+        $cols = $this->fetchAll($cmd);
+        if (! $cols) {
+            throw $this->_exception('ERR_NO_COLS_FOUND', array(
+                'table' => $table,
+                'schema' => $schema,
+            ));
+        }
         
         // where the description will be stored
         $descr = array();
-        
-        // get the column descriptions
-        $cols = $this->fetchAll("DESCRIBE $table");
-        if (! $cols) {
-            throw $this->_exception('ERR_QUERY_FAILED');
-        }
         
         // loop through the result rows; each describes a column.
         foreach ($cols as $val) {
@@ -248,25 +267,34 @@ class Solar_Sql_Adapter_Mysql extends Solar_Sql_Adapter
      * 
      * @param string $table The table name to fetch indexes for.
      * 
+     * @param string $schema The database in which the table resides.
+     * 
      * @return array An array of table indexes.
      * 
      */
-    protected function _fetchIndexInfo($table)
+    protected function _fetchIndexInfo($table, $schema)
     {
         // strip non-word characters to try and prevent SQL injections,
         // then quote it to avoid reserved-word issues
         $table = preg_replace('/[^\w]/', '', $table);
         $table = $this->quoteName($table);
         
-        // where the index info will be stored
-        $info = array();
+        $cmd = "SHOW INDEXES FROM $table";
+        if ($schema) {
+            $schema = preg_replace('/[^\w]/', '', $schema);
+            $schema = $this->quoteName($schema);
+            $cmd .= " IN $schema";
+        }
         
         // get all indexed columns
-        $list = $this->fetchAll("SHOW INDEXES IN $table");
+        $list = $this->fetchAll($cmd);
         if (! $list) {
             // no indexes
             return array();
         }
+        
+        // where the index info will be stored
+        $info = array();
         
         // collect indexes
         foreach ($list as $item) {

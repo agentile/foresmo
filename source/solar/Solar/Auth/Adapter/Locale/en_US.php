@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: en_US.php 2444 2007-04-21 16:00:59Z pmjones $
+ * @version $Id: en_US.php 4405 2010-02-18 04:27:25Z pmjones $
  * 
  */
 return array(
@@ -21,5 +21,7 @@ return array(
     'WRONG'   => 'Your username and password did not match.  Please try again.',
     'REPLAY'  => 'The time window for processing closed.  Please try again.',
     'EXPIRED' => 'Your session has expired.  Please sign in again.',
-    'IDLED'   => 'Your session has been idle for too long.  Please sign in again.'
+    'IDLED'   => 'Your session has been idle for too long.  Please sign in again.',
+    'ERR_PHP_SESSION_IDLE' => 'The .ini value for session.gc_maxlifetime is shorter than the authentication idle time.',
+    'ERR_PHP_SESSION_EXPIRE' => 'The .ini value for session.cookie_lifetime  is shorter than the authentication expire time.',
 );

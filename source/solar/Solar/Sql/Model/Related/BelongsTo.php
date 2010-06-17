@@ -14,7 +14,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: BelongsTo.php 3835 2009-06-12 20:05:36Z pmjones $
+ * @version $Id: BelongsTo.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
 class Solar_Sql_Model_Related_BelongsTo extends Solar_Sql_Model_Related_ToOne
@@ -93,6 +93,18 @@ class Solar_Sql_Model_Related_BelongsTo extends Solar_Sql_Model_Related_ToOne
     
     /**
      * 
+     * Returns a null when there is no related data.
+     * 
+     * @return null
+     * 
+     */
+    public function fetchEmpty()
+    {
+        return null;
+    }
+    
+    /**
+     * 
      * Pre-save behavior when saving foreign records through this 
      * relationship.
      * 
@@ -111,7 +123,8 @@ class Solar_Sql_Model_Related_BelongsTo extends Solar_Sql_Model_Related_ToOne
         $foreign = $native->{$this->name};
         if (! $foreign) {
             // we need the record the native belongs to, to connect the two
-            throw $this->_exception('ERR_RELATED_DOES_NOT_EXIST', array(
+            throw $this->_exception('ERR_NO_RELATED_RECORD', array(
+                'native' => get_class($native),
                 'name' => $native->{$this->name},
             ));
         } else {

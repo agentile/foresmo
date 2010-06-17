@@ -14,7 +14,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: File.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: File.php 4263 2009-12-07 19:25:31Z pmjones $
  * 
  */
 class Solar_Mail_Transport_Adapter_File extends Solar_Mail_Transport_Adapter
@@ -48,7 +48,7 @@ class Solar_Mail_Transport_Adapter_File extends Solar_Mail_Transport_Adapter
         parent::_preConfig();
         
         if (Solar::$system) {
-            $tmp = Solar::$system . '/mail/';
+            $tmp = Solar::$system . '/tmp/mail/';
         } else {
             $tmp = Solar_Dir::tmp('/Solar_Mail_Transport_Adapter_File/');
         }

@@ -32,9 +32,14 @@ class Foresmo_Model_Groups extends Solar_Sql_Model {
             'foreign_class' => 'Foresmo_Model_Permissions',
             'through'       => 'groups_permissions',
             'through_key'   => 'group_id',
+            'through_native_col' => 'group_id',
+            'through_foreign_col' => 'permission_id',
+
         ));
 
-        $this->_hasMany('users', array('foreign_key' => 'group_id'));
+        $this->_hasMany('users', array(
+            'foreign_key' => 'group_id',
+        ));
     }
 
     /**

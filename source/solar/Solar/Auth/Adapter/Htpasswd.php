@@ -22,7 +22,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Htpasswd.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Htpasswd.php 4405 2010-02-18 04:27:25Z pmjones $
  * 
  */
 class Solar_Auth_Adapter_Htpasswd extends Solar_Auth_Adapter
@@ -55,19 +55,17 @@ class Solar_Auth_Adapter_Htpasswd extends Solar_Auth_Adapter
         
         // does the file exist?
         if (! file_exists($file)) {
-            throw $this->_exception(
-                'ERR_FILE_NOT_FOUND',
-                array('file' => $file)
-            );
+            throw $this->_exception('ERR_FILE_NOT_FOUND', array(
+                'file' => $file,
+            ));
         }
         
         // open the file
         $fp = @fopen($file, 'r');
         if (! $fp) {
-            throw $this->_exception(
-                'ERR_FILE_NOT_READABLE',
-                array('file' => $file)
-            );
+            throw $this->_exception('ERR_FILE_NOT_READABLE', array(
+                'file' => $file,
+            ));
         }
         
         // find the user's line in the file

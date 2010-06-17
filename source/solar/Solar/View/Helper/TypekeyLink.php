@@ -8,13 +8,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_View
+ * @package Solar_View_Helper
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: TypekeyLink.php 3898 2009-07-22 15:33:45Z pmjones $
+ * @version $Id: TypekeyLink.php 4285 2009-12-31 02:18:15Z pmjones $
  * 
  */
 class Solar_View_Helper_TypekeyLink extends Solar_View_Helper

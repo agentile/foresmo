@@ -26,7 +26,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: DefList.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: DefList.php 4531 2010-04-12 17:23:56Z pmjones $
  * 
  */
 class Solar_Markdown_Extra_DefList extends Solar_Markdown_Plugin
@@ -39,6 +39,43 @@ class Solar_Markdown_Extra_DefList extends Solar_Markdown_Plugin
      * 
      */
     protected $_is_block = true;
+    
+    /**
+     * 
+     * The tag to open a definition term.
+     * 
+     * @var string
+     * 
+     */
+    protected $_dt_open = '<dt>';
+    
+    /**
+     * 
+     * The tag to close a definition term.
+     * 
+     * @var string
+     * 
+     */
+    protected $_dt_close = '</dt>';
+    
+    /**
+     * 
+     * The tag to open a definition definition.
+     * 
+     * @var string
+     * 
+     */
+    protected $_dd_open = '<dd>';
+    
+    /**
+     * 
+     * The tag to close a definition definition.
+     * 
+     * @var string
+     * 
+     */
+    protected $_dd_close = '</dd>';
+    
     
     /**
      * 
@@ -158,7 +195,7 @@ class Solar_Markdown_Extra_DefList extends Solar_Markdown_Plugin
                 (?= \n+                                         # stop at next definition mark,
                     (?:                                         # next term or end of text
                         [ ]{0,'.$less_than_tab.'} [:][ ]    |
-                        <dt> | \z
+                        '.$this->_dt_open.' | \z
                     )                        
                 )                    
             }xm',
@@ -184,7 +221,7 @@ class Solar_Markdown_Extra_DefList extends Solar_Markdown_Plugin
         $text = '';
         foreach ($terms as $term) {
             $term = $this->_processSpans(trim($term));
-            $text .= "\n<dt>" . $term . "</dt>";
+            $text .= "\n{$this->_dt_open}" . $term . $this->_dt_close;
         }
         return $text . "\n";
     }
@@ -211,6 +248,6 @@ class Solar_Markdown_Extra_DefList extends Solar_Markdown_Plugin
             $def = $this->_processSpans($this->_outdent($def));
         }
         
-        return "\n<dd>" . $def . "</dd>\n";
+        return "\n{$this->_dd_open}" . $def . "{$this->_dd_close}\n";
     }
 }

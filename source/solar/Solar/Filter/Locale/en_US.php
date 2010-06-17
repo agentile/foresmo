@@ -11,10 +11,12 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: en_US.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: en_US.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
 return array(
+    'ERR_NOT_MODEL_RECORD'              => 'The data being filtered must be a from model record.',
+    'ERR_CHAIN_LOCALE_OBJECT'           => 'The spec for the chain locale object is not valid.',
     'INVALID_ALNUM'                     => 'Please use only letters (A-Z and a-z) and numbers (0-9).',
     'INVALID_ALPHA'                     => 'Please use only the letters A-Z and a-z.',
     'INVALID_BLANK'                     => 'This value must be blank.',

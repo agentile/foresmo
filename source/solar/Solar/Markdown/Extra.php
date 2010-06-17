@@ -10,7 +10,8 @@
  * 
  * @category Solar
  * 
- * @package Solar_Markdown_Extra
+ * @package Solar_Markdown_Extra Plugin-based system to implement the 
+ * Markdown-Extra syntax.
  * 
  * @author Michel Fortin <http://www.michelf.com/projects/php-markdown/>
  * 
@@ -18,7 +19,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Extra.php 3850 2009-06-24 20:18:27Z pmjones $
+ * @version $Id: Extra.php 4380 2010-02-14 16:06:52Z pmjones $
  * 
  * @todo Implement the markdown-in-html portion of Markdown-Extra.
  * 

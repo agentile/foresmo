@@ -11,7 +11,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: en_US.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: en_US.php 4496 2010-03-04 18:45:57Z pmjones $
  * 
  */
 return array(
@@ -53,11 +53,21 @@ return array(
     
     // exception error messages  
     'ERR_CONNECTION_FAILED'      => 'Connection failed.',
-    'ERR_EXTENSION_NOT_LOADED'   => 'Extension not loaded.',
-    'ERR_FILE_NOT_FOUND'         => 'File not found.',
-    'ERR_FILE_NOT_READABLE'      => 'File not readable or does not exist.',
-    'ERR_METHOD_NOT_CALLABLE'    => 'Method not callable.',
-    'ERR_METHOD_NOT_IMPLEMENTED' => 'Method not implemented.',
+    'ERR_CONNECTION_TIMEOUT'     => 'Connection timed out.',
+    'ERR_DIR_NOT_FOUND'          => 'Directory "{:dir}" not found.',
+    'ERR_EXTENSION_NOT_LOADED'   => 'Extension "{:extension}" not loaded.',
+    'ERR_FILE_NOT_FOUND'         => 'File "{:file}" not found.',
+    'ERR_FILE_NOT_READABLE'      => 'File "{:file}" not readable or does not exist.',
+    'ERR_METHOD_NOT_CALLABLE'    => 'Method "{:method}()" not callable.',
+    'ERR_METHOD_NOT_IMPLEMENTED' => 'Method "{:method}()" not implemented.',
+    'ERR_MKDIR_FAILED'           => 'Failed to make directory "{:dir}".',
+    'ERR_NO_CLASS'               => 'No class name specified.',
+    'ERR_NO_CONNECTION'          => 'No connection.',
+    'ERR_NO_SUCH_PROPERTY'       => 'Class "{:class}" has no such property "${:property}".',
+    'ERR_NO_VENDOR'              => 'No vendor name specified.',
+    'ERR_RMDIR_FAILED'           => 'Failed to remove directory "{:dir}".',
+    'ERR_USE_OTHER_METHOD'       => 'Please use another method to set the "{:key}" value.',
+    'ERR_CSRF_ATTEMPT'           => 'The request looks like cross-site request forgery.',
     
     // success feedback messages
     'SUCCESS_FORM'               => 'Saved.',

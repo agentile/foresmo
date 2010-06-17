@@ -12,7 +12,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Params.php 3995 2009-09-08 18:49:24Z pmjones $
+ * @version $Id: Params.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  */
 abstract class Solar_Sql_Model_Params extends Solar_Struct { 
@@ -73,7 +73,7 @@ abstract class Solar_Sql_Model_Params extends Solar_Struct {
      * @param string $name The name of the related to eager-fetch.
      * 
      * @param array $opts Options for the eager-fetch; cf.
-     * [[Class::Solar_Sql_Model_Params_Eager]].
+     * [[Solar_Sql_Model_Params_Eager]].
      * 
      * @return Solar_Sql_Model_Params
      * 

@@ -25,8 +25,8 @@
  *     $struct->zim = 'irk';
  *     echo $struct['zim']; // 'irk'
  *     
- *     $struct->noSuchKey = 'nothing';
- *     echo $struct->noSuchKey; // null
+ *     $struct->addNewKey = 'something new has been added';
+ *     echo $struct->noSuchKey; // 'something new has been added'
  * }}
  * 
  * One problem is that casting the object to an array will not
@@ -70,11 +70,11 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Struct.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Struct.php 4516 2010-03-15 19:17:24Z pmjones $
  * 
  */
-class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterator {
-    
+class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, IteratorAggregate
+{
     /**
      * 
      * Default configuration values.
@@ -105,15 +105,6 @@ class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterato
      * 
      */
     protected $_data_keylock = false;
-    
-    /**
-     * 
-     * Iterator: is the current position valid?
-     * 
-     * @var array
-     * 
-     */
-    protected $_iterator_valid = false;
     
     /**
      * 
@@ -160,24 +151,25 @@ class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterato
         if (array_key_exists($key, $this->_data)) {
             return $this->_data[$key];
         } else {
-            throw $this->_exception('ERR_NO_SUCH_KEY', array(
-                'class' => get_class($this),
-                'key'   => $key,
-                'keys'  => array_keys($this->_data),
+            throw $this->_exception('ERR_NO_SUCH_PROPERTY', array(
+                'class'     => get_class($this),
+                'property'  => $key,
+                'keys'      => array_keys($this->_data),
             ));
         }
     }
     
     /**
      * 
-     * Sets a key value and marks the struct as "dirty"; also marks all parent
-     * structs as "dirty" too.
+     * Sets a key value and marks the struct as "dirty".
      * 
      * @param string $key The requested data key.
      * 
      * @param mixed $val The value to set the data to.
      * 
      * @return void
+     * 
+     * @see _setIsDirty()
      * 
      */
     public function __set($key, $val)
@@ -238,7 +230,7 @@ class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterato
      */
     public function __toString()
     {
-        return serialize($this->_data);
+        return serialize($this->toArray());
     }
     
     /**
@@ -334,13 +326,6 @@ class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterato
         
         // heavy lifting
         $this->_load($data);
-        
-        // set iterator validity
-        if ($this->_data) {
-            $this->_iterator_valid = true;
-        } else {
-            $this->_iterator_valid = false;
-        }
     }
     
     /**
@@ -473,62 +458,26 @@ class Solar_Struct extends Solar_Base implements ArrayAccess, Countable, Iterato
     
     /**
      * 
-     * Iterator: get the current value for the array pointer.
+     * IteratorAggregate: returns an external iterator for this struct.
      * 
-     * @return mixed
+     * @return Solar_Struct_Iterator
      * 
      */
-    public function current()
+    public function getIterator()
     {
-        return $this->__get($this->key());
+        return new Solar_Struct_Iterator($this);
     }
     
     /**
      * 
-     * Iterator: get the current key for the array pointer.
+     * Returns all the keys for this struct.
      * 
-     * @return mixed
-     * 
-     */
-    public function key()
-    {
-        return key($this->_data);
-    }
-    
-    /**
-     * 
-     * Iterator: move to the next position.
-     * 
-     * @return void
+     * @return array
      * 
      */
-    public function next()
+    public function getKeys()
     {
-        $this->_iterator_valid = (next($this->_data) !== false);
-    }
-    
-    /**
-     * 
-     * Iterator: move to the first position.
-     * 
-     * @return void
-     * 
-     */
-    public function rewind()
-    {
-        $this->_iterator_valid = (reset($this->_data) !== false);
-    }
-    
-    /**
-     * 
-     * Iterator: is the current position valid?
-     * 
-     * @return void
-     * 
-     */
-    public function valid()
-    {
-        return $this->_iterator_valid;
+        return array_keys($this->_data);
     }
     
     /**

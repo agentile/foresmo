@@ -32,6 +32,8 @@ class Foresmo_Model_Permissions extends Solar_Sql_Model {
              'foreign_class' => 'Foresmo_Model_Groups',
              'through'       => 'groups_permissions',
              'through_key'   => 'group_id',
+             'through_native_col' => 'permission_id',
+             'through_foreign_col' => 'group_id',
         ));
     }
 }

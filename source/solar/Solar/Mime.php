@@ -5,13 +5,13 @@
  * 
  * @category Solar
  * 
- * @package Solar_Mime
+ * @package Solar_Mime Generic MIME support methods.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Mime.php 3153 2008-05-05 23:14:16Z pmjones $
+ * @version $Id: Mime.php 4380 2010-02-14 16:06:52Z pmjones $
  * 
  */
 class Solar_Mime

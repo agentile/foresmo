@@ -16,7 +16,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Adapter.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Adapter.php 4416 2010-02-23 19:52:43Z pmjones $
  * 
  */
 abstract class Solar_Smtp_Adapter extends Solar_Base {
@@ -757,7 +757,7 @@ abstract class Solar_Smtp_Adapter extends Solar_Base {
         // did we time out?
         $info = stream_get_meta_data($this->_conn);
         if (! empty($info['timed_out'])) {
-            throw $this->_exception('ERR_TIMEOUT', array(
+            throw $this->_exception('ERR_CONNECTION_TIMEOUT', array(
                 'host'    => $this->_host,
                 'port'    => $this->_port,
             ));

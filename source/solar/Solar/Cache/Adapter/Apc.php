@@ -21,7 +21,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Apc.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Apc.php 4442 2010-02-26 16:33:06Z pmjones $
  * 
  */
 class Solar_Cache_Adapter_Apc extends Solar_Cache_Adapter
@@ -37,10 +37,9 @@ class Solar_Cache_Adapter_Apc extends Solar_Cache_Adapter
     {
         parent::_preConfig();
         if (! ( extension_loaded('apc') && ini_get('apc.enabled') ) ) {
-            throw $this->_exception(
-                'ERR_EXTENSION_NOT_LOADED',
-                array('extension' => 'apc')
-            );
+            throw $this->_exception('ERR_EXTENSION_NOT_LOADED', array(
+                'extension' => 'apc',
+            ));
         }
     }
     
@@ -52,10 +51,13 @@ class Solar_Cache_Adapter_Apc extends Solar_Cache_Adapter
      * 
      * @param mixed $data The data to write into the entry.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return bool True on success, false on failure.
      * 
      */
-    public function save($key, $data)
+    public function save($key, $data, $life = null)
     {
         if (! $this->_active) {
             return;
@@ -64,8 +66,15 @@ class Solar_Cache_Adapter_Apc extends Solar_Cache_Adapter
         // modify the key to add the prefix
         $key = $this->entry($key);
         
+        // life value
+        if ($life === null) {
+            $life = $this->_life;
+        }
+        
+        Solar::dump($life, 'life');
+        
         // save to apc
-        return apc_store($key, $data, $this->_life);
+        return apc_store($key, $data, $life);
     }
     
     /**
@@ -76,10 +85,13 @@ class Solar_Cache_Adapter_Apc extends Solar_Cache_Adapter
      * 
      * @param mixed $data The data to write into the entry.
      * 
+     * @param int $life A custom lifespan, in seconds, for the entry; if null,
+     * uses the default lifespan for the adapter instance.
+     * 
      * @return bool True on success, false on failure.
      * 
      */
-    public function add($key, $data)
+    public function add($key, $data, $life = null)
     {
         if (! $this->_active) {
             return;
@@ -88,8 +100,13 @@ class Solar_Cache_Adapter_Apc extends Solar_Cache_Adapter
         // modify the key to add the prefix
         $key = $this->entry($key);
         
+        // life value
+        if ($life === null) {
+            $life = $this->_life;
+        }
+        
         // add to apc
-        return apc_add($key, $data, $this->_life);
+        return apc_add($key, $data, $life);
     }
     
     /**

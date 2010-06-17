@@ -7,7 +7,7 @@
  * 
  * @category Solar
  * 
- * @package Solar_Filter
+ * @package Solar_Filter Filters to sanitize and validate user input.
  * 
  * @author Paul M. Jones <pmjones@solarphp.com>
  * 
@@ -15,7 +15,7 @@
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
- * @version $Id: Filter.php 3988 2009-09-04 13:51:51Z pmjones $
+ * @version $Id: Filter.php 4533 2010-04-23 16:35:15Z pmjones $
  * 
  */
 class Solar_Filter extends Solar_Base
@@ -358,7 +358,7 @@ class Solar_Filter extends Solar_Base
     /**
      * 
      * Sets the object used for getting locale() translations during
-     * [[applyChain()]].
+     * [[Solar_Filter::applyChain() | ]].
      * 
      * @param Solar_Base|null|false $spec Any Solar object with a locale() 
      * method. When null, uses $this for locale(); when false, does not 
@@ -387,7 +387,7 @@ class Solar_Filter extends Solar_Base
     /**
      * 
      * Sets whether or not a particular data key is required to be present and
-     * non-blank in the data being processed by [[applyChain()]].
+     * non-blank in the data being processed by [[Solar_Filter::applyChain() | ]].
      * 
      * @param string $key The data key.
      * 
@@ -512,7 +512,7 @@ class Solar_Filter extends Solar_Base
     /**
      * 
      * Gets a copy of the data array, or a specific element of data, being
-     * processed by [[applyChain()]].
+     * processed by [[Solar_Filter::applyChain() | ]].
      * 
      * @param string $key If empty, returns the whole data array; otherwise,
      * returns just that key element of data.
@@ -528,11 +528,7 @@ class Solar_Filter extends Solar_Base
             return $this->_data;
         }
         
-        if ($this->_data instanceof Solar_Struct && isset($this->_data[$key])) {
-            return $this->_data[$key];
-        }
-        
-        if (array_key_exists($key, $this->_data)) {
+        if ($this->dataKeyExists($key)) {
             return $this->_data[$key];
         }
         
@@ -541,7 +537,7 @@ class Solar_Filter extends Solar_Base
     
     /**
      * 
-     * Sets one data element being processed by [[applyChain()]].
+     * Sets one data element being processed by [[Solar_Filter::applyChain() | ]].
      * 
      * @param string $key Set this element key.
      * 
@@ -569,6 +565,28 @@ class Solar_Filter extends Solar_Base
     public function getDataKey()
     {
         return $this->_data_key;
+    }
+    
+    /**
+     * 
+     * Does the requested key exist in the data?
+     * 
+     * @param string $key Checks to see if the data array has this key in it.
+     * 
+     * @return bool True if the data key is present, false if not.
+     * 
+     */
+    public function dataKeyExists($key = null)
+    {
+        if ($this->_data instanceof Solar_Struct && isset($this->_data[$key])) {
+            return true;
+        }
+        
+        if (array_key_exists($key, $this->_data)) {
+            return true;
+        }
+        
+        return false;
     }
     
     /**
@@ -670,7 +688,7 @@ class Solar_Filter extends Solar_Base
     
     /**
      * 
-     * Support method for [[applyChain()]] to apply all the filters on a
+     * Support method for [[Solar_Filter::applyChain() | ]] to apply all the filters on a
      * single data element.
      * 
      * @param string $key The data element key.
@@ -685,11 +703,18 @@ class Solar_Filter extends Solar_Base
         
         // is this key required?
         if (! empty($this->_chain_require[$key])) {
+            // required
             $this->setRequire(true);
         } else {
+            // not required
             $this->setRequire(false);
+            // if not present, skip it entirely
+            if (! $this->dataKeyExists($key)) {
+                return;
+            }
         }
         
+        // apply the filter chain
         foreach ((array) $this->_chain_filters[$key] as $params) {
             
             // take the method name off the top of the params ...
